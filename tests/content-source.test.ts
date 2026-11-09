@@ -52,7 +52,7 @@ test("相対パスの記事ディレクトリはサイトのルートから解�
 
 test("存在しない記事ディレクトリは変数名と戻し方を示してエラーにする", () => {
   expect(() => resolveContentSource(site, { SIMOCHEE_CONTENT_DIR: "/nonexistent" })).toThrow(
-    /SIMOCHEE_CONTENT_DIR.*\n.*SIMOCHEE_CONTENT_DIR= pnpm exec vp run dev/,
+    /SIMOCHEE_CONTENT_DIR.*\n.*SIMOCHEE_CONTENT_DIR= vp run dev/,
   );
 });
 

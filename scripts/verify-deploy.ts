@@ -66,11 +66,15 @@ try {
   if (prepare) console.log(temp);
   else {
     if (!resume)
-      execFileSync("pnpm", ["install", "--frozen-lockfile", "--package-import-method=copy"], {
-        cwd: site,
-        stdio: "inherit",
-        env: { ...ambientEnv, SIMOCHEE_CONTENT_DIR: "../content/posts" },
-      });
+      execFileSync(
+        join(source, "node_modules/.bin/vp"),
+        ["install", "--frozen-lockfile", "--", "--package-import-method=copy"],
+        {
+          cwd: site,
+          stdio: "inherit",
+          env: { ...ambientEnv, SIMOCHEE_CONTENT_DIR: "../content/posts" },
+        },
+      );
     const build = (postsDir: string) =>
       spawnSync(join(site, "node_modules/.bin/vp"), ["run", "build"], {
         cwd: site,

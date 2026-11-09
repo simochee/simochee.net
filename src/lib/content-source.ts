@@ -26,7 +26,7 @@ export function resolveContentSource(
   if (external && !existsSync(external))
     throw new Error(
       `SIMOCHEE_CONTENT_DIR が存在しません: ${external}\n` +
-        "ダミー記事に戻すには SIMOCHEE_CONTENT_DIR= pnpm exec vp run dev のように空にして実行してください。",
+        "ダミー記事に戻すには SIMOCHEE_CONTENT_DIR= vp run dev のように空にして実行してください。",
     );
   const postsDir = external ?? resolve(siteRoot, defaultPostsPath);
   const gitRoot = env.SIMOCHEE_CONTENT_GIT_ROOT ?? (external ? gitToplevel(external) : siteRoot);

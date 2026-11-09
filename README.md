@@ -5,16 +5,17 @@ Astro 7 で生成する日本語の個人ブログです。
 
 ## 開発
 
-Node.js 24.22 以降と pnpm 12.14.0 を使用します。
+Node.js 24.22 以降と [Vite+](https://viteplus.dev/)（`vp`）を使用します。
+`vp install` は `package.json` の `packageManager`（pnpm）を自動で使います。
 
 ```sh
-pnpm install --frozen-lockfile
-pnpm exec vp run dev
-pnpm exec vp check
-pnpm exec vp test
-pnpm exec vp run astro:check
-pnpm exec vp run build
-pnpm exec wrangler deploy --dry-run
+vp install --frozen-lockfile
+vp run dev
+vp check
+vp test
+vp run astro:check
+vp run build
+vp exec wrangler deploy --dry-run
 ```
 
 `vp dev` と `vp build` は通常の Vite 用です。
@@ -71,7 +72,7 @@ tags: [Astro, TypeScript]
 ローカルで下書きを確認するときだけ、次を使用します。
 
 ```sh
-SIMOCHEE_INCLUDE_DRAFTS=1 pnpm exec vp run dev
+SIMOCHEE_INCLUDE_DRAFTS=1 vp run dev
 ```
 
 `SIMOCHEE_INCLUDE_DRAFTS` は本番ビルドと CI では無効です。
@@ -80,7 +81,7 @@ dev と build は `.astro/` にある同じ data store を使い、本番ビル�
 
 スキーマの定義は `src/content/schema.ts`、エディタ用の JSON Schema は `schema/frontmatter.schema.json` です。
 raw URL（https://raw.githubusercontent.com/simochee/simochee.net/main/schema/frontmatter.schema.json）でも参照できます。
-定義を変更したら `pnpm run schema` で再生成してください。
+定義を変更したら `vp run schema` で再生成してください。
 テストでコミット済みファイルとの一致を検査します。
 タグ URL では日本語を保持し、`/` などの予約文字を `~` と文字コードでエスケープして単一のパス要素に収めます。
 タグの重複や日時の暦上の妥当性は、ビルド時の Zod 検証でも確認します。
@@ -115,7 +116,7 @@ Workers Builds は `CI=true` と `WORKERS_CI=1` を設定します（[公式資�
 ダミー記事に戻すときは変数を空にして実行します。
 
 ```sh
-SIMOCHEE_CONTENT_DIR= pnpm exec vp run dev
+SIMOCHEE_CONTENT_DIR= vp run dev
 ```
 
 ディレクトリが git の外にある場合、日時は警告のうえ現在日時になります（CI ではエラー）。
@@ -141,19 +142,26 @@ SIMOCHEE_CONTENT_DIR= pnpm exec vp run dev
 SSR アダプターは使用しません。
 
 ```sh
-pnpm install --frozen-lockfile
-pnpm run build
-pnpm exec wrangler deploy
+vp install --frozen-lockfile
+vp run build
+vp exec wrangler deploy
 ```
 
 Wrangler の `assets.directory` は `./dist`、404 は `404-page`、HTML の URL は `auto-trailing-slash` です。
 `/feed.xml`、サイトマップ、`robots.txt`、canonical と OG / Twitter の meta 情報を生成します。
 CI で浅い clone を使う場合は、ビルド前に `git fetch --unshallow` で履歴を取得してください。
 
+`vp` が入っていない CI（Cloudflare Workers Builds など）では、公式インストーラで入れてから実行します。
+
+```sh
+curl -fsSL https://vite.plus | VP_VERSION=1.5.0 VP_HOME="$HOME/.vite-plus" VP_NODE_MANAGER=no bash
+. "$HOME/.vite-plus/env"
+```
+
 ## 検証用スクリプト
 
 ```sh
-pnpm exec vp run build
+vp run build
 node scripts/verify-output.ts
 node scripts/verify-deploy.ts
 ```
@@ -162,4 +170,4 @@ node scripts/verify-deploy.ts
 `verify-deploy.ts` はシステムの一時ディレクトリに記事用の git リポジトリとサイトのコピーを作り、`SIMOCHEE_CONTENT_DIR` で指定した記事だけが公開されることと、浅い clone が CI で失敗することを確認します。
 
 ネットワークやキャッシュの権限を個別に扱う環境では、`node scripts/verify-deploy.ts --prepare` で一時環境を作成できます。
-表示されたパスの `site/` で `SIMOCHEE_CONTENT_DIR=../content/posts pnpm install --frozen-lockfile` を実行し、`node scripts/verify-deploy.ts --resume <表示されたパス>` で検証と後片付けを行います。
+表示されたパスの `site/` で `SIMOCHEE_CONTENT_DIR=../content/posts vp install --frozen-lockfile` を実行し、`node scripts/verify-deploy.ts --resume <表示されたパス>` で検証と後片付けを行います。
