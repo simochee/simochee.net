@@ -17,6 +17,7 @@ export function readHistory(root: string, postsPath: string, ci = isCI()): Map<s
       "投稿の日時には完全な git 履歴が必要です。git fetch --unshallow を実行してください。";
     if (ci) throw new Error(message);
     console.warn(message);
+    return new Map();
   }
   const head = spawnSync("git", ["-C", resolve(root), "rev-parse", "--verify", "--quiet", "HEAD"]);
   if (head.status === 1) return new Map();

@@ -98,7 +98,7 @@ test("浅い clone は CI で明確なエラーにする", () => {
   execFileSync("git", ["clone", "--depth=1", `file://${r.dir}`, clone]);
   expect(() => readHistory(clone, "posts", true)).toThrow("git fetch --unshallow");
   vi.spyOn(console, "warn").mockImplementation(() => {});
-  expect(() => readHistory(clone, "posts", false)).not.toThrow();
+  expect(readHistory(clone, "posts", false).size).toBe(0);
 });
 test("未コミットの公開記事は CI で失敗しローカルでは警告と現在日時を使う", () => {
   expect(() => resolveDates(fm, undefined, { ci: true })).toThrow("公開日が git 履歴にありません");

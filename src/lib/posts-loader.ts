@@ -62,7 +62,8 @@ export function postsLoader(): Loader {
             ...frontmatter,
             description: frontmatter.description ?? excerpt(content),
             ...resolveDates(frontmatter, history.get(dir.name)),
-            thumbnail: thumbnails[0] ? `content/posts/${dir.name}/${thumbnails[0]}` : undefined,
+            thumbnail: thumbnails[0] ? `./${thumbnails[0]}` : undefined,
+            thumbnailPath: thumbnails[0] ? `content/posts/${dir.name}/${thumbnails[0]}` : undefined,
           });
         }
         if (!selected.length) return;
