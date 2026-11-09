@@ -14,6 +14,11 @@ import { tmpdir } from "node:os";
 import { basename, join, resolve } from "node:path";
 
 const source = process.cwd();
+const ambientEnv = {
+  ...process.env,
+  SIMOCHEE_CONTENT_DIR: "",
+  SIMOCHEE_INCLUDE_DRAFTS: "",
+};
 const prepare = process.argv[2] === "--prepare";
 const resume = process.argv[2] === "--resume";
 const temp = resume ? resolve(process.argv[3]) : mkdtempSync(join(tmpdir(), "simochee-deploy-"));
@@ -57,8 +62,6 @@ try {
           (name) => path === join(source, name),
         ),
     });
-    rmSync(join(site, "content/posts"), { recursive: true });
-    cpSync(join(content, "posts"), join(site, "content/posts"), { recursive: true });
   }
   if (prepare) console.log(temp);
   else {
@@ -66,25 +69,16 @@ try {
       execFileSync("pnpm", ["install", "--frozen-lockfile", "--package-import-method=copy"], {
         cwd: site,
         stdio: "inherit",
-        env: {
-          ...process.env,
-          SIMOCHEE_CONTENT_GIT_ROOT: content,
-          SIMOCHEE_CONTENT_GIT_PATH: "posts",
-        },
+        env: { ...ambientEnv, SIMOCHEE_CONTENT_DIR: "../content/posts" },
       });
-    const build = (root: string) =>
-      spawnSync("pnpm", ["exec", "vp", "run", "build"], {
+    const build = (postsDir: string) =>
+      spawnSync(join(site, "node_modules/.bin/vp"), ["run", "build"], {
         cwd: site,
         encoding: "utf8",
-        env: {
-          ...process.env,
-          CI: "1",
-          SIMOCHEE_CONTENT_GIT_ROOT: root,
-          SIMOCHEE_CONTENT_GIT_PATH: "posts",
-        },
+        env: { ...ambientEnv, CI: "1", SIMOCHEE_CONTENT_DIR: postsDir },
         maxBuffer: 16 * 1024 * 1024,
       });
-    const result = build(content);
+    const result = build("../content/posts");
     assert.equal(result.status, 0, result.stdout + result.stderr);
     const html = readFileSync(join(site, "dist/posts/deploy-example/index.html"), "utf8");
     assert.match(html, /datetime="2025-02-03T03:00:00.000Z"/);
@@ -94,7 +88,7 @@ try {
       "Deploy replacement: only deploy-example; published=2025-02-03T03:00:00.000Z, updated=2025-02-05T03:00:00.000Z (JST 12:00).",
     );
     execFileSync("git", ["clone", "--depth=1", `file://${content}`, shallow], { stdio: "pipe" });
-    const rejected = build(shallow);
+    const rejected = build("../shallow/posts");
     assert.notEqual(rejected.status, 0);
     assert.match(rejected.stdout + rejected.stderr, /git fetch --unshallow/);
     console.log(

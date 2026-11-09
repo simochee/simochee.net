@@ -47,7 +47,8 @@ export function readHistory(root: string, postsPath: string, ci = isCI()): Map<s
       entry = undefined;
     } else if (line.startsWith("+++ b/")) {
       const path = line.slice(6);
-      const prefix = `${postsPath.replace(/\/$/, "").replace(/^\.\//, "")}/`;
+      const dir = postsPath.replace(/\/$/, "").replace(/^\.\//, "").replace(/^\.$/, "");
+      const prefix = dir && `${dir}/`;
       const match =
         path.startsWith(prefix) &&
         path.slice(prefix.length).match(/^([a-z0-9]+(?:-[a-z0-9]+)*)\/index\.(md|mdx)$/);

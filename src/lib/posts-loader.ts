@@ -9,7 +9,8 @@ import remarkParse from "remark-parse";
 import remarkMdx from "remark-mdx";
 import { visit } from "unist-util-visit";
 import { frontmatterSchema } from "../content/schema";
-import { isCI, readHistory, resolveDates } from "./git-dates";
+import { resolveContentSource } from "./content-source";
+import { isCI, readHistory, resolveDates, type History } from "./git-dates";
 
 export function excerpt(body: string): string {
   const tree = unified().use(remarkParse).use(remarkMdx).parse(body);
@@ -27,13 +28,13 @@ export function postsLoader(): Loader {
     name: "published-posts",
     async load(context) {
       const root = fileURLToPath(context.config.root);
-      const base = resolve(root, "content/posts");
+      const source = resolveContentSource(root);
+      const base = source.postsDir;
       async function sync() {
         context.store.clear();
-        const history = readHistory(
-          process.env.SIMOCHEE_CONTENT_GIT_ROOT ?? root,
-          process.env.SIMOCHEE_CONTENT_GIT_PATH ?? "content/posts",
-        );
+        const history = source.git
+          ? readHistory(source.git.root, source.git.path)
+          : new Map<string, History>();
         const selected: string[] = [];
         const metadata = new Map<string, Record<string, unknown>>();
         for (const dir of await readdir(base, { withFileTypes: true })) {
@@ -63,7 +64,7 @@ export function postsLoader(): Loader {
             description: frontmatter.description ?? excerpt(content),
             ...resolveDates(frontmatter, history.get(dir.name)),
             thumbnail: thumbnails[0] ? `./${thumbnails[0]}` : undefined,
-            thumbnailPath: thumbnails[0] ? `content/posts/${dir.name}/${thumbnails[0]}` : undefined,
+            thumbnailPath: thumbnails[0] ? resolve(base, dir.name, thumbnails[0]) : undefined,
           });
         }
         if (!selected.length) return;
