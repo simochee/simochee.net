@@ -47,12 +47,12 @@ for (const dir of ["dist", ".astro", "node_modules/.astro"]) {
 }
 const markdown = await readFile("dist/posts/markdown-lab/index.html", "utf8");
 for (const pattern of [
-  /heading-anchor/,
-  /markdown-alert-note/,
+  /<a class="heading-anchor"/,
+  /<div class="markdown-alert markdown-alert-note"/,
   /class="line diff add"/,
   /class="line diff remove"/,
-  /highlighted/,
-  /highlighted-word/,
+  /class="line highlighted"/,
+  /class="highlighted-word"/,
   /target="_blank"/,
   /rel="noopener"/,
   /aria-label="目次"/,

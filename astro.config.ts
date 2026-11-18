@@ -1,4 +1,4 @@
-import { unified } from "@astrojs/markdown-remark";
+import { rehypeHeadingIds, unified } from "@astrojs/markdown-remark";
 import { resolve } from "node:path";
 import { defineConfig } from "astro/config";
 import mdx from "@astrojs/mdx";
@@ -23,6 +23,8 @@ export default defineConfig({
       remarkPlugins: [remarkAlerts],
       rehypePlugins: [
         [externalLinks, { target: "_blank", rel: ["noopener"] }],
+        // Astro は見出しの id をユーザーのプラグインより後に付ける。autolinkHeadings は id のない見出しを素通しするので、先に付けておく。
+        rehypeHeadingIds,
         [
           autolinkHeadings,
           {
