@@ -2,7 +2,7 @@ import { bindings, defineConfig } from "cf/config";
 
 export default defineConfig({
   worker: {
-    name: "simochee-net",
+    name: "simochee-net-v2",
     compatibilityDate: "2026-11-09",
     assets: {
       htmlHandling: "auto-trailing-slash",
