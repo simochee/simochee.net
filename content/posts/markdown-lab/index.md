@@ -8,10 +8,10 @@ tags: [sample, tech]
 ## コードの表示
 
 ```ts
+// [!code word:current]
 const previous = 1; // [!code --]
 const current = 2; // [!code ++]
 console.log(current); // [!code highlight]
-// [!code word:current]
 ```
 
 > [!NOTE]
