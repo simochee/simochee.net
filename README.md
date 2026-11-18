@@ -212,7 +212,7 @@ export const GET: APIRoute = () => Response.json({ ok: true });
 
   ```sh
   ANALYTICS_ACCOUNT_ID=アカウント ID
-  ANALYTICS_SITE_TAG=Web Analytics のサイトタグ（ビーコンの token）
+  ANALYTICS_SITE_TAG=Web Analytics のサイトタグ（`cf rum site-info list` の site_tag。ビーコンの token とは別の値）
   ANALYTICS_API_TOKEN=「Account Analytics: Read」権限の API トークン
   ```
 
