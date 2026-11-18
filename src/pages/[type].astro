@@ -1,8 +1,19 @@
 ---
-import Base from '../layouts/Base.astro';
-import PostList from '../components/PostList.astro';
-import { posts } from '../lib/posts';
-export function getStaticPaths() { return ['tech', 'personal'].map((type) => ({ params: { type } })); }
-const type = Astro.params.type;
+import Base from "../layouts/Base.astro";
+import EntryList from "../components/EntryList.astro";
+import ListHeader from "../components/ListHeader.astro";
+import { posts } from "../lib/posts";
+import { categories, type Category } from "../site";
+
+export function getStaticPaths() {
+  return Object.keys(categories).map((type) => ({ params: { type } }));
+}
+const type = Astro.params.type as Category;
+const name = categories[type];
+const listed = (await posts()).filter((post) => post.data.type === type);
 ---
-<Base title={type === 'tech' ? '技術' : '日々'}><h1>{type === 'tech' ? '技術' : '日々'}</h1><PostList posts={(await posts()).filter((post) => post.data.type === type)} /></Base>
+
+<Base title={`カテゴリ「${name}」`}>
+  <ListHeader crumbs={["カテゴリ", name]} heading={`カテゴリ「${name}」の記事一覧`} count={listed.length} />
+  <EntryList posts={listed} />
+</Base>

@@ -1,0 +1,10 @@
+---
+import type { Post } from "../lib/posts";
+import EntryExcerpt from "./EntryExcerpt.astro";
+
+interface Props {
+  posts: Post[];
+}
+---
+
+{Astro.props.posts.map((post) => <EntryExcerpt post={post} />)}

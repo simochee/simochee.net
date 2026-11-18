@@ -1,17 +1,51 @@
 ---
-import { render } from 'astro:content';
-import Base from '../../layouts/Base.astro';
-import { posts, formatDate } from '../../lib/posts';
-import { tagPath } from '../../lib/tags';
-export async function getStaticPaths() { return (await posts()).map((post) => ({ params: { slug: post.id }, props: { post } })); }
-const { post } = Astro.props;
+import { render } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import EntryMeta from "../../components/EntryMeta.astro";
+import Pager from "../../components/Pager.astro";
+import { posts } from "../../lib/posts";
+import { formatDay } from "../../lib/dates";
+
+export async function getStaticPaths() {
+  const all = await posts();
+  return all.map((post, index) => ({
+    params: { slug: post.id },
+    props: { post, newer: all[index - 1], older: all[index + 1] },
+  }));
+}
+const { post, newer, older } = Astro.props;
 const { Content, headings } = await render(post);
+// 脚注の見出しは remark が足す読み上げ専用のもので、目に見える見出しではない。
+const toc = headings.filter((heading) => heading.depth <= 3 && heading.slug !== "footnote-label");
+const link = (target?: typeof post) => target && { href: `/posts/${target.id}/`, label: target.data.title };
 ---
+
 <Base title={post.data.title} description={post.data.description} image={`/og/${post.id}.jpg`} article publishedAt={post.data.publishedAt} updatedAt={post.data.updatedAt}>
-  <article><header><p><a href={`/${post.data.type}/`}>{post.data.type === 'tech' ? '技術' : '日々'}</a>{post.data.status === 'draft' && ' · 下書きプレビュー'}</p><h1>{post.data.title}</h1>
-    <p class="metadata">公開: <time datetime={post.data.publishedAt.toISOString()}>{formatDate(post.data.publishedAt)}</time>{post.data.updatedAt && <> · 更新: <time datetime={post.data.updatedAt.toISOString()}>{formatDate(post.data.updatedAt)}</time></>}</p>
-    <ul class="tags">{post.data.tags.map((tag) => <li><a href={tagPath(tag)}>{tag}</a></li>)}</ul>
-  </header>
-  {headings.length > 0 && <nav class="toc" aria-label="目次"><h2>目次</h2><ul>{headings.map((heading) => <li style={`margin-inline-start: ${Math.max(0, heading.depth - 2)}em`}><a href={`#${heading.slug}`}>{heading.text}</a></li>)}</ul></nav>}
-  <div class="prose"><Content /></div></article>
+  <Pager class="mb-12 p-4" label="前後の記事" newer={link(newer)} older={link(older)} />
+  <article>
+    <p class="type-small mb-6 border-b border-dotted border-frame pb-2 text-ink-soft">
+      <time datetime={post.data.publishedAt.toISOString()}>{formatDay(post.data.publishedAt)}</time>
+      {post.data.status === "draft" && " ［下書きプレビュー］"}
+    </p>
+    <h1 class="title-box mb-10">{post.data.title}</h1>
+    <div class="prose px-6 leading-prose">
+      {
+        toc.length > 1 && (
+          <nav class="border border-line bg-wash px-12 py-6" aria-label="目次">
+            <p class="font-bold text-ink-strong" aria-hidden="true">【もくじ】</p>
+            <ol class="mt-2 pl-[1.8em]">
+              {toc.map((heading) => (
+                <li class:list={{ "ml-[1em] list-['・'] [counter-increment:list-item_0]": heading.depth > 2 }}>
+                  <a href={`#${heading.slug}`}>{heading.text}</a>
+                </li>
+              ))}
+            </ol>
+          </nav>
+        )
+      }
+      <Content />
+    </div>
+    <EntryMeta post={post} />
+  </article>
+  <Pager class="mt-16 p-4" label="前後の記事（ページ下）" newer={link(newer)} older={link(older)} />
 </Base>

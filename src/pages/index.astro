@@ -1,7 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
-import PostList from "../components/PostList.astro";
+import EntryPage from "../components/EntryPage.astro";
 import { posts } from "../lib/posts";
 ---
 
-<Base><PostList posts={await posts()} /></Base>
+<Base><EntryPage posts={await posts()} page={1} /></Base>

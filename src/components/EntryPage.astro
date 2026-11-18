@@ -1,0 +1,22 @@
+---
+import type { Post } from "../lib/posts";
+import { pageCount, pageOf, pagePath } from "../lib/paging";
+import EntrySummary from "./EntrySummary.astro";
+import Pager from "./Pager.astro";
+
+interface Props {
+  posts: Post[];
+  page: number;
+}
+const { posts, page } = Astro.props;
+const last = pageCount(posts.length);
+---
+
+{pageOf(posts, page).map((post) => <EntrySummary post={post} />)}
+{posts.length === 0 && <p>記事はまだありません。</p>}
+<Pager
+  class="p-8"
+  label="ページ送り"
+  newer={{ label: "新しい記事", href: page > 1 ? pagePath(page - 1) : undefined }}
+  older={{ label: "古い記事", href: page < last ? pagePath(page + 1) : undefined }}
+/>

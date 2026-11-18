@@ -1,0 +1,30 @@
+---
+import { Image } from "astro:assets";
+import type { Post } from "../lib/posts";
+import { formatDay } from "../lib/dates";
+import EntryMeta from "./EntryMeta.astro";
+
+interface Props {
+  post: Post;
+}
+const { post } = Astro.props;
+const href = `/posts/${post.id}/`;
+---
+
+<article class="mb-30">
+  <p class="type-small mb-6 border-b border-dotted border-frame pb-2 text-ink-soft">
+    <time datetime={post.data.publishedAt.toISOString()}>{formatDay(post.data.publishedAt)}</time>
+    {post.data.status === "draft" && " ［下書き］"}
+  </p>
+  <h2 class="title-box mb-10"><a href={href}>{post.data.title}</a></h2>
+  <div class="px-6 leading-prose *:not-first:mt-[1em]">
+    {
+      post.data.thumbnail && (
+        <Image class="block h-auto max-w-full border border-photo" src={post.data.thumbnail} alt="" width={240} height={160} fit="cover" densities={[1, 2]} format="webp" loading="lazy" />
+      )
+    }
+    <p>{post.data.description}</p>
+  </div>
+  <p class="mx-6 my-8 text-right"><a href={href} aria-label={`「${post.data.title}」の続きを読む`}>続きを読む &raquo;</a></p>
+  <EntryMeta post={post} />
+</article>

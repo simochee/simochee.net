@@ -1,0 +1,39 @@
+---
+import type { Post } from "../lib/posts";
+import { formatDay } from "../lib/dates";
+import { tagPath } from "../lib/tags";
+import { categories } from "../site";
+
+interface Props {
+  post: Post;
+}
+const { data } = Astro.props.post;
+---
+
+<footer class="type-small border-t border-line-soft pt-5 text-right text-ink-soft">
+  <p>
+    <span class="ico ico-folder" aria-hidden="true"></span> カテゴリ：<a href={`/${data.type}/`}>{categories[data.type]}</a>
+    {
+      data.updatedAt && (
+        <>
+          {" | "}
+          <span class="ico ico-clock" aria-hidden="true" /> 更新：
+          <time datetime={data.updatedAt.toISOString()}>{formatDay(data.updatedAt)}</time>
+        </>
+      )
+    }
+  </p>
+  {
+    data.tags.length > 0 && (
+      <p>
+        タグ：
+        {data.tags.map((tag, index) => (
+          <>
+            {index > 0 && " , "}
+            <a href={tagPath(tag)} rel="tag">{tag}</a>
+          </>
+        ))}
+      </p>
+    )
+  }
+</footer>

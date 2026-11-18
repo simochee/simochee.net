@@ -1,0 +1,17 @@
+---
+interface Props {
+  crumbs: string[];
+  heading: string;
+  count: number;
+}
+const { crumbs, heading, count } = Astro.props;
+---
+
+<nav class="type-small mb-6 text-ink-soft" aria-label="現在位置">
+  <a href="/">ホーム</a>
+  {crumbs.map((crumb) => <> &gt; {crumb}</>)}
+</nav>
+<header class="mb-16 border border-line bg-wash px-10 py-6">
+  <h1 class="font-bold text-ink-strong">{heading}</h1>
+  <p class="type-small text-ink-soft">{count > 0 ? `${count} 件の記事があります` : "記事はまだありません"}</p>
+</header>

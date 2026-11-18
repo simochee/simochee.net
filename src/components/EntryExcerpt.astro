@@ -1,0 +1,25 @@
+---
+import type { Post } from "../lib/posts";
+import { formatDay } from "../lib/dates";
+import { categories } from "../site";
+
+interface Props {
+  post: Post;
+}
+const { post } = Astro.props;
+const href = `/posts/${post.id}/`;
+---
+
+<article class="mb-22">
+  <p class="type-small mb-6 border-b border-dotted border-frame pb-2 text-ink-soft">
+    <time datetime={post.data.publishedAt.toISOString()}>{formatDay(post.data.publishedAt)}</time>
+    {post.data.status === "draft" && " ［下書き］"}
+  </p>
+  <h2 class="title-box mb-8"><a href={href}>{post.data.title}</a></h2>
+  <p class="mb-6 px-6 leading-prose">
+    {post.data.description}… <a href={href} aria-label={`「${post.data.title}」の続きを読む`}>続きを読む &raquo;</a>
+  </p>
+  <p class="type-small text-right text-ink-soft">
+    <span class="ico ico-folder" aria-hidden="true"></span> カテゴリ：<a href={`/${post.data.type}/`}>{categories[post.data.type]}</a>
+  </p>
+</article>
