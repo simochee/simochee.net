@@ -129,3 +129,18 @@
   --ico: url("../assets/icons/x.svg");
   background-color: #000000;
 }
+.ico-alert-caution {
+  --ico: url("../assets/icons/alert-caution.svg");
+}
+.ico-alert-important {
+  --ico: url("../assets/icons/alert-important.svg");
+}
+.ico-alert-note {
+  --ico: url("../assets/icons/alert-note.svg");
+}
+.ico-alert-tip {
+  --ico: url("../assets/icons/alert-tip.svg");
+}
+.ico-alert-warning {
+  --ico: url("../assets/icons/alert-warning.svg");
+}
