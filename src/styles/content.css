@@ -291,6 +291,13 @@
     background: var(--tint);
     border-block-end: 1px solid var(--line);
   }
+  & copy-code button {
+    padding: 0 6px;
+    color: var(--ink-strong);
+    background: var(--paper);
+    border: 1px solid var(--frame);
+    cursor: pointer;
+  }
   & pre {
     margin: 0;
     padding: 8px 10px;

@@ -46,6 +46,20 @@ export function rehypeCodeFrame() {
                 properties: {},
                 children: [{ type: "text", value: `コード：${codeLabel(language)}` }],
               },
+              // クリップボードはスクリプトなしでは使えない。押せないボタンを見せないよう hidden で出し、要素の定義側で外す。
+              {
+                type: "element",
+                tagName: "copy-code",
+                properties: { hidden: true },
+                children: [
+                  {
+                    type: "element",
+                    tagName: "button",
+                    properties: { type: "button" },
+                    children: [{ type: "text", value: "コピー" }],
+                  },
+                ],
+              },
             ],
           },
           node,

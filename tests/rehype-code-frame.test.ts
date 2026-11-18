@@ -18,6 +18,15 @@ test("ハイライトされたコードは、言語名を示す見出しつき�
   expect(JSON.stringify(frame.children[0])).toContain("コード：TypeScript");
   expect((frame.children[1] as Element).tagName).toBe("pre");
 });
+test("コピーのボタンは、スクリプトが動くまで隠れた状態で枠の見出しに入る", () => {
+  const root = tree(pre({ dataLanguage: "ts" }));
+  rehypeCodeFrame()(root);
+  const head = (root.children[0] as Element).children[0] as Element;
+  const copy = head.children.find(
+    (child): child is Element => child.type === "element" && child.tagName === "copy-code",
+  );
+  expect(copy?.properties.hidden).toBe(true);
+});
 test("言語のわからない pre は枠で包まない", () => {
   const root = tree(pre({}));
   rehypeCodeFrame()(root);

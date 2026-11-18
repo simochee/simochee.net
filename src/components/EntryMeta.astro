@@ -7,7 +7,7 @@ import { categories } from "../site";
 interface Props {
   post: Post;
 }
-const { data } = Astro.props.post;
+const { id, data } = Astro.props.post;
 ---
 
 <footer class="entry-meta small">
@@ -22,6 +22,11 @@ const { data } = Astro.props.post;
         </>
       )
     }
+    <share-button hidden data-title={data.title} data-url={`/posts/${id}/`}>
+      {" | "}
+      <span class="ico ico-share" aria-hidden="true"></span>
+      <button type="button" class="text-button" aria-label={`「${data.title}」を共有する`}>共有する</button>
+    </share-button>
   </p>
   {
     data.tags.length > 0 && (
