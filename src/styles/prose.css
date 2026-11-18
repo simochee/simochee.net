@@ -54,9 +54,6 @@
   & .heading-anchor {
     color: inherit;
     text-decoration: none;
-    &:hover {
-      text-decoration: underline;
-    }
   }
   & :is(ul, ol) {
     padding-inline-start: 1.6em;
