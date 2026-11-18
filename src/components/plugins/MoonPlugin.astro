@@ -1,0 +1,44 @@
+---
+import Plugin from "../Plugin.astro";
+---
+
+<moon-phase hidden>
+  <Plugin title="きょうの月">
+    <div class="plugin-body moon">
+      <svg width="48" height="48" viewBox="0 0 64 64" role="img">
+        <circle cx="32" cy="32" r="28" fill="#3d4b5c"></circle>
+        <path fill="#f2df8a"></path>
+      </svg>
+      <p>
+        <b data-moon="name"></b>（月齢 <span data-moon="age"></span>）<br />
+        <span class="small note">次の満月は <span data-moon="full"></span> ごろ</span>
+      </p>
+    </div>
+  </Plugin>
+</moon-phase>
+
+<script>
+  import { moonAge, moonName, moonPath, nextFullMoon } from "../../lib/moon";
+
+  // 月の形は見た日で決まる。ビルド時に描くと、次のデプロイまで同じ月が出続ける。
+  customElements.define(
+    "moon-phase",
+    class extends HTMLElement {
+      connectedCallback() {
+        const now = new Date();
+        const age = moonAge(now);
+        const name = moonName(age);
+        const full = nextFullMoon(now);
+        const text = (key: string, value: string) => {
+          this.querySelector(`[data-moon="${key}"]`)!.textContent = value;
+        };
+        text("name", name);
+        text("age", age.toFixed(1));
+        text("full", `${full.getMonth() + 1}/${full.getDate()}`);
+        this.querySelector("path")!.setAttribute("d", moonPath(age));
+        this.querySelector("svg")!.setAttribute("aria-label", `きょうの月のかたち：${name}`);
+        this.hidden = false;
+      }
+    },
+  );
+</script>

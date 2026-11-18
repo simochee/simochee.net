@@ -1,0 +1,52 @@
+---
+import Plugin from "../Plugin.astro";
+import { calendarWeeks, groupByMonth } from "../../lib/archive";
+import { posts } from "../../lib/posts";
+
+const months = groupByMonth(await posts());
+const [current, previous] = months;
+const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
+---
+
+{
+  current && (
+    <Plugin title="カレンダー">
+      <div class="plugin-body">
+        <table class="calendar small">
+          <caption>{current.label}</caption>
+          <thead>
+            <tr>
+              {weekdays.map((name, weekday) => (
+                <th scope="col" data-weekday={weekday}>
+                  {name}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {calendarWeeks(current).map((week) => (
+              <tr>
+                {week.map((cell) => (
+                  <td data-weekday={cell?.weekday}>
+                    {cell?.posts[0] ? (
+                      <a href={`/posts/${cell.posts[0].id}/`} aria-label={`${cell.day}日の記事「${cell.posts[0].data.title}」`}>
+                        {cell.day}
+                      </a>
+                    ) : (
+                      cell?.day
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {previous && (
+          <p class="small">
+            <a href={previous.path}>&laquo; {Number(previous.month)}月</a>
+          </p>
+        )}
+      </div>
+    </Plugin>
+  )
+}

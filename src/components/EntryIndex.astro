@@ -1,0 +1,24 @@
+---
+import type { Post } from "../lib/posts";
+import { formatDay } from "../lib/dates";
+
+interface Props {
+  posts: Post[];
+  note: (post: Post) => string;
+}
+const { posts, note } = Astro.props;
+---
+
+<ul class="entry-index">
+  {
+    posts.map((post) => (
+      <li>
+        <time class="small note" datetime={post.data.publishedAt.toISOString()}>
+          {formatDay(post.data.publishedAt).slice(0, 10)}
+        </time>
+        <a href={`/posts/${post.id}/`}>{post.data.title}</a>
+        <span class="small note">{note(post)}</span>
+      </li>
+    ))
+  }
+</ul>

@@ -1,0 +1,54 @@
+---
+import Base from "../../layouts/Base.astro";
+import EntryIndex from "../../components/EntryIndex.astro";
+import { groupByMonth } from "../../lib/archive";
+import { posts } from "../../lib/posts";
+import { categories } from "../../site";
+
+const all = await posts();
+const months = groupByMonth(all);
+const byCategory = Object.entries(categories).map(([type, name]) => ({
+  type,
+  name,
+  posts: all.filter((post) => post.data.type === type),
+}));
+---
+
+<Base title="全記事一覧" description="これまでに書いた記事を、月ごと・カテゴリごとに。">
+  <h1 class="page-title">全記事一覧</h1>
+  <div class="archive">
+    <div class="archive-bar small note">
+      <span>このブログには、ぜんぶで {all.length} 件の記事があります。</span>
+      <fieldset class="segmented">
+        <legend>表示：</legend>
+        <label><input type="radio" name="view" value="month" checked /><span>月ごと</span></label>
+        <label><input type="radio" name="view" value="category" /><span>カテゴリごと</span></label>
+      </fieldset>
+    </div>
+    <div data-view="month">
+      {
+        months.map((month) => (
+          <section class="archive-group">
+            <h2>
+              <a href={month.path}>{month.label}</a>（{month.posts.length}件）
+            </h2>
+            <EntryIndex posts={month.posts} note={(post) => `［${categories[post.data.type]}］`} />
+          </section>
+        ))
+      }
+    </div>
+    <div data-view="category">
+      {
+        byCategory.map((category) => (
+          <section class="archive-group">
+            <h2>
+              <a href={`/${category.type}/`}>{category.name}</a>（{category.posts.length}件）
+            </h2>
+            <EntryIndex posts={category.posts} note={() => ""} />
+          </section>
+        ))
+      }
+    </div>
+  </div>
+  <p class="to-top small"><a href="#main">▲ ページの先頭へ</a></p>
+</Base>

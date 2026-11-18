@@ -5,6 +5,8 @@ export const site = {
   description: "小さなことから大きなものまで気軽にどんどん書いていきます。",
   author: {
     name: "しもちぃ",
+    id: "simochee",
+    message: "気軽にどんどん書いていきます。",
     bio: "技術のことや日々のこと、写真などを書いています。",
   },
   links: [

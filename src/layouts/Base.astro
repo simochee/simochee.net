@@ -19,6 +19,8 @@ const isHome = Astro.url.pathname === "/";
 const SiteTitle = isHome ? "h1" : "p";
 const menu = [
   { href: "/", label: "ホーム" },
+  { href: "/archive/", label: "全記事一覧" },
+  { href: "/profile/", label: "プロフィール" },
   ...Object.entries(categories).map(([type, label]) => ({ href: `/${type}/`, label })),
   { href: "/feed.xml", label: "RSS" },
 ];
@@ -55,7 +57,7 @@ const menu = [
     <div class="frame">
       <div class="topline small">
         <span>{site.tagline}</span>
-        <a href="/">ブログトップ</a>
+        <span><a href="/">ブログトップ</a> | <a href="/archive/">記事一覧</a></span>
       </div>
       <header class="banner">
         <SiteTitle class="site-title"><a href="/">{site.name}</a></SiteTitle>

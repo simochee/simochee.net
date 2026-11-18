@@ -1,0 +1,40 @@
+---
+import Base from "../layouts/Base.astro";
+import { site } from "../site";
+---
+
+<Base title="プロフィール" description={`管理人${site.author.name}のことと、このブログのこと。`}>
+  <h1 class="page-title">プロフィール</h1>
+  <div class="profile">
+    <svg class="avatar" width="120" height="120" viewBox="0 0 80 80" role="img" aria-label="管理人のアイコン" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="40" cy="30" r="14"></circle>
+      <path d="M14 74c3-16 14-24 26-24s23 8 26 24"></path>
+    </svg>
+    <table class="small">
+      <tbody>
+        <tr><th scope="row">なまえ</th><td>{site.author.name}（{site.author.id}）</td></tr>
+        <tr><th scope="row">かいていること</th><td>{site.author.bio}</td></tr>
+        <tr><th scope="row">ひとこと</th><td>{site.author.message}</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="prose">
+    <h2>ごあいさつ</h2>
+    <p>
+      はじめまして、{site.author.name}です。<br />
+      このブログには、技術のこと、写真のこと、日々のことを、数行のメモからながめの解説まで書いていきます。<br />
+      どうぞのんびりしていってください。
+    </p>
+    <h2>ほかの場所でも</h2>
+    <ul>
+      {
+        site.links.map((link) => (
+          <li>
+            <a href={link.href} rel="me noopener">{link.label}</a>（{link.note}）
+          </li>
+        ))
+      }
+      <li><span class="ico ico-rss" aria-hidden="true"></span> RSS：<a href="/feed.xml">{new URL("/feed.xml", Astro.site)}</a></li>
+    </ul>
+  </div>
+</Base>
