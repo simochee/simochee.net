@@ -62,17 +62,71 @@
   :root {
     color-scheme: light;
   }
-  :root[data-theme="wakakusa"] {
-    --color-accent: #5b7f3a;
+  /* 着せかえで替えるのは色みを持つトークンだけ。本文の墨色や日曜・土曜の赤青、注意書きの色は、どのテーマでも意味が変わらないように残す。 */
+  :root[data-theme="shiro"] {
+    --color-accent: #e8e8e8;
+    --color-on-accent: #333333;
+    --color-page: #f4f4f4;
+    --color-band: #fafafa;
+    --color-tint: #f7f7f7;
+    --color-wash: #fafafa;
+    --color-code: #fbfbfb;
+    --color-frame: #c4c4c4;
+    --color-line: #dcdcdc;
+    --color-line-soft: #e8e8e8;
+    --color-control: #8c8c8c;
+    --color-ink-strong: #333333;
+    --color-ink-sub: #666666;
+    --color-link: #444444;
+    --color-menu-divider: rgb(0 0 0 / 0.12);
+    --color-menu-current: rgb(0 0 0 / 0.08);
+  }
+  :root[data-theme="aka"] {
+    --color-accent: #b33a3a;
+    --color-page: #f4e6e5;
+    --color-band: #f0dad8;
+    --color-tint: #f9eeed;
+    --color-wash: #fbf5f4;
+    --color-code: #fdf9f9;
+    --color-frame: #d4aaa6;
+    --color-line: #e7cbc8;
+    --color-line-soft: #efdedc;
+    --color-control: #a57d79;
+    --color-ink-strong: #6a1f1f;
+    --color-ink-sub: #734a47;
+    --color-link: #9b2c2c;
+    /* 既定のホバー色も赤なので、そのままだとリンクにふれても色が変わったと分からない。 */
+    --color-link-hover: #c25400;
   }
   :root[data-theme="sakura"] {
-    --color-accent: #a0456b;
+    --color-accent: #bf4d78;
+    --color-page: #f6e6ed;
+    --color-band: #f3dbe5;
+    --color-tint: #fbeff4;
+    --color-wash: #fcf5f8;
+    --color-code: #fdf9fb;
+    --color-frame: #d8a9bd;
+    --color-line: #ebc9d7;
+    --color-line-soft: #f1dde6;
+    --color-control: #a87a8d;
+    --color-ink-strong: #6b2141;
+    --color-ink-sub: #77495c;
+    --color-link: #9a325c;
   }
-  :root[data-theme="sumire"] {
-    --color-accent: #6b5b95;
-  }
-  :root[data-theme="kogecha"] {
-    --color-accent: #7a4a1e;
+  :root[data-theme="wakakusa"] {
+    --color-accent: #4f7833;
+    --color-page: #ecf2e7;
+    --color-band: #e4efdc;
+    --color-tint: #f2f8ee;
+    --color-wash: #f7faf4;
+    --color-code: #fafcf8;
+    --color-frame: #b8cbab;
+    --color-line: #d4e1ca;
+    --color-line-soft: #e3ebde;
+    --color-control: #778e66;
+    --color-ink-strong: #283f17;
+    --color-ink-sub: #48593c;
+    --color-link: #416725;
   }
   html {
     background: var(--color-page);

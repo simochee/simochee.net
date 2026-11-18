@@ -11,7 +11,7 @@ import { themes } from "../../lib/themes";
         {
           themes.map((theme) => (
             <button type="button" class="h-20 w-30 cursor-pointer border border-frame bg-paper p-2 aria-pressed:border-2 aria-pressed:border-ink-strong aria-pressed:p-1" data-theme-choice={theme.id} aria-pressed="false" aria-label={theme.name} title={theme.name}>
-              <span class="block h-full" style={`background: ${theme.color}`} />
+              <span class="block h-full border border-line" style={`background: ${theme.color}`} />
             </button>
           ))
         }
@@ -27,7 +27,7 @@ import { themes } from "../../lib/themes";
 </theme-picker>
 
 <script>
-  import { themes } from "../../lib/themes";
+  import { defaultTheme, themes } from "../../lib/themes";
 
   const key = "theme";
   const save = (theme: string) => {
@@ -57,7 +57,7 @@ import { themes } from "../../lib/themes";
       }
       reflect() {
         const chosen = document.documentElement.dataset.theme;
-        const theme = themes.find((item) => item.id === chosen) ?? themes[0];
+        const theme = themes.find((item) => item.id === chosen) ?? defaultTheme;
         for (const button of this.querySelectorAll<HTMLElement>("[aria-pressed]"))
           button.setAttribute("aria-pressed", String(button.dataset.themeChoice === theme.id));
         this.querySelector("[data-theme-name]")!.textContent = theme.name;
