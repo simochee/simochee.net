@@ -92,13 +92,14 @@ const menu = [
       </nav>
       {/* 折り返しの判定を flex に任せている。メディアクエリにすると、サイドバーが下へ回る幅を文字サイズの設定ごとに決め直すことになる。 */}
       <div class="flex flex-wrap gap-20 p-16">
-        <main id="main" class="min-w-0 flex-[999_1_520px]" transition:name="main" transition:animate="fade"><slot /></main>
+        <main id="main" class="min-w-0 flex-[999_1_520px] scroll-mt-16" transition:name="main" transition:animate="fade"><slot /></main>
         <aside class="flex min-w-0 flex-[1_1_210px] flex-col gap-16" aria-label="サイドバー" transition:name="sidebar" transition:persist><Sidebar /></aside>
       </div>
       <footer class="type-small border-t border-frame bg-band px-10 py-12 text-center" transition:name="footer">Copyright &copy; {site.name} All Rights Reserved.</footer>
     </div>
     <script>
       import "../scripts/elements";
+      import "../scripts/landing";
     </script>
   </body>
 </html>
