@@ -1,0 +1,20 @@
+---
+import Plugin from "../layout/Plugin.astro";
+
+// デザインに書かれていた見本のデータ。実データにつなぐときに置き換える。
+const popular = [
+  "固めプリンの名店まとめ",
+  "はじめてのネルドリップ",
+  "久しぶりに喫茶店でモーニング",
+  "古本屋のまわりかた",
+  "雨の日の喫茶店",
+];
+---
+
+<Plugin title="人気記事">
+<ol class="list-decimal py-6 pr-4 pl-24 *:border-b *:border-dotted *:border-line *:py-2">
+{popular.map((p) => (
+<li><a href="#">{p}</a></li>
+))}
+</ol>
+</Plugin>

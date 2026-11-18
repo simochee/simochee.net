@@ -2,6 +2,7 @@
 import { Image } from "astro:assets";
 import type { Post } from "../../lib/posts";
 import { formatDay } from "../../lib/dates";
+import Clap from "./Clap.astro";
 import EntryMeta from "./EntryMeta.astro";
 
 interface Props {
@@ -26,5 +27,6 @@ const href = `/posts/${post.id}/`;
     <p>{post.data.description}</p>
   </div>
   <p class="mx-6 my-8 text-right"><a href={href} aria-label={`「${post.data.title}」の続きを読む`}>続きを読む &raquo;</a></p>
+  <Clap />
   <EntryMeta post={post} />
 </article>

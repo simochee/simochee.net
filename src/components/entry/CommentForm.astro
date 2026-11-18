@@ -1,0 +1,20 @@
+---
+import Plugin from "../layout/Plugin.astro";
+import Button from "../ui/Button.astro";
+import TextArea from "../ui/TextArea.astro";
+import TextField from "../ui/TextField.astro";
+---
+
+<Plugin title="コメントの投稿" class="mt-22">
+  <form class="mt-6 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-8 gap-y-4">
+    <label for="comment-name">名前</label><TextField class="max-w-220" id="comment-name" autocomplete="name" />
+    <label for="comment-title">タイトル</label><TextField class="max-w-320" id="comment-title" />
+    <label for="comment-mail">メールアドレス</label><TextField class="max-w-320" id="comment-mail" type="email" autocomplete="email" />
+    <label for="comment-url">URL</label><TextField class="max-w-320" id="comment-url" type="url" autocomplete="url" />
+    <label class="self-start" for="comment-body">本文</label><TextArea id="comment-body" rows="5" />
+    <label for="comment-pass">パスワード</label><TextField class="max-w-160" id="comment-pass" type="password" autocomplete="off" />
+    <span>非公開コメント</span><label class="type-small"><input type="checkbox" /> 管理者にだけ表示を許可する</label>
+    <span></span>
+    <div><Button class="px-16 py-2">送信</Button></div>
+  </form>
+</Plugin>

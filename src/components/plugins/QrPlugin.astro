@@ -1,0 +1,31 @@
+---
+import Plugin from "../layout/Plugin.astro";
+
+// まだ本物の QR コードではなく、それらしく見える模様。URL を符号化する処理を入れるときに置き換える。
+const size = 21;
+const corners = [
+  [0, 0],
+  [0, size - 7],
+  [size - 7, 0],
+] as const;
+function finder(row: number, column: number) {
+  for (const [top, left] of corners) {
+    const y = row - top;
+    const x = column - left;
+    if (y < 0 || y > 6 || x < 0 || x > 6) continue;
+    return y === 0 || y === 6 || x === 0 || x === 6 || (y >= 2 && y <= 4 && x >= 2 && x <= 4);
+  }
+  return undefined;
+}
+const rows = Array.from({ length: size }, (_, row) =>
+  Array.from({ length: size }, (_, column) => finder(row, column) ?? (row * 7 + column * 13 + row * column) % 5 < 2),
+);
+---
+
+<Plugin title="QRコード">
+  <div class="px-4 py-8">
+    <div class="inline-flex flex-col border border-line bg-paper p-6" role="img" aria-label="このブログのQRコード">
+      {rows.map((row) => <div class="flex">{row.map((on) => <span class:list={["block size-4", on ? "bg-lcd" : "bg-paper"]} />)}</div>)}
+    </div>
+  </div>
+</Plugin>

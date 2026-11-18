@@ -1,6 +1,9 @@
 ---
 import { render } from "astro:content";
 import Base from "../../layouts/Base.astro";
+import Clap from "../../components/entry/Clap.astro";
+import CommentForm from "../../components/entry/CommentForm.astro";
+import Comments from "../../components/entry/Comments.astro";
 import EntryMeta from "../../components/entry/EntryMeta.astro";
 import Pager from "../../components/entry/Pager.astro";
 import { posts } from "../../lib/posts";
@@ -45,7 +48,10 @@ const link = (target?: typeof post) => target && { href: `/posts/${target.id}/`,
       }
       <Content />
     </div>
+    <Clap />
     <EntryMeta post={post} />
   </article>
   <Pager class="mt-16 p-4" label="前後の記事（ページ下）" newer={link(newer)} older={link(older)} />
+  <Comments />
+  <CommentForm />
 </Base>

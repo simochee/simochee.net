@@ -1,0 +1,28 @@
+---
+import Plugin from "../layout/Plugin.astro";
+import Icon from "../ui/Icon.astro";
+import { sampleComments, services } from "../../sample";
+---
+
+<Plugin title="コメント" class="mt-22" id="comments">
+  {
+    sampleComments.map((comment) => (
+      <article class="border-b border-dotted border-line px-6 py-8">
+        <h3 class="font-bold text-ink-strong before:content-['■_']">{comment.title}</h3>
+        <p class="mt-2 mb-4">{comment.text}</p>
+        <p class="type-small text-right text-ink-soft">
+          {comment.at} |{" "}
+          {"via" in comment ? (
+            <>
+              <Icon name={comment.via} /> <a href="#comments">{services[comment.via]}の投稿</a>
+            </>
+          ) : (
+            <a href="#comments">URL</a>
+          )}{" "}
+          | {comment.name} <a href="#comments">#-</a>[ <a href="#comments">編集</a> ]
+        </p>
+      </article>
+    ))
+  }
+  <p class="type-small mt-6 text-ink-soft">※ Bluesky・Mastodon でこの記事に返信した内容も、ここに表示されます。</p>
+</Plugin>
