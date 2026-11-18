@@ -1,0 +1,21 @@
+---
+import EntryListPage from "../../components/entry/EntryListPage.astro";
+import { pageParams } from "../../lib/paging";
+import { posts } from "../../lib/posts";
+import { categories, type Category } from "../../site";
+
+export async function getStaticPaths() {
+  const all = await posts();
+  return (Object.keys(categories) as Category[]).flatMap((type) => {
+    const listed = all.filter((post) => post.data.type === type);
+    return pageParams(listed.length).map(({ page, param }) => ({
+      params: { type, page: param },
+      props: { type, posts: listed, page },
+    }));
+  });
+}
+const { type, posts: listed, page } = Astro.props;
+const name = categories[type];
+---
+
+<EntryListPage base={`/${type}/`} title={`カテゴリ「${name}」`} crumbs={["カテゴリ", name]} heading={`カテゴリ「${name}」の記事一覧`} posts={listed} page={page} />

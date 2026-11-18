@@ -2,21 +2,27 @@
 import Plugin from "../layout/Plugin.astro";
 import PluginList from "../layout/PluginList.astro";
 import Icon from "../ui/Icon.astro";
+import { services } from "../../content/comment-schema";
+import { threads } from "../../lib/comment-store";
+import { commentAnchor, recentComments } from "../../lib/comments";
+import { formatMonthDay } from "../../lib/dates";
+import { posts } from "../../lib/posts";
 
-// デザインに書かれていた見本のデータ。実データにつなぐときに置き換える。
-const comments = [
-  {name: "みかん", title: "久しぶりに喫茶店でモーニング", date: "11/18", icon: "", via: ""},
-  {name: "pochi", title: "久しぶりに喫茶店でモーニング", date: "11/18", icon: "bsky", via: "Blueskyから"},
-  {name: "ゆず", title: "テンプレートを変えてみました", date: "11/16", icon: "mastodon", via: "Mastodonから"},
-  {name: "しもちぃ", title: "テンプレートを変えてみました", date: "11/16", icon: "", via: ""},
-  {name: "通りすがり", title: "近所の公園の銀杏並木", date: "11/08", icon: "", via: ""},
-];
+const titles = new Map((await posts()).map((post) => [post.id, post.data.title]));
+const recent = recentComments(await threads(), 5);
 ---
 
-<Plugin title="最新コメント">
-<PluginList>
-{comments.map((r) => (
-<li>・{r.icon && <Icon name={r.icon} label={r.via} class="mr-2" />}{r.name}：<a href="#">{r.title}</a> ({r.date})</li>
-))}
-</PluginList>
-</Plugin>
+{
+  recent.length > 0 && (
+    <Plugin title="最新コメント">
+      <PluginList>
+        {recent.map(({ slug, number, comment }) => (
+          <li>
+            ・{comment.via && <Icon name={comment.via} label={`${services[comment.via]}から`} class="mr-2" />}
+            {comment.name}：<a href={`/posts/${slug}/#${commentAnchor(number)}`}>{titles.get(slug)}</a> ({formatMonthDay(comment.at)})
+          </li>
+        ))}
+      </PluginList>
+    </Plugin>
+  )
+}

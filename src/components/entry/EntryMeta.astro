@@ -5,12 +5,14 @@ import type { Post } from "../../lib/posts";
 import { formatDay } from "../../lib/dates";
 import { tagPath } from "../../lib/tags";
 import { categories } from "../../site";
-import { sampleComments } from "../../sample";
+import { threads } from "../../lib/comment-store";
+import { commentCount } from "../../lib/comments";
 
 interface Props {
   post: Post;
 }
 const { id, data } = Astro.props.post;
+const comments = commentCount(await threads(), id);
 ---
 
 <footer class="type-small mt-2 text-right text-ink-soft">
@@ -26,7 +28,7 @@ const { id, data } = Astro.props.post;
       )
     }
     {" | "}
-    <Icon name="comment" /> <a href={`/posts/${id}/#comments`}>コメント({sampleComments.length})</a>
+    <Icon name="comment" /> <a href={`/posts/${id}/#comments`}>コメント({comments})</a>
     <share-button hidden data-title={data.title} data-url={`/posts/${id}/`}>
       {" | "}
       <Icon name="share" />

@@ -1,0 +1,18 @@
+---
+import EntryListPage from "../../../../components/entry/EntryListPage.astro";
+import { groupByMonth } from "../../../../lib/archive";
+import { pageParams } from "../../../../lib/paging";
+import { posts } from "../../../../lib/posts";
+
+export async function getStaticPaths() {
+  return groupByMonth(await posts()).flatMap((month) =>
+    pageParams(month.posts.length).map(({ page, param }) => ({
+      params: { year: month.year, month: month.month, page: param },
+      props: { month, page },
+    })),
+  );
+}
+const { month, page } = Astro.props;
+---
+
+<EntryListPage base={month.path} title={`${month.label}の記事`} crumbs={["月別アーカイブ", month.label]} heading={`${month.label}の記事一覧`} posts={month.posts} page={page} />
