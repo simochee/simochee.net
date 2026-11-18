@@ -1,0 +1,25 @@
+comments:
+  - title: 厚切りトースト
+    name: みかん
+    at: 2026-11-18T10:12:34+09:00
+    url: https://example.com/mikan/
+    body: 厚切りトースト、いいなあ。どこのお店か今度こっそり教えてください！
+  - title: Blueskyからの返信
+    name: pochi
+    at: 2026-11-18T10:40:02+09:00
+    via: bsky
+    body: ゆで卵つきのモーニング、うれしくなりますよね。
+  - title: Mastodonからの返信
+    name: ゆず
+    at: 2026-11-18T12:05:47+09:00
+    via: mastodon
+    body: 午前休の喫茶店、最高の使い方ですね。
+  - title: "Re: 厚切りトースト"
+    name: しもちぃ
+    at: 2026-11-18T21:30:15+09:00
+    body: みかんさん > 駅前の角のお店です。ナポリタンもおすすめらしいです！
+  - title: Blueskyからの返信
+    name: kotori
+    at: 2026-11-18T22:02:31+09:00
+    via: bsky
+    body: 窓ぎわの席、写真だけで落ち着きます。

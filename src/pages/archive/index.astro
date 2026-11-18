@@ -2,10 +2,14 @@
 import Base from "../../layouts/Base.astro";
 import EntryIndex from "../../components/entry/EntryIndex.astro";
 import { groupByMonth } from "../../lib/archive";
+import { threads } from "../../lib/comment-store";
+import { commentCount } from "../../lib/comments";
 import { posts } from "../../lib/posts";
 import { categories } from "../../site";
 
 const all = await posts();
+const comments = await threads();
+const commentNote = (post: (typeof all)[number]) => `コメント(${commentCount(comments, post.id)})`;
 const months = groupByMonth(all);
 const shownMonths = 3;
 const shownPerCategory = 4;
@@ -38,7 +42,7 @@ const groupTitle = "mb-2 border-b border-line bg-wash px-6 py-2 font-bold text-i
             <h2 class={groupTitle}>
               {month.label}（{month.posts.length}件）
             </h2>
-            <EntryIndex posts={month.posts} note={(post) => `［${categories[post.data.type]}］`} />
+            <EntryIndex posts={month.posts} note={(post) => `［${categories[post.data.type]}］ ${commentNote(post)}`} />
           </section>
         ))
       }
@@ -65,7 +69,7 @@ const groupTitle = "mb-2 border-b border-line bg-wash px-6 py-2 font-bold text-i
             <h2 class={groupTitle}>
               {category.name}（{category.posts.length}件）
             </h2>
-            <EntryIndex posts={category.posts.slice(0, shownPerCategory)} note={() => ""} />
+            <EntryIndex posts={category.posts.slice(0, shownPerCategory)} note={commentNote} />
             {category.posts.length > shownPerCategory && (
               <p class="type-small px-4 pt-2 text-right">
                 <a href={`/${category.type}/`}>
