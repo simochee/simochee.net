@@ -1,4 +1,5 @@
 ---
+import { ClientRouter } from "astro:transitions";
 import "../styles/global.css";
 import bodyFont from "../assets/fonts/shinonome14-regular-kana.woff2?url";
 import Sidebar from "../components/Sidebar.astro";
@@ -52,19 +53,20 @@ const menu = [
     {publishedAt && <meta property="article:published_time" content={publishedAt.toISOString()} />}
     {updatedAt && <meta property="article:modified_time" content={updatedAt.toISOString()} />}
     <ThemeBoot />
+    <ClientRouter fallback="swap" />
   </head>
   <body class="px-10 pt-14 pb-32">
     <a class="absolute top-0 left-0 -translate-y-[200%] border border-frame bg-paper px-12 py-4 focus:z-10 focus:translate-y-0" href="#main">本文へ移動</a>
     <div class="mx-auto max-w-800 border border-frame bg-paper">
-      <div class="type-small flex flex-wrap justify-between gap-x-12 gap-y-4 border-b border-line bg-wash px-10 py-3">
+      <div class="type-small flex flex-wrap justify-between gap-x-12 gap-y-4 border-b border-line bg-wash px-10 py-3" transition:name="topline">
         <span>{site.tagline}</span>
         <span><a href="/">ブログトップ</a> | <a href="/archive/">記事一覧</a></span>
       </div>
-      <header class="border-b-3 border-double border-frame bg-band px-20 pt-30 pb-20">
+      <header class="border-b-3 border-double border-frame bg-band px-20 pt-30 pb-20" transition:name="banner">
         <SiteTitle class="text-title font-bold"><a class="text-ink-strong no-underline" href="/">{site.name}</a></SiteTitle>
         <p class="mt-6 text-ink-sub">{site.description}</p>
       </header>
-      <nav class="bg-accent" aria-label="グローバルメニュー">
+      <nav class="bg-accent" aria-label="グローバルメニュー" transition:name="menu">
         <ul class="flex flex-wrap">
           {
             menu.map((item, index) => (
@@ -86,10 +88,13 @@ const menu = [
       </nav>
       {/* 折り返しの判定を flex に任せている。メディアクエリにすると、サイドバーが下へ回る幅を文字サイズの設定ごとに決め直すことになる。 */}
       <div class="flex flex-wrap gap-20 p-16">
-        <main id="main" class="min-w-0 flex-[999_1_520px]"><slot /></main>
-        <aside class="flex min-w-0 flex-[1_1_210px] flex-col gap-16" aria-label="サイドバー"><Sidebar /></aside>
+        <main id="main" class="min-w-0 flex-[999_1_520px]" transition:name="main" transition:animate="fade"><slot /></main>
+        <aside class="flex min-w-0 flex-[1_1_210px] flex-col gap-16" aria-label="サイドバー" transition:name="sidebar" transition:persist><Sidebar /></aside>
       </div>
-      <footer class="type-small border-t border-frame bg-band px-10 py-12 text-center">Copyright &copy; {site.name} All Rights Reserved.</footer>
+      <footer class="type-small border-t border-frame bg-band px-10 py-12 text-center" transition:name="footer">Copyright &copy; {site.name} All Rights Reserved.</footer>
     </div>
+    <script>
+      import "../scripts/elements";
+    </script>
   </body>
 </html>

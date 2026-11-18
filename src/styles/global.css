@@ -95,6 +95,14 @@
     outline: 2px solid var(--color-link-hover);
     outline-offset: 1px;
   }
+  /* 2008 年のページは一瞬で切り替わった。枠は動かさず、本文だけを短く切り替える。 */
+  ::view-transition-group(*) {
+    animation-duration: 160ms;
+  }
+  ::view-transition-old(main),
+  ::view-transition-new(main) {
+    animation-duration: 120ms;
+  }
 }
 
 /* 小さい文字は大きさだけでなくフォントも 12px 用に替える。14px 用を縮めるとドットが潰れる。 */

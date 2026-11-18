@@ -13,4 +13,6 @@ const allowed = themes.map((theme) => theme.id);
     } catch {}
   };
   apply(document.documentElement);
+  // ページ遷移では html 要素の属性も次のページのものへ置き換わる。差し替える前の文書に付けておけば、既定の色が一瞬見えることもない。
+  document.addEventListener("astro:before-swap", (event) => apply(event.newDocument.documentElement));
 </script>
