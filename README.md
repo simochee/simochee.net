@@ -233,12 +233,6 @@ curl -fsSL https://vite.plus | VP_VERSION=1.7.0 VP_HOME="$HOME/.vite-plus" VP_NO
 . "$HOME/.vite-plus/env"
 ```
 
-## ステージング
-
-`main` に push すると、GitHub Actions（`.github/workflows/pages.yml`）がダミー記事でビルドし、GitHub Pages の https://staging.simochee.net/ に公開します。
-検索エンジンに載らないよう、`SIMOCHEE_NOINDEX=true` でビルドします。
-GitHub Pages では静的ファイルだけが配信され、`prerender = false` のルート（`/api/health/` など）は 404 になります。
-
 ## 検証用スクリプト
 
 ```sh
