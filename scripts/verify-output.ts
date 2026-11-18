@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import { readdir, readFile, stat } from "node:fs/promises";
 import sharp from "sharp";
 
-const expected = ["markdown-lab", "mdx-example", "walking-note", "welcome"];
+const expected = (await readdir("content/posts", { withFileTypes: true }))
+  .filter((entry) => entry.isDirectory() && entry.name !== "unfinished")
+  .map((entry) => entry.name)
+  .sort();
 assert.deepEqual((await readdir("dist/posts")).sort(), expected);
 for (const path of [
   "index.html",
