@@ -16,7 +16,7 @@ const href = `/posts/${post.id}/`;
     <time datetime={post.data.publishedAt.toISOString()}>{formatDay(post.data.publishedAt)}</time>
     {post.data.status === "draft" && " ［下書き］"}
   </p>
-  <h2 class="entry-title"><a href={href}>{post.data.title}</a></h2>
+  <h2 class="entry-title" transition:name={`entry-${post.id}`}><a href={href}>{post.data.title}</a></h2>
   <div class="entry-body">
     {
       post.data.thumbnail && (

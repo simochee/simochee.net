@@ -27,7 +27,7 @@ const link = (target?: typeof post) => target && { href: `/posts/${target.id}/`,
       <time datetime={post.data.publishedAt.toISOString()}>{formatDay(post.data.publishedAt)}</time>
       {post.data.status === "draft" && " ［下書きプレビュー］"}
     </p>
-    <h1 class="entry-title">{post.data.title}</h1>
+    <h1 class="entry-title" transition:name={`entry-${post.id}`}>{post.data.title}</h1>
     <div class="entry-body prose">
       {
         toc.length > 1 && (

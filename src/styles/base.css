@@ -107,3 +107,12 @@ small,
 .ico-archive {
   --ico: url("../assets/icons/archive.svg");
 }
+
+/* 2008 年のページは一瞬で切り替わった。枠は動かさず、本文だけを短く切り替える。 */
+::view-transition-group(*) {
+  animation-duration: 160ms;
+}
+::view-transition-old(main),
+::view-transition-new(main) {
+  animation-duration: 120ms;
+}
