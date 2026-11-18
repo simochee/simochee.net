@@ -11,8 +11,7 @@ export default defineConfig({
     env: {
       COUNTER_DB: bindings.d1({
         name: "simochee-net-counter",
-        // 本番のデータベースを作るまでの仮の ID。id を省くと、手元のエミュレータが cf d1 migrations で指定できない ID でデータベースを作る。
-        id: "00000000-0000-4000-8000-000000000000",
+        id: "88b21b19-fe1c-40a1-b13c-103303fbe721",
       }),
       ANALYTICS_ACCOUNT_ID: bindings.secret(),
       ANALYTICS_SITE_TAG: bindings.secret(),
