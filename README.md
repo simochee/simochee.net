@@ -11,7 +11,7 @@ Astro 7 で生成する日本語の個人ブログです。
 - スタイルは Tailwind CSS です。色・書体・文字サイズのデザイントークンは `src/styles/global.css` の `@theme` にあり、1 単位は 1px です（`px-14` は 14px）。
 - 文字は東雲フォント（パブリックドメイン）です。由来と分割の方法は `src/assets/fonts/README.md` にあります。
 - Markdown から生成される本文にはクラスを付けられないので、その装飾だけ `src/styles/prose.css` に素の CSS で書いています。
-- サイドバーのプラグインは `src/components/plugins/` に 1 つずつあり、並び順は `src/components/Sidebar.astro` で決めます。
+- コンポーネントの層分けと置き場所の決めかたは `src/components/README.md` にあります。
 - ページ遷移は Astro の `<ClientRouter />` による view transition です。サイドバーは遷移をまたいで保持します。
 - スクリプトが動かなくても読めます。月の満ち欠け、着せかえ、共有、コードのコピーだけがスクリプトを使い、動かないときは表示しません。
 

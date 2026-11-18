@@ -1,5 +1,6 @@
 ---
-import Plugin from "../Plugin.astro";
+import Button from "../ui/Button.astro";
+import Plugin from "../layout/Plugin.astro";
 import { themes } from "../../lib/themes";
 ---
 
@@ -18,7 +19,7 @@ import { themes } from "../../lib/themes";
       <p class="type-small mt-4">
         いまの色：<span data-theme-name></span>
         <span data-theme-reset hidden>
-          | <button type="button" class="cursor-pointer text-link underline hover:text-link-hover" data-theme-choice="">もとにもどす</button>
+          | <Button variant="link" data-theme-choice="">もとにもどす</Button>
         </span>
       </p>
     </div>
