@@ -1,0 +1,20 @@
+---
+import EntryListPage from "../../../components/entry/EntryListPage.astro";
+import { pageParams } from "../../../lib/paging";
+import { posts } from "../../../lib/posts";
+import { tagPath, tagSlug } from "../../../lib/tags";
+
+export async function getStaticPaths() {
+  const all = await posts();
+  return [...new Set(all.flatMap((post) => post.data.tags))].flatMap((tag) => {
+    const listed = all.filter((post) => post.data.tags.includes(tag));
+    return pageParams(listed.length).map(({ page, param }) => ({
+      params: { tag: tagSlug(tag), page: param },
+      props: { tag, posts: listed, page },
+    }));
+  });
+}
+const { tag, posts: listed, page } = Astro.props;
+---
+
+<EntryListPage base={tagPath(tag)} title={`タグ「${tag}」`} crumbs={["タグ", tag]} heading={`タグ「${tag}」の記事一覧`} posts={listed} page={page} />

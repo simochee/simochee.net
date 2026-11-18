@@ -98,6 +98,27 @@ raw URL（https://raw.githubusercontent.com/simochee/simochee.net/main/schema/fr
 タグ URL では日本語を保持し、`/` などの予約文字を `~` と文字コードでエスケープして単一のパス要素に収めます。
 タグの重複や日時の暦上の妥当性は、ビルド時の Zod 検証でも確認します。
 
+## コメント
+
+記事に付いたコメントは `content/comments/<記事の slug>.yaml` に書きます。
+いまはビルド時に読むテスト用のデータで、保存先ができたらそちらに置き換えます。
+
+```yaml
+comments:
+  - title: コメントの題名
+    name: 書いた人
+    at: 2026-11-18T10:12:34+09:00
+    body: コメントの本文
+    via: bsky # 任意。bsky または mastodon
+    url: https://example.com/ # 任意。http と https のみ
+```
+
+未知のキーはエラーです。
+記事ページのコメント欄は古い順、サイドバーの「最新コメント」と `/comments.xml` は新しい順に並びます。
+記事の下と全記事一覧の「コメント(n)」は、この件数です。
+公開されていない記事（下書き、または記事のない slug）のコメントは、件数にも一覧にも RSS にも出ません。
+集計の定義は `src/lib/comments.ts`、書式の定義は `src/content/comment-schema.ts` です。
+
 ## 日付
 
 公開日は first-parent の履歴で、記事の `index.md(x)` に `status: published` 行を初めて追加したコミットのコミッター日時です。

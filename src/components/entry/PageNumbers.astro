@@ -1,7 +1,32 @@
 ---
-/** 一覧ページのページ番号。いまはどの一覧も 1 ページに収めているので、番号は 1 だけになる。 */
+import { pageNumbers, pagePath } from "../../lib/paging";
+
+interface Props {
+  base: string;
+  page: number;
+  last: number;
+}
+const { base, page, last } = Astro.props;
 ---
 
 <nav class="border-y border-dotted border-frame p-4 text-center" aria-label="ページ番号">
-  <span>&laquo; 前のページ</span> | <b aria-current="page">1</b> | <span>次のページ &raquo;</span>
+  {page > 1 ? <a href={pagePath(page - 1, base)} rel="prev">&laquo; 前のページ</a> : <span>&laquo; 前のページ</span>}
+  {" | "}
+  {
+    pageNumbers(page, last).map((number) =>
+      number === undefined ? (
+        <span>… </span>
+      ) : number === page ? (
+        <>
+          <b aria-current="page">{number}</b>{" "}
+        </>
+      ) : (
+        <>
+          <a href={pagePath(number, base)} aria-label={`${number}ページ目`}>{number}</a>{" "}
+        </>
+      ),
+    )
+  }
+  {"| "}
+  {page < last ? <a href={pagePath(page + 1, base)} rel="next">次のページ &raquo;</a> : <span>次のページ &raquo;</span>}
 </nav>
