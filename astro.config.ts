@@ -1,6 +1,6 @@
 import { rehypeHeadingIds, unified } from "@astrojs/markdown-remark";
 import { resolve } from "node:path";
-import { defineConfig } from "astro/config";
+import { defineConfig, envField } from "astro/config";
 import cloudflare from "@astrojs/cloudflare";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
@@ -17,7 +17,7 @@ import { rehypeAlerts } from "./src/lib/rehype-alerts";
 import { rehypeCodeFrame } from "./src/lib/rehype-code-frame";
 const contentDir = process.env.SIMOCHEE_CONTENT_DIR;
 export default defineConfig({
-  site: "https://simochee.net",
+  site: process.env.SIMOCHEE_SITE_URL || "https://simochee.net",
   output: "static",
   // アダプターは既定でセッション用の KV を用意する。セッションは使わないので、要らない KV を作らせない。
   session: false,
@@ -29,6 +29,11 @@ export default defineConfig({
   }),
   cacheDir: "./.astro/",
   trailingSlash: "always",
+  env: {
+    schema: {
+      SIMOCHEE_NOINDEX: envField.boolean({ context: "server", access: "public", default: false }),
+    },
+  },
   integrations: [mdx(), sitemap({ filter: (page) => !page.endsWith("/404/") })],
   markdown: {
     processor: unified({
