@@ -14,7 +14,7 @@ Astro 7 で生成する日本語の個人ブログです。
 - コンポーネントの層分けと置き場所の決めかたは `src/components/README.md` にあります。
 - ページ遷移は Astro の `<ClientRouter />` による view transition です。サイドバーは遷移をまたいで保持します。
 - 遷移後のスクロール位置は `src/lib/landing.ts` で決めます。戻る・進むは離れたときの位置、`#` 付きの URL はその要素、それ以外は本文の先頭です。ヘッダーが見えている位置から移ったときは動かしません。
-- スクリプトが動かなくても読めます。月の満ち欠け、着せかえ、共有、コードのコピーだけがスクリプトを使い、動かないときは表示しません。
+- スクリプトが動かなくても読めます。月の満ち欠け、アクセスカウンター、着せかえ、共有、コードのコピーだけがスクリプトを使い、動かないときは表示しません。
 
 ## 開発
 
@@ -186,11 +186,36 @@ export const GET: APIRoute = () => Response.json({ ok: true });
 - URL の末尾スラッシュの決まりはページと同じです（`/api/health/`）。
 - KV や D1 などを使うときは、`cloudflare.config.ts` の `worker.env` に binding を足し、ルートの中で `import { env } from "cloudflare:workers"` から読みます。
 
+### アクセスカウンター
+
+サイドバーのアクセスカウンターは、表示したときに `GET /api/counter/` を呼び、累計と今日までの 7 日間の訪問数を受け取ります。数字にマウスを重ねる（またはフォーカスする）と、7 日間の訪問数を棒グラフで出します。
+
+- 数字は Cloudflare Web Analytics の訪問数（visits）です。サイトでは数えず、Web Analytics が有効になっていることを前提にしています。
+- 日の区切りは日本時間です。Web Analytics から 1 時間ごとの数を読み、日本時間の日付でまとめ直します。
+- Web Analytics は古い集計を消していくので、一昨日までの分は D1 の `daily_visits` テーブルに写し、累計はその合計に昨日と今日の分を足したものです。テーブルの定義は `migrations/` にあります。
+- はじめて動かしたときは 30 日前までさかのぼります。それより前の訪問は数えません。
+- 結果は Cloudflare のキャッシュに 10 分置くので、数字の更新は最大で 10 分（と Web Analytics の集計の遅れのぶん）遅れます。
+- 呼び出しに失敗したとき（GitHub Pages のステージングなど）は、カウンターごと表示しません。
+
 ### 手元で動かす
 
 `vp run dev` で、サーバー側のルートも含めて動きます。Astro の dev サーバーが、サーバー側のコードを Cloudflare のランタイム（workerd）の中で動かします。
 
 - KV や D1 などの binding は、手元ではエミュレータで動きます。Cloudflare へのサインインは要りません。
+- D1 のテーブルは、はじめに手元のエミュレータへマイグレーションを当てて作ります。ID は `cloudflare.config.ts` の `COUNTER_DB` の `id` です。
+
+  ```sh
+  pnpm exec cf d1 migrations apply <COUNTER_DB の id> --local
+  ```
+
+- アクセスカウンターは Web Analytics に問い合わせるので、`.dev.vars` に次の 3 つを書きます（git には入りません）。書かないときはカウンターが表示されないだけです。
+
+  ```sh
+  ANALYTICS_ACCOUNT_ID=アカウント ID
+  ANALYTICS_SITE_TAG=Web Analytics のサイトタグ（`cf rum site-info list` の site_tag。ビーコンの token とは別の値）
+  ANALYTICS_API_TOKEN=「Account Analytics: Read」権限の API トークン
+  ```
+
 - エミュレータのデータは `.cloudflare/state/` に残り、起動し直しても消えません。消すときはこのディレクトリを削除します。
 - 本番と同じ形（ビルド済みのファイルと Worker）で確かめるときは `vp run preview` を使います。
 
@@ -205,6 +230,15 @@ pnpm exec cf deploy --dry-run   # アップロードせずにビルドと検証�
 ```
 
 デプロイには `cf auth login` でのサインインか、環境変数 `CLOUDFLARE_API_TOKEN` が要ります。
+
+アクセスカウンターの D1 は、はじめてのデプロイの前に作り、`migrations/` を当てておきます。`migrations/` にファイルを足したときも、デプロイの前に当てます。
+
+```sh
+pnpm exec cf d1 create --name simochee-net-counter   # 返ってきた ID を cloudflare.config.ts の COUNTER_DB の id に書く
+pnpm exec cf d1 migrations apply <COUNTER_DB の id>
+```
+
+Web Analytics に問い合わせるための `ANALYTICS_ACCOUNT_ID`、`ANALYTICS_SITE_TAG`、`ANALYTICS_API_TOKEN` は、Worker のシークレットとして設定します（値は `.dev.vars` と同じです）。
 
 | ファイル               | 内容                                                                   |
 | ---------------------- | ---------------------------------------------------------------------- |
