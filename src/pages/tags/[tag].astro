@@ -1,9 +1,21 @@
 ---
-import Base from '../../layouts/Base.astro';
-import PostList from '../../components/PostList.astro';
-import { posts } from '../../lib/posts';
-import { tagSlug } from '../../lib/tags';
-export async function getStaticPaths() { return [...new Set((await posts()).flatMap((post) => post.data.tags))].map((tag) => ({ params: { tag: tagSlug(tag) }, props: { tag } })); }
+import Base from "../../layouts/Base.astro";
+import EntryList from "../../components/EntryList.astro";
+import ListHeader from "../../components/ListHeader.astro";
+import { posts } from "../../lib/posts";
+import { tagSlug } from "../../lib/tags";
+
+export async function getStaticPaths() {
+  return [...new Set((await posts()).flatMap((post) => post.data.tags))].map((tag) => ({
+    params: { tag: tagSlug(tag) },
+    props: { tag },
+  }));
+}
 const { tag } = Astro.props;
+const listed = (await posts()).filter((post) => post.data.tags.includes(tag));
 ---
-<Base title={`タグ: ${tag}`}><h1 class="page-title">■ タグ「{tag}」の記事一覧</h1><PostList posts={(await posts()).filter((post) => post.data.tags.includes(tag))} /></Base>
+
+<Base title={`タグ「${tag}」`}>
+  <ListHeader crumbs={["タグ", tag]} heading={`タグ「${tag}」の記事一覧`} count={listed.length} />
+  <EntryList posts={listed} />
+</Base>

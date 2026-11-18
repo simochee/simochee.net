@@ -1,94 +1,376 @@
-.page-title {
-  margin-block-end: 12px;
+.page-title,
+.entry-title {
   padding: 6px 8px;
   color: var(--ink-strong);
   background: var(--tint);
   border: 1px solid var(--line);
+  &::before {
+    content: "■ " / "";
+  }
+  & a {
+    color: inherit;
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 }
-.metadata {
-  font-family: var(--font-small);
-  font-size: var(--text-small);
-  line-height: var(--leading-small);
+.page-title {
+  margin-block-end: 12px;
+}
+.entry {
+  margin-block-end: 30px;
+}
+.entry-date {
+  margin-block-end: 6px;
+  padding-block-end: 2px;
   color: var(--ink-soft);
+  border-block-end: 1px dotted var(--frame);
 }
-.post-list,
-.tags {
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.entry-title {
+  margin-block-end: 10px;
 }
-.post-list > li {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 16px;
-  padding-block: 12px;
-  border-block-end: 1px dotted var(--line);
-  & > a {
-    flex: 0 0 160px;
-  }
-  & > div {
-    flex: 1 1 16em;
-  }
-  & img {
-    display: block;
-    inline-size: 100%;
-    block-size: auto;
-    aspect-ratio: 1.9;
-    object-fit: cover;
-    border: 1px solid var(--line);
-  }
-}
-.tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 12px;
-}
-.toc {
-  margin-block: 16px;
-  padding: 6px 12px;
-  background: var(--wash);
-  border: 1px solid var(--line);
-}
-.prose {
+.entry-body {
+  padding-inline: 6px;
   line-height: var(--leading-prose);
   & > * + * {
     margin-block-start: 1em;
   }
-  & :is(h2, h3) {
-    margin-block-start: 1.6em;
+}
+.entry-photo,
+.prose img {
+  display: block;
+  max-inline-size: 100%;
+  block-size: auto;
+  border: 1px solid #cccccc;
+}
+.entry-more {
+  margin: 8px 6px;
+  text-align: end;
+}
+.entry-meta {
+  padding-block-start: 5px;
+  color: var(--ink-soft);
+  text-align: end;
+  border-block-start: 1px solid var(--line-soft);
+}
+.pager {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 4px 12px;
+  padding: 4px;
+  border-block: 1px dotted var(--frame);
+  & > :first-child {
+    text-align: start;
+  }
+  & > :last-child {
+    text-align: end;
+  }
+  main > &:first-child {
+    margin-block-end: 12px;
+  }
+}
+.crumbs {
+  margin-block-end: 6px;
+  color: var(--ink-soft);
+}
+.list-header {
+  margin-block-end: 16px;
+  padding: 6px 10px;
+  background: var(--wash);
+  border: 1px solid var(--line);
+  & h1 {
     color: var(--ink-strong);
   }
-  & img {
-    max-inline-size: 100%;
-    block-size: auto;
+}
+.toc {
+  padding: 6px 12px;
+  background: var(--wash);
+  border: 1px solid var(--line);
+  & .toc-label {
+    font-weight: bold;
+    color: var(--ink-strong);
   }
-  & pre {
-    overflow: auto;
-    padding: 8px 10px;
-    border: 1px solid var(--line);
+  & ol {
+    margin: 2px 0 0;
+    padding-inline-start: 1.8em;
   }
-  & table {
-    display: block;
-    overflow: auto;
-    border-collapse: collapse;
+  & li.sub {
+    counter-increment: list-item 0;
+    list-style: "・";
+    margin-inline-start: 1em;
   }
-  & :is(th, td) {
-    padding: 3px 12px;
-    border: 1px solid var(--line);
+}
+
+.prose {
+  & h2 {
+    margin-block: 1.6em 0.5em;
+    padding: 2px 4px;
+    color: var(--ink-strong);
+    border-block-end: 1px dashed var(--frame);
+    &::before {
+      content: "◆ " / "";
+    }
+  }
+  & h3 {
+    margin-block: 1.4em 0.4em;
+    color: var(--ink-strong);
+    &::before {
+      content: "● " / "";
+    }
+  }
+  & :is(h4, h5, h6) {
+    margin-block: 1.2em 0.4em;
+    color: var(--ink-sub);
+    &::before {
+      content: "・" / "";
+    }
+  }
+  & :is(h2, h3, h4, h5, h6) {
+    scroll-margin-block-start: 8px;
+    & + * {
+      margin-block-start: 0;
+    }
+  }
+  & .heading-anchor {
+    margin-inline-start: 6px;
+    font-family: var(--font-small);
+    font-size: var(--text-small);
+    font-weight: normal;
+    text-decoration: none;
+    /* 見出しごとに「#」が並ぶと 2008 年の見た目から外れるので普段は隠す。キーボードとタッチでは hover が起きないため、そちらでは常に見せる。 */
+    @media (hover: hover) {
+      opacity: 0;
+      :is(h2, h3, h4, h5, h6):hover > &,
+      &:focus-visible {
+        opacity: 1;
+      }
+    }
+  }
+  & :is(ul, ol) {
+    padding-inline-start: 1.6em;
+    & :is(ul, ol) {
+      margin-block-start: 0;
+      padding-inline-start: 1.4em;
+    }
+    & ul {
+      list-style-type: circle;
+    }
+  }
+  & .contains-task-list {
+    padding-inline-start: 0.2em;
+    list-style: none;
+  }
+  & del {
+    color: #5e5e5e;
+  }
+  & :not(pre) > code {
+    padding: 0 3px;
+    background: var(--wash);
+    border: 1px solid var(--line-soft);
+  }
+  & kbd {
+    padding: 0 4px;
+    font: inherit;
+    background: var(--wash);
+    border: 1px solid var(--frame);
+    border-block-end-width: 2px;
   }
   & blockquote {
     padding: 6px 12px;
     background: var(--wash);
     border: 1px dotted var(--frame);
+    & > * + * {
+      margin-block-start: 0.5em;
+    }
+  }
+  & hr {
+    margin-block: 1.2em;
+    border: 0;
+    border-block-start: 1px dashed var(--frame);
+  }
+  & figcaption {
+    margin-block-start: 2px;
+    font-family: var(--font-small);
+    font-size: var(--text-small);
+    line-height: var(--leading-small);
+    color: var(--ink-soft);
+  }
+  & table {
+    display: block;
+    inline-size: fit-content;
+    max-inline-size: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    font-family: var(--font-small);
+    font-size: var(--text-small);
+    line-height: var(--leading-small);
+  }
+  & :is(th, td) {
+    padding: 3px 12px;
+    border: 1px solid var(--line);
+  }
+  & th {
+    background: var(--tint);
+  }
+  & tbody tr:nth-child(even) {
+    background: #f8fafc;
+  }
+  & details {
+    padding: 4px 10px;
+    background: var(--wash);
+    border: 1px solid var(--line);
+    & > summary {
+      font-weight: bold;
+      color: var(--ink-strong);
+      cursor: pointer;
+      list-style: none;
+      &::-webkit-details-marker {
+        display: none;
+      }
+      &::before {
+        content: "＋ " / "";
+      }
+    }
+    &[open] > summary::before {
+      content: "－ " / "";
+    }
+    & > :not(summary) {
+      margin-block-start: 4px;
+    }
+  }
+  & sup {
+    font-family: var(--font-small);
+    font-size: var(--text-small);
+    line-height: 0;
+    vertical-align: baseline;
+    & a::before {
+      content: "[※";
+    }
+    & a::after {
+      content: "]";
+    }
+  }
+  & .footnotes {
+    margin-block-start: 1.2em;
+    padding-block-start: 1.2em;
+    font-family: var(--font-small);
+    font-size: var(--text-small);
+    line-height: var(--leading-small);
+    color: var(--ink-soft);
+    border-block-start: 1px dashed var(--frame);
+    & ol {
+      padding-inline-start: 2.4em;
+    }
+    & li::marker {
+      content: "※" counter(list-item) " ";
+    }
+  }
+  & .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }
-.line.diff.add {
-  background: #228b2230;
+
+.code-block {
+  border: 1px solid var(--line);
+  & .code-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 1px 4px 1px 8px;
+    font-family: var(--font-small);
+    font-size: var(--text-small);
+    line-height: var(--leading-small);
+    color: var(--ink-soft);
+    background: var(--tint);
+    border-block-end: 1px solid var(--line);
+  }
+  & pre {
+    margin: 0;
+    padding: 8px 10px;
+    overflow-x: auto;
+    font-family: var(--font-small);
+    font-size: var(--text-small);
+    line-height: 1.25rem;
+    /* Shiki は背景色を style 属性に書き込むため、テーマの白をテンプレートの色へ戻すには !important が要る。 */
+    background: #f8fafc !important;
+    & code {
+      display: block;
+      inline-size: fit-content;
+      min-inline-size: 100%;
+      font: inherit;
+    }
+  }
+  & .line {
+    display: inline-block;
+    inline-size: 100%;
+  }
+  & .line.diff.add {
+    background: #dcf2dc;
+  }
+  & .line.diff.remove {
+    background: #fbe0e0;
+  }
+  & .line.highlighted {
+    background: #fff4c2;
+  }
+  & .highlighted-word {
+    background: #fff4c2;
+    outline: 1px solid #e3c77a;
+  }
 }
-.line.diff.remove {
-  background: #dc143c25;
+
+.markdown-alert {
+  --alert-ink: #1f4f86;
+  padding: 4px 10px;
+  background: #eef4fb;
+  border: 1px solid #9fb8d6;
+  /* プラグインが出す題名は英語（NOTE など）とアイコンで、2008 年風の【メモ】表記にならない。題名を消し、本文の頭へ日本語の題名を足している。 */
+  & > .markdown-alert-title {
+    display: none;
+  }
+  & > .markdown-alert-title + *::before {
+    content: var(--alert-label);
+    font-weight: bold;
+    color: var(--alert-ink);
+  }
+  & > * + * {
+    margin-block-start: 0.5em;
+  }
+  & > .markdown-alert-title + * {
+    margin-block-start: 0;
+  }
 }
-.line.highlighted,
-.highlighted-word {
-  background: #88888830;
+.markdown-alert-note {
+  --alert-label: "【メモ】 ";
+}
+.markdown-alert-tip {
+  --alert-label: "【ヒント】 ";
+  --alert-ink: #2b6a2b;
+  background: #eef7ee;
+  border-color: #a6cfa6;
+}
+.markdown-alert-important {
+  --alert-label: "【重要】 ";
+  --alert-ink: #5b3b8c;
+  background: #f4effa;
+  border-color: #c5b3e0;
+}
+.markdown-alert-warning {
+  --alert-label: "【注意】 ";
+  --alert-ink: #7a5600;
+  background: #fff8e6;
+  border-color: #e3c77a;
+}
+.markdown-alert-caution {
+  --alert-label: "【警告】 ";
+  --alert-ink: #9b2c2c;
+  background: #fdeeee;
+  border-color: #e2a8a8;
 }
