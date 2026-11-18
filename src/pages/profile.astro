@@ -1,0 +1,61 @@
+---
+import Base from "../layouts/Base.astro";
+import Avatar from "../components/Avatar.astro";
+import { site } from "../site";
+
+const { profile } = site;
+const cell = "border border-line px-8 py-3";
+---
+
+<Base title="プロフィール" description={`管理人${site.author.name}のことと、このブログのこと。`}>
+  <h1 class="title-box mb-12">プロフィール</h1>
+  <div class="mb-18 flex flex-wrap items-start gap-14">
+    <Avatar size={120} />
+    <table class="type-small flex-[1_1_280px] border-collapse">
+      <tbody>
+        {
+          profile.facts.map(([name, value]) => (
+            <tr>
+              <th class:list={[cell, "w-[9em] bg-tint text-left font-bold whitespace-nowrap"]} scope="row">
+                {name}
+              </th>
+              <td class={cell}>{value}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+  <div class="prose">
+    <h2>ごあいさつ</h2>
+    <p>
+      {
+        profile.greeting.map((line, index) => (
+          <>
+            {index > 0 && <br />}
+            {line}
+          </>
+        ))
+      }
+    </p>
+    <h2>すきなもの いろいろ</h2>
+    <dl class="grid grid-cols-[auto_minmax(0,1fr)] gap-x-12 gap-y-2">
+      {
+        profile.favorites.map(([name, value]) => (
+          <>
+            <dt class="font-bold text-ink-strong">{name}</dt>
+            <dd>{value}</dd>
+          </>
+        ))
+      }
+    </dl>
+    <h2>このブログについて</h2>
+    <ul>
+      {profile.notes.map((note) => <li>{note}</li>)}
+    </ul>
+    <h2>ほかの場所でも</h2>
+    <div class="flex flex-col gap-4 border border-line bg-wash px-10 py-6">
+      <p><span class="ico ico-rss" aria-hidden="true"></span> RSS：<a href="/feed.xml">{new URL("/feed.xml", Astro.site)}</a></p>
+    </div>
+  </div>
+</Base>

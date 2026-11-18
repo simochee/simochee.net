@@ -1,0 +1,82 @@
+---
+import Base from "../../layouts/Base.astro";
+import EntryIndex from "../../components/EntryIndex.astro";
+import { groupByMonth } from "../../lib/archive";
+import { posts } from "../../lib/posts";
+import { categories } from "../../site";
+
+const all = await posts();
+const months = groupByMonth(all);
+const shownMonths = 3;
+const shownPerCategory = 4;
+const byCategory = Object.entries(categories).map(([type, name]) => ({
+  type,
+  name,
+  posts: all.filter((post) => post.data.type === type),
+}));
+const segment =
+  "block cursor-pointer border border-control bg-paper px-8 py-2 text-ink-strong peer-checked:bg-accent peer-checked:text-on-accent peer-focus-visible:outline-2 peer-focus-visible:outline-offset-1 peer-focus-visible:outline-link-hover";
+const groupTitle = "mb-2 border-b border-line bg-wash px-6 py-2 font-bold text-ink-strong before:content-['▼_']";
+---
+
+<Base title="全記事一覧" description="これまでに書いた記事を、月ごと・カテゴリごとに。">
+  <h1 class="title-box mb-12">全記事一覧</h1>
+  <div class="group">
+    <div class="type-small mb-12 flex flex-wrap items-center justify-between gap-x-12 gap-y-6 text-ink-soft">
+      <span>このブログには、ぜんぶで {all.length} 件の記事があります。</span>
+      <fieldset class="flex items-center">
+        <legend class="float-left">表示：</legend>
+        <label><input class="peer absolute opacity-0" type="radio" name="view" value="month" checked /><span class={segment}>月ごと</span></label>
+        <label><input class="peer absolute opacity-0" type="radio" name="view" value="category" /><span class:list={[segment, "border-l-0"]}>カテゴリごと</span></label>
+      </fieldset>
+    </div>
+    {/* 表示の切り替えに JavaScript を使っていない。ラジオボタンの状態を :has() で読むだけなので、スクリプトが動かなくても切り替わる。 */}
+    <div class="group-has-[[value=category]:checked]:hidden" data-view="month">
+      {
+        months.slice(0, shownMonths).map((month) => (
+          <section class="mb-14">
+            <h2 class={groupTitle}>
+              {month.label}（{month.posts.length}件）
+            </h2>
+            <EntryIndex posts={month.posts} note={(post) => `［${categories[post.data.type]}］`} />
+          </section>
+        ))
+      }
+      {
+        months.length > shownMonths && (
+          <div class="type-small border border-line bg-wash px-8 py-6">
+            <p class="font-bold text-ink-strong">それより前の記事</p>
+            <p>
+              {months.slice(shownMonths).map((month, index) => (
+                <>
+                  {index > 0 && " | "}
+                  <a href={month.path}>{month.year}/{month.month}</a> ({month.posts.length})
+                </>
+              ))}
+            </p>
+          </div>
+        )
+      }
+    </div>
+    <div class="group-has-[[value=month]:checked]:hidden" data-view="category">
+      {
+        byCategory.map((category) => (
+          <section class="mb-14">
+            <h2 class={groupTitle}>
+              {category.name}（{category.posts.length}件）
+            </h2>
+            <EntryIndex posts={category.posts.slice(0, shownPerCategory)} note={() => ""} />
+            {category.posts.length > shownPerCategory && (
+              <p class="type-small px-4 pt-2 text-right">
+                <a href={`/${category.type}/`}>
+                  &raquo; 「{category.name}」の記事をもっと見る（ほか {category.posts.length - shownPerCategory} 件）
+                </a>
+              </p>
+            )}
+          </section>
+        ))
+      }
+    </div>
+  </div>
+  <p class="type-small mt-12 text-right"><a href="#main">▲ ページの先頭へ</a></p>
+</Base>

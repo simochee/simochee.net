@@ -1,0 +1,53 @@
+---
+import Plugin from "../Plugin.astro";
+import { calendarWeeks, groupByMonth } from "../../lib/archive";
+import { posts } from "../../lib/posts";
+
+const months = groupByMonth(await posts());
+const [current, previous] = months;
+const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
+const weekend = "data-[weekday=0]:text-sunday data-[weekday=6]:text-saturday";
+---
+
+{
+  current && (
+    <Plugin title="カレンダー">
+      <div class="type-small px-2 py-8">
+        <div class="mb-4 flex justify-between">
+          <span>{previous && <a href={previous.path}>&laquo; {Number(previous.month)}月</a>}</span>
+          <b aria-hidden="true">{current.label}</b>
+          <span />
+        </div>
+        <table class="w-full table-fixed border-collapse text-center">
+          <caption class="sr-only">{current.label}</caption>
+          <thead>
+            <tr>
+              {weekdays.map((name, weekday) => (
+                <th class:list={["border-b border-line font-normal", weekend]} scope="col" data-weekday={weekday}>
+                  {name}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {calendarWeeks(current).map((week) => (
+              <tr>
+                {week.map((cell) => (
+                  <td class={weekend} data-weekday={cell?.weekday}>
+                    {cell?.posts[0] ? (
+                      <a class="font-bold" href={`/posts/${cell.posts[0].id}/`} aria-label={`${cell.day}日の記事「${cell.posts[0].data.title}」`}>
+                        {cell.day}
+                      </a>
+                    ) : (
+                      cell?.day
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </Plugin>
+  )
+}
