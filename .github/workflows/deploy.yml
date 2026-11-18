@@ -1,0 +1,19 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  dispatch:
+    # fork には secret がないので、送っても失敗するだけになる。
+    if: github.repository == 'simochee/simochee.net'
+    runs-on: ubuntu-latest
+    steps:
+      - run: gh api "repos/$DEPLOY_REPOSITORY/dispatches" -f event_type=site-updated
+        env:
+          GH_TOKEN: ${{ secrets.DEPLOY_DISPATCH_TOKEN }}
+          DEPLOY_REPOSITORY: ${{ secrets.DEPLOY_REPOSITORY }}
