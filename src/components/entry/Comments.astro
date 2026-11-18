@@ -1,28 +1,43 @@
 ---
 import Plugin from "../layout/Plugin.astro";
 import Icon from "../ui/Icon.astro";
-import { sampleComments, services } from "../../sample";
+import { services } from "../../content/comment-schema";
+import { threads } from "../../lib/comment-store";
+import { commentAnchor } from "../../lib/comments";
+import { formatTimestamp } from "../../lib/dates";
+
+interface Props {
+  slug: string;
+}
+const comments = (await threads()).get(Astro.props.slug) ?? [];
 ---
 
 <Plugin title="コメント" class="mt-22" id="comments">
   {
-    sampleComments.map((comment) => (
-      <article class="border-b border-dotted border-line px-6 py-8">
+    comments.map((comment, index) => (
+      <article id={commentAnchor(index + 1)} class="border-b border-dotted border-line px-6 py-8">
         <h3 class="font-bold text-ink-strong before:content-['■_']">{comment.title}</h3>
-        <p class="mt-2 mb-4">{comment.text}</p>
+        <p class="mt-2 mb-4 whitespace-pre-line">{comment.body}</p>
         <p class="type-small text-right text-ink-soft">
-          {comment.at} |{" "}
-          {"via" in comment ? (
+          <time datetime={comment.at.toISOString()}>{formatTimestamp(comment.at)}</time>
+          {comment.via && (
             <>
-              <Icon name={comment.via} /> <a href="#comments">{services[comment.via]}の投稿</a>
+              {" | "}
+              <Icon name={comment.via} /> {services[comment.via]}の投稿
             </>
-          ) : (
-            <a href="#comments">URL</a>
-          )}{" "}
-          | {comment.name} <a href="#comments">#-</a>[ <a href="#comments">編集</a> ]
+          )}
+          {comment.url && (
+            <>
+              {" | "}
+              <a href={comment.url} rel="nofollow ugc noopener">URL</a>
+            </>
+          )}
+          {" | "}
+          {comment.name}
         </p>
       </article>
     ))
   }
+  {comments.length === 0 && <p class="px-6 py-8">コメントはまだありません。</p>}
   <p class="type-small mt-6 text-ink-soft">※ Bluesky・Mastodon でこの記事に返信した内容も、ここに表示されます。</p>
 </Plugin>

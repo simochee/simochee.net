@@ -3,13 +3,15 @@ import Icon from "../ui/Icon.astro";
 import type { Post } from "../../lib/posts";
 import { formatDay } from "../../lib/dates";
 import { categories } from "../../site";
-import { sampleComments } from "../../sample";
+import { threads } from "../../lib/comment-store";
+import { commentCount } from "../../lib/comments";
 
 interface Props {
   post: Post;
 }
 const { post } = Astro.props;
 const href = `/posts/${post.id}/`;
+const comments = commentCount(await threads(), post.id);
 ---
 
 <article class="mb-22">
@@ -24,6 +26,6 @@ const href = `/posts/${post.id}/`;
   <p class="type-small text-right text-ink-soft">
     <Icon name="folder" /> カテゴリ：<a href={`/${post.data.type}/`}>{categories[post.data.type]}</a>
     {" | "}
-    <Icon name="comment" /> <a href={`${href}#comments`}>コメント({sampleComments.length})</a>
+    <Icon name="comment" /> <a href={`${href}#comments`}>コメント({comments})</a>
   </p>
 </article>
