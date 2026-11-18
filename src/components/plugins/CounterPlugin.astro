@@ -39,10 +39,10 @@ import Plugin from "../layout/Plugin.astro";
       #requested = false;
 
       async connectedCallback() {
-        // サイドバーはページ遷移をまたいで付け替えられ、そのたびに呼ばれる。数えるのは最初の 1 回だけ。
+        // サイドバーはページ遷移をまたいで付け替えられ、そのたびに呼ばれる。数字は 10 分ごとにしか変わらないので、読むのは最初の 1 回だけ。
         if (this.#requested) return;
         this.#requested = true;
-        const response = await fetch("/api/counter/", { method: "POST" }).catch(() => undefined);
+        const response = await fetch("/api/counter/").catch(() => undefined);
         if (!response?.ok) return;
         this.#render((await response.json()) as CounterStats);
         this.hidden = false;
@@ -62,19 +62,19 @@ import Plugin from "../layout/Plugin.astro";
         );
 
         this.#part("week-total").textContent = week
-          .reduce((sum, entry) => sum + entry.visitors, 0)
+          .reduce((sum, entry) => sum + entry.visits, 0)
           .toLocaleString("ja-JP");
 
-        const most = Math.max(1, ...week.map((entry) => entry.visitors));
+        const most = Math.max(1, ...week.map((entry) => entry.visits));
         this.#part("bars").replaceChildren(
-          ...week.map(({ day, visitors }) => {
+          ...week.map(({ day, visits }) => {
             const [, month, date] = day.split("-").map(Number);
-            const label = `${month}月${date}日 ${visitors} 人`;
+            const label = `${month}月${date}日 ${visits} 人`;
             const bar = element("li", "flex h-48 w-16 items-end");
             bar.title = label;
             const fill = element("span", "block w-full bg-accent");
             // 1 人でもいれば、0 人の日と見分けられるよう 1px は残す。
-            fill.style.height = `${visitors && Math.max(1, Math.round((visitors / most) * barHeight))}px`;
+            fill.style.height = `${visits && Math.max(1, Math.round((visits / most) * barHeight))}px`;
             bar.append(fill, element("span", "sr-only", label));
             return bar;
           }),

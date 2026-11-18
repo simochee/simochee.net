@@ -3,6 +3,7 @@
 declare module "cloudflare:workers" {
   interface D1PreparedStatement {
     bind(...values: unknown[]): D1PreparedStatement;
+    first<T>(column: string): Promise<T | null>;
   }
   interface D1Database {
     prepare(query: string): D1PreparedStatement;
@@ -12,5 +13,8 @@ declare module "cloudflare:workers" {
   }
   export const env: {
     COUNTER_DB: D1Database;
+    ANALYTICS_ACCOUNT_ID: string;
+    ANALYTICS_SITE_TAG: string;
+    ANALYTICS_API_TOKEN: string;
   };
 }

@@ -187,10 +187,13 @@ export const GET: APIRoute = () => Response.json({ ok: true });
 
 ### アクセスカウンター
 
-サイドバーのアクセスカウンターは、表示したときに `POST /api/counter/` を呼び、累計と今日までの 7 日間の人数を受け取ります。数字にマウスを重ねる（またはフォーカスする）と、7 日間の人数を棒グラフで出します。
+サイドバーのアクセスカウンターは、表示したときに `GET /api/counter/` を呼び、累計と今日までの 7 日間の訪問数を受け取ります。数字にマウスを重ねる（またはフォーカスする）と、7 日間の訪問数を棒グラフで出します。
 
-- 訪問者を見分けないため、クッキーも localStorage も使わず、IP アドレスも残しません。そのかわり、リロードするたびに数が増えます。サイト内の移動ではサイドバーを付け替えるだけなので、数えません。
-- 人数は D1 の `daily_visitors` テーブルに日ごとに持ち、累計はその合計です。テーブルの定義は `migrations/` にあります。
+- 数字は Cloudflare Web Analytics の訪問数（visits）です。サイトでは数えず、Web Analytics が有効になっていることを前提にしています。
+- 日の区切りは日本時間です。Web Analytics から 1 時間ごとの数を読み、日本時間の日付でまとめ直します。
+- Web Analytics は古い集計を消していくので、一昨日までの分は D1 の `daily_visits` テーブルに写し、累計はその合計に昨日と今日の分を足したものです。テーブルの定義は `migrations/` にあります。
+- はじめて動かしたときは 30 日前までさかのぼります。それより前の訪問は数えません。
+- 結果は Cloudflare のキャッシュに 10 分置くので、数字の更新は最大で 10 分（と Web Analytics の集計の遅れのぶん）遅れます。
 - 呼び出しに失敗したとき（GitHub Pages のステージングなど）は、カウンターごと表示しません。
 
 ### 手元で動かす
@@ -202,6 +205,14 @@ export const GET: APIRoute = () => Response.json({ ok: true });
 
   ```sh
   pnpm exec cf d1 migrations apply <COUNTER_DB の id> --local
+  ```
+
+- アクセスカウンターは Web Analytics に問い合わせるので、`.dev.vars` に次の 3 つを書きます（git には入りません）。書かないときはカウンターが表示されないだけです。
+
+  ```sh
+  ANALYTICS_ACCOUNT_ID=アカウント ID
+  ANALYTICS_SITE_TAG=Web Analytics のサイトタグ（ビーコンの token）
+  ANALYTICS_API_TOKEN=「Account Analytics: Read」権限の API トークン
   ```
 
 - エミュレータのデータは `.cloudflare/state/` に残り、起動し直しても消えません。消すときはこのディレクトリを削除します。
@@ -225,6 +236,8 @@ pnpm exec cf deploy --dry-run   # アップロードせずにビルドと検証�
 pnpm exec cf d1 create --name simochee-net-counter   # 返ってきた ID を cloudflare.config.ts の COUNTER_DB の id に書く
 pnpm exec cf d1 migrations apply <COUNTER_DB の id>
 ```
+
+Web Analytics に問い合わせるための `ANALYTICS_ACCOUNT_ID`、`ANALYTICS_SITE_TAG`、`ANALYTICS_API_TOKEN` は、Worker のシークレットとして設定します（値は `.dev.vars` と同じです）。
 
 | ファイル               | 内容                                                                   |
 | ---------------------- | ---------------------------------------------------------------------- |

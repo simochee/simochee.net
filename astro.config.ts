@@ -2,6 +2,7 @@ import { rehypeHeadingIds, unified } from "@astrojs/markdown-remark";
 import { resolve } from "node:path";
 import { defineConfig, envField } from "astro/config";
 import cloudflare from "@astrojs/cloudflare";
+import { cacheCloudflare } from "@astrojs/cloudflare/cache";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
@@ -27,6 +28,7 @@ export default defineConfig({
     // 画像はビルド時に sharp で最適化して静的ファイルにする。既定の Cloudflare Images は、配信のたびに変換する有料の機能。
     imageService: "compile",
   }),
+  cache: { provider: cacheCloudflare() },
   cacheDir: "./.astro/",
   trailingSlash: "always",
   env: {

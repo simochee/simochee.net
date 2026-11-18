@@ -6,3 +6,4 @@ dist/
 .vite-plus/
 .wrangler/
 .cloudflare/
+.dev.vars*
