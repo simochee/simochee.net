@@ -53,6 +53,18 @@
   :root {
     color-scheme: light;
   }
+  :root[data-theme="wakakusa"] {
+    --color-accent: #5b7f3a;
+  }
+  :root[data-theme="sakura"] {
+    --color-accent: #a0456b;
+  }
+  :root[data-theme="sumire"] {
+    --color-accent: #6b5b95;
+  }
+  :root[data-theme="kogecha"] {
+    --color-accent: #7a4a1e;
+  }
   html {
     background: var(--color-page);
     scrollbar-gutter: stable;

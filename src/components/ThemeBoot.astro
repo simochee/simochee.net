@@ -1,0 +1,16 @@
+---
+import { themes } from "../lib/themes";
+
+const allowed = themes.map((theme) => theme.id);
+---
+
+{/* 外部ファイルにすると読み込みを待つあいだ既定の色で描かれ、選んだ色へ切り替わる瞬間が見えてしまう。 */}
+<script is:inline define:vars={{ allowed }}>
+  const apply = (root) => {
+    try {
+      const theme = localStorage.getItem("theme");
+      if (allowed.includes(theme)) root.dataset.theme = theme;
+    } catch {}
+  };
+  apply(document.documentElement);
+</script>
