@@ -206,6 +206,13 @@ cf deploy --dry-run         # アップロードせずにビルドと検証だ�
 
 デプロイには `cf auth login` でのサインインか、環境変数 `CLOUDFLARE_API_TOKEN` が要ります。
 
+`main` に push すると、GitHub Actions（`.github/workflows/deploy.yml`）が `repository_dispatch`（`site-updated`）を送り、送り先のリポジトリの workflow が本番へデプロイします。
+
+| secret                  | 内容                                                              |
+| ----------------------- | ----------------------------------------------------------------- |
+| `DEPLOY_REPOSITORY`     | 送り先のリポジトリ（`owner/name`）                                |
+| `DEPLOY_DISPATCH_TOKEN` | 送り先の Contents に書き込める fine-grained personal access token |
+
 | ファイル               | 内容                                                                   |
 | ---------------------- | ---------------------------------------------------------------------- |
 | `cloudflare.config.ts` | Worker の名前、互換性の日付、静的ファイルの配信の決まり、binding       |
