@@ -1,10 +1,14 @@
 ---
+import { pageRange } from "../../lib/paging";
+
 interface Props {
   crumbs: string[];
   heading: string;
   count: number;
+  page: number;
 }
-const { crumbs, heading, count } = Astro.props;
+const { crumbs, heading, count, page } = Astro.props;
+const { from, to } = pageRange(count, page);
 ---
 
 <nav class="type-small mb-6 text-ink-soft" aria-label="現在位置">
@@ -13,5 +17,7 @@ const { crumbs, heading, count } = Astro.props;
 </nav>
 <header class="mb-16 border border-line bg-wash px-10 py-6">
   <h1 class="font-bold text-ink-strong">{heading}</h1>
-  <p class="type-small text-ink-soft">{count > 0 ? `${count} 件の記事があります` : "記事はまだありません"}</p>
+  <p class="type-small text-ink-soft">
+    {count > 0 ? `${count} 件の記事があります（${from}〜${to} 件目を表示）` : "記事はまだありません"}
+  </p>
 </header>

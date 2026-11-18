@@ -1,0 +1,25 @@
+---
+import Base from "../../layouts/Base.astro";
+import type { Post } from "../../lib/posts";
+import { pageCount, pageOf } from "../../lib/paging";
+import EntryList from "./EntryList.astro";
+import ListHeader from "./ListHeader.astro";
+import PageNumbers from "./PageNumbers.astro";
+
+interface Props {
+  /** 一覧の 1 ページ目の URL。 */
+  base: string;
+  title: string;
+  crumbs: string[];
+  heading: string;
+  posts: Post[];
+  page: number;
+}
+const { base, title, crumbs, heading, posts, page } = Astro.props;
+---
+
+<Base title={page > 1 ? `${title}（${page}ページ目）` : title}>
+  <ListHeader crumbs={crumbs} heading={heading} count={posts.length} page={page} />
+  <EntryList posts={pageOf(posts, page)} />
+  <PageNumbers base={base} page={page} last={pageCount(posts.length)} />
+</Base>
