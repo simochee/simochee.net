@@ -12,6 +12,10 @@ export function formatDay(date: Date) {
   const { year, month, day, weekday } = parts(date);
   return `${year}/${month}/${day} (${weekday})`;
 }
+export function dayKey(date: Date) {
+  const { year, month, day } = parts(date);
+  return `${year}/${month}/${day}`;
+}
 const clock = tokyo({ hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" });
 /** コメントの投稿日時。秒まで出すのは、同じ日に続けて付いたコメントの順がわかるようにするため。 */
 export function formatTimestamp(date: Date) {

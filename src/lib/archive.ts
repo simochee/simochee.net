@@ -1,4 +1,4 @@
-import { formatDay } from "./dates";
+import { dayKey, formatDay } from "./dates";
 
 export interface Dated {
   data: { publishedAt: Date };
@@ -30,25 +30,44 @@ export function groupByMonth<T extends Dated>(posts: T[]): Month<T>[] {
   return [...months.values()].sort((a, b) => b.path.localeCompare(a.path));
 }
 
+export interface CalendarPost {
+  id: string;
+  title: string;
+  publishedAt: string;
+}
+
 export interface Day<T> {
+  date: string;
   day: number;
   weekday: number;
   posts: T[];
 }
-export function calendarWeeks<T extends Dated>(month: Month<T>): (Day<T> | undefined)[][] {
+export type YearMonth = Pick<Month<unknown>, "year" | "month">;
+export function addMonths({ year, month }: YearMonth, delta: number): YearMonth {
+  const date = new Date(Date.UTC(Number(year), Number(month) - 1 + delta, 1));
+  return {
+    year: String(date.getUTCFullYear()),
+    month: String(date.getUTCMonth() + 1).padStart(2, "0"),
+  };
+}
+
+export function calendarWeeks<T extends Dated>(
+  month: YearMonth & Pick<Month<T>, "posts">,
+): (Day<T> | undefined)[][] {
   const year = Number(month.year);
   const index = Number(month.month) - 1;
   const first = new Date(Date.UTC(year, index, 1)).getUTCDay();
   const length = new Date(Date.UTC(year, index + 1, 0)).getUTCDate();
   const cells: (Day<T> | undefined)[] = Array.from({ length: first }, () => undefined);
-  for (let day = 1; day <= length; day++)
+  for (let day = 1; day <= length; day++) {
+    const date = `${month.year}/${month.month}/${String(day).padStart(2, "0")}`;
     cells.push({
+      date,
       day,
       weekday: (first + day - 1) % 7,
-      posts: month.posts.filter(
-        (post) => Number(formatDay(post.data.publishedAt).slice(8, 10)) === day,
-      ),
+      posts: month.posts.filter((post) => dayKey(post.data.publishedAt) === date),
     });
+  }
   while (cells.length % 7) cells.push(undefined);
   return Array.from({ length: cells.length / 7 }, (_, week) => cells.slice(week * 7, week * 7 + 7));
 }
