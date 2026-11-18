@@ -1,0 +1,27 @@
+---
+import Plugin from "../layout/Plugin.astro";
+import Button from "../ui/Button.astro";
+
+// デザインに書かれていた見本のデータ。実データにつなぐときに置き換える。
+const pollOptions = [
+  {label: "ブレンド", checked: true, pct: "42%"},
+  {label: "カフェオレ", checked: false, pct: "18%"},
+  {label: "ココア", checked: false, pct: "25%"},
+  {label: "クリームソーダ", checked: false, pct: "15%"},
+];
+---
+
+<Plugin title="アンケート">
+<div class="py-8 px-4">
+<p class="mb-4 font-bold">冬の喫茶店で頼むのは？</p>
+
+<form class="flex flex-col gap-1">
+{pollOptions.map((o) => (
+<label class="flex items-center gap-4"><input type="radio" name="poll" checked={o.checked} />{o.label}</label>
+))}
+<div class="flex justify-between items-center mt-4"><Button class="py-1 px-10">投票</Button><a href="#">結果を見る</a></div>
+</form>
+
+
+</div>
+</Plugin>

@@ -1,11 +1,16 @@
 ---
-import Icon from "../ui/Icon.astro";
 import Plugin from "../layout/Plugin.astro";
-import PluginList from "../layout/PluginList.astro";
+import Icon from "../ui/Icon.astro";
 ---
 
-<Plugin title="RSS">
-  <PluginList>
-    <li class="border-b-0!"><Icon name="rss" /> <a href="/feed.xml">最近記事のRSS</a></li>
-  </PluginList>
+<Plugin title="RSS・フォロー">
+  <ul class="px-4 py-6 *:py-2">
+    <li><Icon name="rss" /> <a href="/feed.xml">最近記事のRSS</a></li>
+    <li><Icon name="rss" /> <a href="#">最新コメントのRSS</a></li>
+    <li><Icon name="bsky" /> <a href="#">Blueskyでフォロー</a></li>
+    <li>
+      <Icon name="mastodon" /> <a href="#">Mastodonでフォロー</a><br />
+      <span class="type-small pl-[1em] break-all text-ink-soft">@simochee@（サーバー未定）</span>
+    </li>
+  </ul>
 </Plugin>
