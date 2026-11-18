@@ -1,0 +1,56 @@
+@font-face {
+  font-family: "Shinonome14";
+  src: url("../assets/fonts/shinonome14-regular-kana.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0-33FF, U+A000-F8FF, U+FB00-FFFF;
+}
+@font-face {
+  font-family: "Shinonome14";
+  src: url("../assets/fonts/shinonome14-regular-kanji.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+3400-9FFF, U+F900-FAFF;
+}
+@font-face {
+  font-family: "Shinonome14";
+  src: url("../assets/fonts/shinonome14-bold-kana.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+  unicode-range: U+0-33FF, U+A000-F8FF, U+FB00-FFFF;
+}
+@font-face {
+  font-family: "Shinonome14";
+  src: url("../assets/fonts/shinonome14-bold-kanji.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+  unicode-range: U+3400-9FFF, U+F900-FAFF;
+}
+@font-face {
+  font-family: "Shinonome12";
+  src: url("../assets/fonts/shinonome12-regular-kana.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0-33FF, U+A000-F8FF, U+FB00-FFFF;
+}
+@font-face {
+  font-family: "Shinonome12";
+  src: url("../assets/fonts/shinonome12-regular-kanji.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+3400-9FFF, U+F900-FAFF;
+}
+@font-face {
+  font-family: "Shinonome12";
+  src: url("../assets/fonts/shinonome12-bold-kana.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+  unicode-range: U+0-33FF, U+A000-F8FF, U+FB00-FFFF;
+}
+@font-face {
+  font-family: "Shinonome12";
+  src: url("../assets/fonts/shinonome12-bold-kanji.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+  unicode-range: U+3400-9FFF, U+F900-FAFF;
+}
