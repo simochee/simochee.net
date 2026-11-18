@@ -53,10 +53,31 @@ const cell = "border border-line px-8 py-3";
     <h2>このブログについて</h2>
     <ul>
       {profile.notes.map((note) => <li>{note}</li>)}
+      <li>お返事がほしいときは、<a href="/mail/">メールフォーム</a>からどうぞ。</li>
     </ul>
     <h2>ほかの場所でも</h2>
+    <p>このブログは、SNS からもフォローできます。新しい記事を書くと、そちらにも届きます。</p>
     <div class="flex flex-col gap-4 border border-line bg-wash px-10 py-6">
+      <p><Icon name="bsky" /> Bluesky：<a href="#">@simochee.net</a></p>
+      <p>
+        <Icon name="mastodon" /> Mastodon：<a href="#">@simochee@（サーバー未定）</a>
+        <span class="type-small text-ink-soft">（検索窓に入れるとフォローできます）</span>
+      </p>
       <p><Icon name="rss" /> RSS：<a href="/feed.xml">{new URL("/feed.xml", Astro.site)}</a></p>
     </div>
+    <h2>このブログのあゆみ</h2>
+    <table class="type-small border-collapse!">
+      <tbody>
+        {
+          profile.history.map(([date, event]) => (
+            <tr>
+              <td class="border-0! border-b! border-dotted! py-2! pr-12! pl-0! whitespace-nowrap text-ink-soft">{date}</td>
+              <td class="border-0! border-b! border-dotted! px-0! py-2!">{event}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+    <p class="type-small text-ink-soft">このブログに来てくれた人：<b>0012341</b> 人（2024年4月1日から）</p>
   </div>
 </Base>

@@ -1,0 +1,37 @@
+---
+import Base from "../layouts/Base.astro";
+import Button from "../components/ui/Button.astro";
+import TextArea from "../components/ui/TextArea.astro";
+import TextField from "../components/ui/TextField.astro";
+---
+
+<Base title="メールフォーム">
+<h1 class="title-box mb-10">メールフォーム</h1>
+
+<p class="mb-10">管理人しもちぃへのメールは、こちらからどうぞ。<br />ブログの感想や相互リンクのご相談など、なんでもうれしいです。</p>
+
+<ol class="type-small flex flex-wrap items-center gap-4 mb-12 p-0 list-none" aria-label="送信までの流れ">
+<li class="py-1 px-10 border border-frame bg-accent text-paper">1. 入力</li>
+<li class="text-ink-soft" aria-hidden="true">→</li>
+<li class="py-1 px-10 border border-frame bg-paper text-ink-strong">2. 確認</li>
+<li class="text-ink-soft" aria-hidden="true">→</li>
+<li class="py-1 px-10 border border-frame bg-paper text-ink-strong">3. 送信完了</li>
+</ol>
+
+
+<form>
+<table class="w-full border-collapse">
+<tbody><tr><th class="w-[9em] py-4 px-8 border border-line bg-tint text-left whitespace-nowrap"><label for="mail-name">お名前</label> <span class="type-small text-danger">※必須</span></th><td class="py-4 px-8 border border-line"><TextField class="w-full max-w-240" id="mail-name" type="text" /></td></tr>
+<tr><th class="py-4 px-8 border border-line bg-tint text-left whitespace-nowrap"><label for="mail-addr">メールアドレス</label></th><td class="py-4 px-8 border border-line"><TextField class="w-full max-w-320" id="mail-addr" type="email" /><div class="type-small text-ink-soft">お返事がほしい方は入れてください。ほかの人には見えません。</div></td></tr>
+<tr><th class="py-4 px-8 border border-line bg-tint text-left whitespace-nowrap">お返事</th><td class="py-4 px-8 border border-line"><label><input type="radio" name="mail-reply" checked /> ほしい</label>　<label><input type="radio" name="mail-reply" /> いらない</label></td></tr>
+<tr><th class="py-4 px-8 border border-line bg-tint text-left whitespace-nowrap"><label for="mail-subject">件名</label></th><td class="py-4 px-8 border border-line"><select class="py-1 px-2 border border-control" id="mail-subject" value="ブログの感想"><option value="ブログの感想">ブログの感想</option><option value="相互リンクのご相談">相互リンクのご相談</option><option value="記事についての質問">記事についての質問</option><option value="その他">その他</option></select></td></tr>
+<tr><th class="py-4 px-8 border border-line bg-tint text-left whitespace-nowrap align-top"><label for="mail-body">本文</label> <span class="type-small text-danger">※必須</span></th><td class="py-4 px-8 border border-line"><TextArea class="w-full" id="mail-body" rows="8"></TextArea></td></tr>
+</tbody></table>
+<div class="flex flex-wrap justify-center items-center gap-8 mt-10">
+<Button class="py-2 px-16">確認画面へ</Button>
+<Button class="py-2 px-10" variant="plain">リセット</Button>
+</div>
+
+<p class="type-small mt-8 text-center text-ink-soft">※ 送信するときに、迷惑メールよけの自動チェックが入ります。</p>
+</form>
+</Base>

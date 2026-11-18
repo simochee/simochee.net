@@ -2,6 +2,7 @@
 import Base from "../layouts/Base.astro";
 import EntryList from "../components/entry/EntryList.astro";
 import ListHeader from "../components/entry/ListHeader.astro";
+import PageNumbers from "../components/entry/PageNumbers.astro";
 import { posts } from "../lib/posts";
 import { categories, type Category } from "../site";
 
@@ -16,4 +17,5 @@ const listed = (await posts()).filter((post) => post.data.type === type);
 <Base title={`カテゴリ「${name}」`}>
   <ListHeader crumbs={["カテゴリ", name]} heading={`カテゴリ「${name}」の記事一覧`} count={listed.length} />
   <EntryList posts={listed} />
+  <PageNumbers />
 </Base>

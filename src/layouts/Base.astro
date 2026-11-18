@@ -23,6 +23,8 @@ const menu = [
   { href: "/", label: "ホーム" },
   { href: "/archive/", label: "全記事一覧" },
   { href: "/profile/", label: "プロフィール" },
+  { href: "/bbs/", label: "掲示板" },
+  { href: "/mail/", label: "メールフォーム" },
   { href: "/feed.xml", label: "RSS" },
 ];
 ---
@@ -60,7 +62,7 @@ const menu = [
     <div class="mx-auto max-w-800 border border-frame bg-paper">
       <div class="type-small flex flex-wrap justify-between gap-x-12 gap-y-4 border-b border-line bg-wash px-10 py-3" transition:name="topline">
         <span>{site.tagline}</span>
-        <span><a href="/">ブログトップ</a> | <a href="/archive/">記事一覧</a></span>
+        <span><a href="/">ブログトップ</a> | <a href="/archive/">記事一覧</a> | <a href="/gallery/">画像一覧</a></span>
       </div>
       <header class="border-b-3 border-double border-frame bg-band px-20 pt-30 pb-20" transition:name="banner">
         <SiteTitle class="text-title font-bold"><a class="text-ink-strong no-underline" href="/">{site.name}</a></SiteTitle>
