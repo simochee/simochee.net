@@ -104,14 +104,8 @@ const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
             step < 0 ? `« ${Number(target.month)}月` : `${Number(target.month)}月 »`;
         }
 
-        const label = this.querySelector("#calendar-label")!;
-        const text = `${this.#shown.year}年${this.#shown.month}月`;
-        if (shown) {
-          const link = document.createElement("a");
-          link.href = shown.path;
-          link.textContent = text;
-          label.replaceChildren(link);
-        } else label.replaceChildren(text);
+        this.querySelector("#calendar-label")!.textContent =
+          `${this.#shown.year}年${this.#shown.month}月`;
 
         const weeks = calendarWeeks({ ...this.#shown, posts: shown?.posts ?? [] });
         this.querySelector("tbody")!.replaceChildren(
