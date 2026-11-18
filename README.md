@@ -27,7 +27,7 @@ vp check
 vp test
 vp run astro:check
 vp run build
-vp exec wrangler deploy --dry-run
+pnpm -C worker exec cf deploy --dry-run
 ```
 
 `vp dev` と `vp build` は通常の Vite 用です。
@@ -150,16 +150,46 @@ SIMOCHEE_CONTENT_DIR= vp run dev
 
 ## デプロイ
 
-静的な `dist/` を Cloudflare Workers の assets として配信します。
-SSR アダプターは使用しません。
+Cloudflare Workers にデプロイします。操作には Cloudflare の CLI（`cf`）を使います。
+サイト本体はビルド済みの静的ファイル（`dist/`）で、SSR アダプターは使用しません。
+サーバーが要る機能だけを、同じ Worker の `/api/` 以下で受けます。
 
 ```sh
 vp install --frozen-lockfile
-vp run build
-vp exec wrangler deploy
+vp run deploy   # astro build のあと、worker/ で cf deploy
+vp run preview  # astro build のあと、worker/ で cf dev（手元で Worker ごと確認）
 ```
 
-Wrangler の `assets.directory` は `./dist`、404 は `404-page`、HTML の URL は `auto-trailing-slash` です。
+アップロードせずに確かめるには `pnpm -C worker exec cf deploy --dry-run` を使います。
+デプロイには `cf auth login` でのサインインか、環境変数 `CLOUDFLARE_API_TOKEN` が要ります。
+
+| リクエスト                   | 答えるもの                                          |
+| ---------------------------- | --------------------------------------------------- |
+| ファイルに一致するパス       | 静的配信。Worker は実行されず、実行回数にも数えない |
+| `/api/` 以下                 | Worker。同じパスにファイルがあっても                |
+| どちらにも当てはまらないパス | Worker が静的配信へ戻し、`404.html` が返る          |
+
+### Worker の置き場所
+
+Worker は `worker/` に、サイトとは別のパッケージとして置いています。
+`cf` はプロジェクトに Astro があると Astro のビルドだけを走らせ、Worker をまとめません。パッケージを分けることで、`cf` が `worker/` を素の Worker として扱います。
+
+| ファイル                      | 内容                                                              |
+| ----------------------------- | ----------------------------------------------------------------- |
+| `worker/cloudflare.config.ts` | Worker の名前、互換性の日付、配信の振り分け、binding              |
+| `worker/wrangler.config.ts`   | 配信するファイルの場所（`../dist`）。`cf` が内部で使う bundler 用 |
+| `worker/src/index.ts`         | 入口。`/api/` とそれ以外を振り分ける                              |
+| `worker/src/api.ts`           | パスとメソッドから処理への対応表                                  |
+| `worker/src/routes/`          | 個々の処理                                                        |
+
+サーバーが要る機能を足すときは、次の 3 か所を触ります。
+
+1. `worker/src/routes/` に処理を書く。
+2. `worker/src/api.ts` の `routes` に、パスとメソッドを 1 行足す。
+3. D1 や KV などを使うなら、`worker/cloudflare.config.ts` の `env` に binding を足し、`worker/src/api.ts` の `Env` にも同じ名前で書く。
+
+いまあるのは、Worker に届いていることを確かめる `GET /api/health` だけです。
+
 `/feed.xml`、サイトマップ、`robots.txt`、canonical と OG / Twitter の meta 情報を生成します。
 CI で浅い clone を使う場合は、ビルド前に `git fetch --unshallow` で履歴を取得してください。
 
