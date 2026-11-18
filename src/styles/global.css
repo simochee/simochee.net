@@ -146,6 +146,9 @@
     font-synthesis: none;
     font-kerning: none;
     text-rendering: optimizeSpeed;
+    /* 東雲フォントは下線位置を持たず、漢字やかなが字面の最下段まで埋まっているので、既定の下線は字の底に重なる。
+       px で下げるとブラウザの文字サイズを上げたときにまた重なるため、字面の下端を基準にする。 */
+    text-underline-position: under;
   }
   a {
     color: var(--color-link);
