@@ -1,0 +1,21 @@
+---
+// デザインに書かれていた見本のデータ。実データにつなぐときに置き換える。
+const cloud = [
+  {w: "喫茶店", n: "31", bold: true},
+  {w: "散歩", n: "14", bold: false},
+  {w: "お知らせ", n: "6", bold: false},
+  {w: "日常", n: "42", bold: true},
+  {w: "プリン", n: "9", bold: false},
+  {w: "ごはん", n: "25", bold: true},
+  {w: "こたつ", n: "4", bold: false},
+  {w: "本のこと", n: "18", bold: true},
+  {w: "古本屋", n: "8", bold: false},
+  {w: "未分類", n: "3", bold: false},
+];
+---
+
+<div class="p-8">
+{cloud.map((t) => (
+<a class:list={["mr-6", { "font-bold": t.bold }]} href="#" title={`${t.n}件`}>{t.w}</a>
+))}
+</div>

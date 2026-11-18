@@ -1,0 +1,23 @@
+---
+import Button from "../ui/Button.astro";
+
+// デザインに書かれていた見本のデータ。実データにつなぐときに置き換える。
+const pollOpts = [
+  {label: "ホットココア", sel: false, votes: "12", pct: "27%", bar: "#3a6a99"},
+  {label: "ブレンド", sel: false, votes: "18", pct: "41%", bar: "#9b2c2c"},
+  {label: "ミルクティー", sel: false, votes: "9", pct: "20%", bar: "#3a6a99"},
+  {label: "ゆずはちみつ", sel: false, votes: "5", pct: "11%", bar: "#3a6a99"},
+];
+---
+
+<div class="p-8">
+<div class="font-bold text-ink-strong">冬の喫茶店で頼むのは？</div>
+
+{pollOpts.map((o) => (
+<label class="block cursor-pointer"><input type="radio" name="bp-poll" checked={o.sel} /> {o.label}</label>
+))}
+<Button class="type-small mt-4 px-10">投票する</Button>
+<span class="type-small ml-6"><Button class="type-small" variant="link">結果を見る</Button></span>
+
+
+</div>

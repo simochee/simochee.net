@@ -1,0 +1,15 @@
+---
+import Icon from "../ui/Icon.astro";
+---
+
+<div class="p-8">
+<table class="type-small w-full border-collapse">
+<thead><tr><th class="p-2 border-b border-frame font-normal text-left" scope="col"></th><th class="p-2 border-b border-frame font-normal" scope="col">天気</th><th class="p-2 border-b border-frame font-normal" scope="col">最高</th><th class="p-2 border-b border-frame font-normal" scope="col">最低</th></tr></thead>
+<tbody>
+<tr><th class="p-2 text-left font-normal" scope="row">きょう</th><td class="p-2 text-center"><Icon name="weather" class="text-[#c07a00]" /> はれ</td><td class="p-2 text-center text-danger">14℃</td><td class="p-2 text-center text-kind-external">6℃</td></tr>
+<tr><th class="p-2 text-left font-normal" scope="row">あした</th><td class="p-2 text-center">くもり</td><td class="p-2 text-center text-danger">12℃</td><td class="p-2 text-center text-kind-external">5℃</td></tr>
+<tr><th class="p-2 text-left font-normal" scope="row">あさって</th><td class="p-2 text-center">雨</td><td class="p-2 text-center text-danger">10℃</td><td class="p-2 text-center text-kind-external">7℃</td></tr>
+</tbody>
+</table>
+<div class="type-small mt-4 text-ink-soft">ブログを書いている町の天気です（見る人の場所は使いません）</div>
+</div>

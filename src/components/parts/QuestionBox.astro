@@ -1,0 +1,16 @@
+---
+import Button from "../ui/Button.astro";
+import TextField from "../ui/TextField.astro";
+---
+
+<div class="p-8">
+<div class="type-small py-4 px-6 bg-wash border border-dotted border-frame"><b>Q.</b> いちばん好きなプリンは？<br /><b>A.</b> 駅前の喫茶店の、固めのやつです。<a href="#">（回答の記事）</a></div>
+
+<label class="type-small block mt-6" for="bp-ask">匿名で質問する</label>
+<div class="flex gap-4">
+<TextField class="flex-[1_1_auto] min-w-0 py-1" id="bp-ask" type="text" />
+<Button class="type-small px-8">質問する</Button>
+</div>
+
+
+</div>

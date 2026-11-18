@@ -1,0 +1,19 @@
+---
+// デザインに書かれていた見本のデータ。実データにつなぐときに置き換える。
+const swatches = [
+  {name: "みずいろ", color: "#3a6a99", on: true, border: "2px solid #1f3f60"},
+  {name: "わかくさ", color: "#5b7f3a", on: false, border: "1px solid #c9d6e2"},
+  {name: "さくら", color: "#a0456b", on: false, border: "1px solid #c9d6e2"},
+  {name: "すみれ", color: "#6b5b95", on: false, border: "1px solid #c9d6e2"},
+  {name: "こげちゃ", color: "#7a4a1e", on: false, border: "1px solid #c9d6e2"},
+];
+---
+
+<div class="p-8">
+<div class="type-small text-ink-soft">このページの帯の色が変わります</div>
+<div class="flex flex-wrap gap-6 mt-6">
+{swatches.map((s) => (
+<button class="type-small flex flex-col items-center gap-2 p-2 bg-paper text-ink cursor-pointer" type="button" aria-pressed={s.on} style={`border: ${s.border}`}><span class="block w-28 h-16" style={`background: ${s.color}`}></span>{s.name}</button>
+))}
+</div>
+</div>

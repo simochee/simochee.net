@@ -1,0 +1,61 @@
+---
+import Catalog from "../../layouts/Catalog.astro";
+import PartCard from "../../components/parts/PartCard.astro";
+import PartKind from "../../components/parts/PartKind.astro";
+import AccessCounter from "../../components/parts/AccessCounter.astro";
+import VisitTotals from "../../components/parts/VisitTotals.astro";
+import Viewers from "../../components/parts/Viewers.astro";
+import WebClap from "../../components/parts/WebClap.astro";
+import ClapRanking from "../../components/parts/ClapRanking.astro";
+import MiniBoard from "../../components/parts/MiniBoard.astro";
+import DrawingBoard from "../../components/parts/DrawingBoard.astro";
+import Poll from "../../components/parts/Poll.astro";
+import PopularRanking from "../../components/parts/PopularRanking.astro";
+import RecentComments from "../../components/parts/RecentComments.astro";
+import VisitorMap from "../../components/parts/VisitorMap.astro";
+import MiniChat from "../../components/parts/MiniChat.astro";
+import RelatedEntries from "../../components/parts/RelatedEntries.astro";
+import QuickMail from "../../components/parts/QuickMail.astro";
+import QuestionBox from "../../components/parts/QuestionBox.astro";
+import MailSubscribe from "../../components/parts/MailSubscribe.astro";
+import UpdateNotice from "../../components/parts/UpdateNotice.astro";
+import BlueskyFeed from "../../components/parts/BlueskyFeed.astro";
+import MastodonFeed from "../../components/parts/MastodonFeed.astro";
+import Weather from "../../components/parts/Weather.astro";
+import NowPlaying from "../../components/parts/NowPlaying.astro";
+import GithubGrass from "../../components/parts/GithubGrass.astro";
+---
+
+<Catalog title="ブログパーツ見本帳 その2" lead="サーバーが要るもの。Cloudflare で自作するか、外のサービスの公開APIを読む。" other={{ href: "/parts/", label: "« その1：ブラウザだけで動くもの" }}>
+  <div slot="legend" class="type-small mb-14 border border-line bg-wash px-10 py-6">
+    <p class="flex flex-wrap gap-x-18 gap-y-4">
+      <span><PartKind kind="Cloudflareで自作" /> 自分の Workers で受けて、データは自分で持つ</span>
+      <span><PartKind kind="外部API" /> 外のサービスの公開データを読む（Worker で数分キャッシュ）</span>
+    </p>
+    <p class="mt-4 border-t border-dotted border-line pt-4">
+      使う部品：Workers（受付）／ D1（データベース）／ Durable Objects（同時接続・数え上げ）／ Analytics Engine（アクセス集計）／ Turnstile（ロボット対策）／ R2（画像置き場）／ Email（メール送信）
+    </p>
+  </div>
+  <PartCard title="アクセスカウンター" kind="Cloudflareで自作" note="Durable Objects で数える。同じ人の連続アクセスは数えない"><AccessCounter /></PartCard>
+  <PartCard title="今日・昨日・合計" kind="Cloudflareで自作" note="カウンターと同じ所で、日ごとに分けて数える"><VisitTotals /></PartCard>
+  <PartCard title="現在の閲覧者数" kind="Cloudflareで自作" note="Durable Objects と WebSocket で、その場で増減"><Viewers /></PartCard>
+  <PartCard title="web拍手" kind="Cloudflareで自作" note="D1 に記録。連打は Worker で間引く"><WebClap /></PartCard>
+  <PartCard title="拍手ランキング" kind="Cloudflareで自作" note="拍手の記録を記事ごとに集計"><ClapRanking /></PartCard>
+  <PartCard title="ミニ掲示板" kind="Cloudflareで自作" note="D1 に保存、Turnstile で荒らし対策"><MiniBoard /></PartCard>
+  <PartCard title="お絵かき掲示板" kind="Cloudflareで自作" note="絵は R2、投稿の情報は D1 に"><DrawingBoard /></PartCard>
+  <PartCard title="アンケート" kind="Cloudflareで自作" note="D1 に集計。1人1票はクッキーで目安に"><Poll /></PartCard>
+  <PartCard title="人気記事ランキング" kind="Cloudflareで自作" note="Analytics Engine で週ごとに集計"><PopularRanking /></PartCard>
+  <PartCard title="最新コメント" kind="Cloudflareで自作" note="コメントの D1 から新しい順に"><RecentComments /></PartCard>
+  <PartCard title="どこから見てる？" kind="Cloudflareで自作" note="Workers に届く地域情報を Analytics Engine へ"><VisitorMap /></PartCard>
+  <PartCard title="ミニチャット" kind="Cloudflareで自作" note="Durable Objects の WebSocket で配る"><MiniChat /></PartCard>
+  <PartCard title="関連記事" kind="Cloudflareで自作" note="Vectorize で近い記事を探す（タグ一致ならビルド時でも可）"><RelatedEntries /></PartCard>
+  <PartCard title="ひとことメール" kind="Cloudflareで自作" note="Workers から自分あてにメール送信"><QuickMail /></PartCard>
+  <PartCard title="なんでも質問箱" kind="Cloudflareで自作" note="D1 に貯めて、答えたものだけ記事にする"><QuestionBox /></PartCard>
+  <PartCard title="更新をメールで受けとる" kind="Cloudflareで自作" note="登録は D1、配信は Cron ＋ メール送信"><MailSubscribe /></PartCard>
+  <PartCard title="更新のおしらせ" kind="Cloudflareで自作" note="Web Push。宛先は D1、送るのは Cron の Worker"><UpdateNotice /></PartCard>
+  <PartCard title="Blueskyのつぶやき" kind="外部API" note="公開API（認証なし）。ブラウザから直接でも読める"><BlueskyFeed /></PartCard>
+  <PartCard title="Mastodonのつぶやき" kind="外部API" note="公開の投稿一覧API。サーバーごとに書き方は同じ"><MastodonFeed /></PartCard>
+  <PartCard title="このあたりの天気" kind="外部API" note="無料の天気API（Open-Meteo など）を1時間キャッシュ"><Weather /></PartCard>
+  <PartCard title="いま聴いてる曲" kind="外部API" note="Last.fm などの再生履歴。鍵は Worker に隠す"><NowPlaying /></PartCard>
+  <PartCard title="GitHubの草" kind="外部API" note="GitHub の API。トークンは Worker に隠し、1日1回更新"><GithubGrass /></PartCard>
+</Catalog>

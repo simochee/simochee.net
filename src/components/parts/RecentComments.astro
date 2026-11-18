@@ -1,0 +1,15 @@
+---
+// デザインに書かれていた見本のデータ。実データにつなぐときに置き換える。
+const comments = [
+  {who: "まめ", title: "久しぶりに喫茶店でモーニング", date: "11/18"},
+  {who: "ゆう", title: "久しぶりに喫茶店でモーニング", date: "11/18"},
+  {who: "くろねこ", title: "古い喫茶店のプリンを食べ比べ", date: "10/22"},
+  {who: "さとう", title: "コスモス畑まで散歩", date: "09/28"},
+];
+---
+
+<ul class="m-0 py-6 px-8 list-none">
+{comments.map((c) => (
+<li class="type-small py-2 border-b border-dotted border-line">{c.who}：<a href="FC2BalancedEntry.dc.html#bal-comments">{c.title}</a> ({c.date})</li>
+))}
+</ul>

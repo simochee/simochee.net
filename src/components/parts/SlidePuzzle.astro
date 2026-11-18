@@ -1,0 +1,26 @@
+---
+import Button from "../ui/Button.astro";
+
+// デザインに書かれていた見本のデータ。実データにつなぐときに置き換える。
+const tiles = [
+  {label: "1", empty: false, aria: "1のこま", bg: "#ffffff"},
+  {label: "2", empty: false, aria: "2のこま", bg: "#ffffff"},
+  {label: "3", empty: false, aria: "3のこま", bg: "#ffffff"},
+  {label: "4", empty: false, aria: "4のこま", bg: "#ffffff"},
+  {label: "", empty: true, aria: "あき", bg: "#c9d6e2"},
+  {label: "6", empty: false, aria: "6のこま", bg: "#ffffff"},
+  {label: "7", empty: false, aria: "7のこま", bg: "#ffffff"},
+  {label: "5", empty: false, aria: "5のこま", bg: "#ffffff"},
+  {label: "8", empty: false, aria: "8のこま", bg: "#ffffff"},
+];
+---
+
+<div class="p-8 text-center">
+<div class="grid grid-cols-[repeat(3,44px)] gap-3 w-[max-content] mx-auto p-3 bg-frame">
+{tiles.map((t) => (
+<button class="w-44 h-44 p-0 border border-control text-ink-strong cursor-pointer" type="button" disabled={t.empty} aria-label={t.aria} style={`background: ${t.bg}`}>{t.label}</button>
+))}
+</div>
+<div class="type-small mt-4 text-ink-soft">0手</div>
+<Button class="type-small px-10">まぜる</Button>
+</div>

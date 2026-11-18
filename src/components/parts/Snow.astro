@@ -1,0 +1,34 @@
+---
+import Button from "../ui/Button.astro";
+import Icon from "../ui/Icon.astro";
+
+// デザインに書かれていた見本のデータ。実データにつなぐときに置き換える。
+const flakes = [
+  {left: "2%", dur: "3.0s", delay: "-0.00s"},
+  {left: "39%", dur: "3.7s", delay: "-0.53s"},
+  {left: "76%", dur: "4.4s", delay: "-1.06s"},
+  {left: "17%", dur: "5.1s", delay: "-1.59s"},
+  {left: "54%", dur: "5.8s", delay: "-2.12s"},
+  {left: "91%", dur: "3.0s", delay: "-2.65s"},
+  {left: "32%", dur: "3.7s", delay: "-3.18s"},
+  {left: "69%", dur: "4.4s", delay: "-3.71s"},
+  {left: "10%", dur: "5.1s", delay: "-0.24s"},
+  {left: "47%", dur: "5.8s", delay: "-0.77s"},
+  {left: "84%", dur: "3.0s", delay: "-1.30s"},
+  {left: "25%", dur: "3.7s", delay: "-1.83s"},
+  {left: "62%", dur: "4.4s", delay: "-2.36s"},
+  {left: "3%", dur: "5.1s", delay: "-2.89s"},
+];
+---
+
+<div class="p-8">
+<div class="relative h-120 overflow-hidden bg-[#2e3f55] border border-night">
+
+{flakes.map((f) => (
+<span class="snow-flake" style={`left: ${f.left}; animation-duration: ${f.dur}; animation-delay: ${f.delay}`}></span>
+))}
+
+<span class="type-small absolute bottom-4 left-6 text-band">しずかな冬の夜</span>
+</div>
+<Button class="type-small mt-4 px-10"><Icon name="snow" /> 雪を止める</Button>
+</div>

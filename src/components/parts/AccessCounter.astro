@@ -1,0 +1,33 @@
+---
+// デザインに書かれていた見本のデータ。実データにつなぐときに置き換える。
+const digits = [
+  {n: "0"},
+  {n: "0"},
+  {n: "1"},
+  {n: "2"},
+  {n: "3"},
+  {n: "3"},
+  {n: "8"},
+];
+const getters = [
+  {n: "12,000", who: "ゆう", date: "11/14"},
+  {n: "11,111", who: "まめ", date: "10/30"},
+  {n: "10,000", who: "くろねこ", date: "10/02"},
+];
+---
+
+<div class="p-8 text-center">
+<div class="inline-flex gap-2 p-3 bg-lcd border-2 border-inset border-control">
+{digits.map((d) => (
+<span class="block w-20 bg-[#2a2a2a] text-[#ffcc33] text-center">{d.n}</span>
+))}
+</div>
+<div class="type-small mt-6">次のキリ番 <b>12,345</b> まで、あと <b class="text-danger">7</b></div>
+<div class="type-small text-ink-soft">キリ番を踏んだら掲示板でご報告を！</div>
+<div class="type-small mt-4 py-4 px-6 bg-memo border border-memo-line text-left">
+<b>キリ番ゲッターのみなさま</b>
+{getters.map((g) => (
+<div>{g.n} … {g.who}さん（{g.date}）</div>
+))}
+</div>
+</div>

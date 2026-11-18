@@ -1,0 +1,16 @@
+---
+const colors = {
+  ブラウザだけ: "text-ok",
+  ビルド時: "text-kind-build",
+  Cloudflareで自作: "text-kind-self",
+  外部API: "text-kind-external",
+};
+export type Kind = keyof typeof colors;
+
+interface Props {
+  kind: Kind;
+}
+const { kind } = Astro.props;
+---
+
+<b class={colors[kind]}>［{kind}］</b>

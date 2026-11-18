@@ -1,0 +1,17 @@
+---
+// デザインに書かれていた見本のデータ。実データにつなぐときに置き換える。
+const books = [
+  {title: "冬の喫茶店で", stars: "★★★★☆", color: "#c9a77a"},
+  {title: "長い夜のミステリー（上）", stars: "★★★★★", color: "#4a5f73"},
+  {title: "散歩のための小さな地図", stars: "★★★☆☆", color: "#8fb07a"},
+];
+---
+
+<ul class="m-0 py-6 px-8 list-none">
+{books.map((b) => (<>
+<li class="flex gap-6 py-3 border-b border-dotted border-line">
+<span class="flex-none w-22 h-30 border border-control" style={`background: ${b.color}`}></span>
+<span class="min-w-0"><a href="#">{b.title}</a><br /><span class="type-small text-[#7a5600]">{b.stars}</span></span>
+</li>
+</>))}
+</ul>

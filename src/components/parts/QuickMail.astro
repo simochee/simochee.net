@@ -1,0 +1,15 @@
+---
+import Button from "../ui/Button.astro";
+import Icon from "../ui/Icon.astro";
+import TextArea from "../ui/TextArea.astro";
+---
+
+<div class="p-8">
+
+<label class="type-small block" for="bp-mail">管理人に、こっそりひとこと</label>
+<TextArea class="w-full" id="bp-mail" rows="3"></TextArea>
+<div class="text-right"><Button class="type-small px-10"><Icon name="mail" /> 送信</Button></div>
+
+
+<div class="type-small mt-4"><a href="/mail/">ちゃんとしたメールフォームはこちら</a></div>
+</div>

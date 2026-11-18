@@ -1,0 +1,17 @@
+---
+import PartKind, { type Kind } from "./PartKind.astro";
+
+interface Props {
+  title: string;
+  kind: Kind;
+  /** その部品をどう動かすつもりかの覚え書き。 */
+  note: string;
+}
+const { title, kind, note } = Astro.props;
+---
+
+<section class="flex min-w-0 flex-col border border-line">
+  <h2 class="type-small bg-accent px-8 py-3 font-bold text-on-accent">{title}</h2>
+  <slot />
+  <p class="type-small border-t border-dotted border-line bg-code px-8 py-3 text-ink-soft"><PartKind kind={kind} /> {note}</p>
+</section>

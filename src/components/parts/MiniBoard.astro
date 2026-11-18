@@ -1,0 +1,29 @@
+---
+import Button from "../ui/Button.astro";
+import TextField from "../ui/TextField.astro";
+
+// デザインに書かれていた見本のデータ。実データにつなぐときに置き換える。
+const miniPosts = [
+  {name: "まめ", date: "11/17 22:10", body: "プリンの記事、行ってみたくなりました！"},
+  {name: "くろねこ", date: "11/16 08:02", body: "おはようございます。今日も寒いですね。"},
+  {name: "ゆう", date: "11/14 19:45", body: "キリ番12000踏みました〜"},
+];
+---
+
+<div class="py-6 px-8">
+<div class="[max-height:160px] [overflow-y:auto] border border-line py-2 px-6 bg-[#fbfcfd]">
+{miniPosts.map((p) => (
+<div class="type-small py-2 border-b border-dotted border-line"><b class="text-ink-strong">{p.name}</b> <span class="text-ink-soft">{p.date}</span><br />{p.body}</div>
+))}
+</div>
+<div class="type-small grid grid-cols-[auto_1fr] gap-y-3 gap-x-4 items-center mt-6">
+<label for="bp-mname">名前</label>
+<TextField class="min-w-0 py-1" id="bp-mname" type="text" />
+<label for="bp-mbody">本文</label>
+<TextField class="min-w-0 py-1" id="bp-mbody" type="text" />
+</div>
+<div class="flex justify-between items-center mt-4">
+<span class="type-small text-ink-soft">■ ロボットではありません</span>
+<Button class="type-small px-10">書きこむ</Button>
+</div>
+</div>

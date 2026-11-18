@@ -1,0 +1,16 @@
+---
+// デザインに書かれていた見本のデータ。実データにつなぐときに置き換える。
+const popular = [
+  {title: "古い喫茶店のプリンを食べ比べ", href: "#"},
+  {title: "このブログで使える書き方まとめ", href: "FC2BalancedGfm.dc.html"},
+  {title: "久しぶりに喫茶店でモーニング", href: "FC2BalancedEntry.dc.html"},
+  {title: "コスモス畑まで散歩", href: "#"},
+  {title: "商店街の古本屋めぐり", href: "#"},
+];
+---
+
+<ol class="list-decimal m-0 py-6 pr-8 pl-[2.4em]">
+{popular.map((r) => (
+<li class="py-1 border-b border-dotted border-line"><a href={r.href}>{r.title}</a></li>
+))}
+</ol>

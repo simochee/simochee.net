@@ -1,0 +1,22 @@
+---
+// デザインに書かれていた見本のデータ。実データにつなぐときに置き換える。
+const regions = [
+  {name: "東京都", pct: "32%"},
+  {name: "大阪府", pct: "14%"},
+  {name: "神奈川県", pct: "11%"},
+  {name: "愛知県", pct: "8%"},
+  {name: "北海道", pct: "6%"},
+  {name: "その他", pct: "29%"},
+];
+---
+
+<div class="p-8">
+{regions.map((r) => (<>
+<div class="type-small flex items-center gap-4">
+<span class="flex-[0_0_5em]">{r.name}</span>
+<span class="flex-[1_1_auto] h-8 bg-page border border-frame"><span class="block h-full bg-accent" style={`width: ${r.pct}`}></span></span>
+<span class="flex-[0_0_3em] text-right">{r.pct}</span>
+</div>
+</>))}
+<div class="type-small mt-4 text-ink-soft">今月の割合。都道府県までの集計だけで、IPアドレスは残しません。</div>
+</div>

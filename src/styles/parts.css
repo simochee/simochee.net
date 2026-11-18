@@ -1,0 +1,35 @@
+@keyframes snow-fall {
+  from {
+    translate: 0 -8px;
+  }
+  to {
+    translate: 0 130px;
+  }
+}
+@keyframes pet-hop {
+  50% {
+    translate: 0 -4px;
+  }
+}
+.snow-flake {
+  position: absolute;
+  inset-block-start: 0;
+  inline-size: 3px;
+  block-size: 3px;
+  background: #ffffff;
+  animation: snow-fall linear infinite;
+}
+.pet-sprite {
+  display: inline-block;
+  inline-size: 32px;
+  block-size: 32px;
+  background: url("../assets/icons/pet.svg") center / 32px 32px no-repeat;
+  /* ドット絵は 2 コマで跳ねる。なめらかに動かすと絵柄に合わない。 */
+  animation: pet-hop 1.2s steps(2) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .snow-flake,
+  .pet-sprite {
+    animation: none;
+  }
+}

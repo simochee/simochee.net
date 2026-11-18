@@ -1,0 +1,16 @@
+---
+// デザインに書かれていた見本のデータ。実データにつなぐときに置き換える。
+const clapRank = [
+  {title: "古い喫茶店のプリンを食べ比べ", n: "86"},
+  {title: "久しぶりに喫茶店でモーニング", n: "41"},
+  {title: "コスモス畑まで散歩", n: "33"},
+  {title: "読書メモ：秋の夜長のミステリー", n: "27"},
+  {title: "雨の日の喫茶店", n: "19"},
+];
+---
+
+<ol class="list-decimal m-0 py-6 pr-8 pl-[2.4em]">
+{clapRank.map((r) => (
+<li class="py-1 border-b border-dotted border-line"><a href="#">{r.title}</a> <span class="type-small text-ink-soft">（{r.n}拍手）</span></li>
+))}
+</ol>

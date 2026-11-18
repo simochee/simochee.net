@@ -1,0 +1,25 @@
+---
+import Button from "../ui/Button.astro";
+
+// デザインに書かれていた見本のデータ。実データにつなぐときに置き換える。
+const years = [
+  {label: "2026年", count: "59", open: true, mark: "[－]", months: [{label: "11月", count: "5"}, {label: "10月", count: "8"}, {label: "09月", count: "6"}, {label: "08月", count: "7"}, {label: "07月", count: "9"}, {label: "06月", count: "4"}, {label: "05月", count: "6"}, {label: "04月", count: "3"}, {label: "03月", count: "5"}, {label: "02月", count: "2"}, {label: "01月", count: "4"}]},
+  {label: "2025年", count: "28", open: false, mark: "[＋]", months: [{label: "12月", count: "6"}, {label: "11月", count: "3"}, {label: "10月", count: "2"}, {label: "09月", count: "3"}, {label: "08月", count: "2"}, {label: "07月", count: "2"}, {label: "06月", count: "2"}, {label: "05月", count: "2"}, {label: "04月", count: "2"}, {label: "03月", count: "1"}, {label: "02月", count: "2"}, {label: "01月", count: "1"}]},
+  {label: "2024年", count: "7", open: false, mark: "[＋]", months: [{label: "12月", count: "1"}, {label: "11月", count: "1"}, {label: "09月", count: "1"}, {label: "06月", count: "1"}, {label: "05月", count: "1"}, {label: "04月", count: "2"}]},
+];
+---
+
+<div class="py-6 px-8">
+{years.map((y) => (<>
+<div>
+<Button class="text-ink-strong font-bold" aria-expanded={y.open} variant="link">{y.mark} {y.label}（{y.count}）</Button>
+{y.open && (<>
+<ul class="mb-2 pl-[1.4em] list-none">
+{y.months.map((m) => (
+<li class="type-small">├ <a href="#">{m.label}</a>（{m.count}）</li>
+))}
+</ul>
+</>)}
+</div>
+</>))}
+</div>

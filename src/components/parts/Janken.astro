@@ -1,0 +1,20 @@
+---
+import Button from "../ui/Button.astro";
+
+// デザインに書かれていた見本のデータ。実データにつなぐときに置き換える。
+const hands = [
+  {label: "グー"},
+  {label: "チョキ"},
+  {label: "パー"},
+];
+---
+
+<div class="p-8 text-center">
+<div class="flex justify-center gap-4">
+{hands.map((h) => (
+<Button class="py-2 px-10">{h.label}</Button>
+))}
+</div>
+<div class="mt-6 min-h-22">どれかを選んでね</div>
+<div class="type-small text-ink-soft">0勝 0敗 0分</div>
+</div>

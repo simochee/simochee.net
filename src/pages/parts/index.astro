@@ -1,0 +1,62 @@
+---
+import Catalog from "../../layouts/Catalog.astro";
+import PartCard from "../../components/parts/PartCard.astro";
+import PartKind from "../../components/parts/PartKind.astro";
+import Clock from "../../components/parts/Clock.astro";
+import Today from "../../components/parts/Today.astro";
+import BlogAge from "../../components/parts/BlogAge.astro";
+import Countdown from "../../components/parts/Countdown.astro";
+import Moon from "../../components/parts/Moon.astro";
+import Omikuji from "../../components/parts/Omikuji.astro";
+import DailyQuote from "../../components/parts/DailyQuote.astro";
+import BlogPet from "../../components/parts/BlogPet.astro";
+import SlidePuzzle from "../../components/parts/SlidePuzzle.astro";
+import Janken from "../../components/parts/Janken.astro";
+import ThemeSwitch from "../../components/parts/ThemeSwitch.astro";
+import Snow from "../../components/parts/Snow.astro";
+import ArchiveTree from "../../components/parts/ArchiveTree.astro";
+import TagCloud from "../../components/parts/TagCloud.astro";
+import Recommended from "../../components/parts/Recommended.astro";
+import UpdateCalendar from "../../components/parts/UpdateCalendar.astro";
+import MobileLink from "../../components/parts/MobileLink.astro";
+import Bookmark from "../../components/parts/Bookmark.astro";
+import RecentBooks from "../../components/parts/RecentBooks.astro";
+import Status from "../../components/parts/Status.astro";
+import PhotoAlbum from "../../components/parts/PhotoAlbum.astro";
+import Bgm from "../../components/parts/Bgm.astro";
+import Doodle from "../../components/parts/Doodle.astro";
+import SiteSearch from "../../components/parts/SiteSearch.astro";
+import WelcomeBack from "../../components/parts/WelcomeBack.astro";
+---
+
+<Catalog title="ブログパーツ見本帳 その1" lead="ブラウザだけで動くもの（サーバーなし）。昔のブログパーツを、今の作り方で。" other={{ href: "/parts/server/", label: "その2：サーバーが要るもの »" }}>
+  <p slot="legend" class="type-small mb-14 flex flex-wrap gap-x-18 gap-y-4 border border-line bg-wash px-10 py-6">
+    <span><PartKind kind="ブラウザだけ" /> JavaScript だけで動く。データも端末の中</span>
+    <span><PartKind kind="ビルド時" /> 記事のデータから、サイトを作るときに書き出す</span>
+  </p>
+  <PartCard title="時計" kind="ブラウザだけ" note="端末の時刻を1秒ごとに書きかえる"><Clock /></PartCard>
+  <PartCard title="きょうの日付と季節" kind="ブラウザだけ" note="二十四節気の目安日を持っておいて計算"><Today /></PartCard>
+  <PartCard title="ブログをはじめて" kind="ブラウザだけ" note="開設日（2024/04/01）から数えるだけ"><BlogAge /></PartCard>
+  <PartCard title="カウントダウン" kind="ブラウザだけ" note="日付を決めておいて引き算"><Countdown /></PartCard>
+  <PartCard title="きょうの月" kind="ブラウザだけ" note="新月の基準日から計算（だいたいの値）"><Moon /></PartCard>
+  <PartCard title="おみくじ" kind="ブラウザだけ" note="乱数で選ぶ。1日1回にするなら日付で固定"><Omikuji /></PartCard>
+  <PartCard title="きょうのひとこと" kind="ブラウザだけ" note="自分のひとことを並べておいて順に出す"><DailyQuote /></PartCard>
+  <PartCard title="ブログペット" kind="ブラウザだけ" note="育てた状態は端末に保存（localStorage）"><BlogPet /></PartCard>
+  <PartCard title="スライドパズル" kind="ブラウザだけ" note="8パズル。ひまつぶし系の定番"><SlidePuzzle /></PartCard>
+  <PartCard title="じゃんけん" kind="ブラウザだけ" note="相手はペットのおもち。戦績は端末に保存"><Janken /></PartCard>
+  <PartCard title="着せかえ" kind="ブラウザだけ" note="選んだ色を端末に保存して、ほかのページにも反映"><ThemeSwitch /></PartCard>
+  <PartCard title="雪をふらせる" kind="ブラウザだけ" note="CSSのアニメーション。冬だけ自動でONにも"><Snow /></PartCard>
+  <PartCard title="月別アーカイブ（ツリー）" kind="ビルド時" note="記事の日付から作り、開け閉めはブラウザ"><ArchiveTree /></PartCard>
+  <PartCard title="タグクラウド" kind="ビルド時" note="記事の数で文字の大きさを変えて書き出す"><TagCloud /></PartCard>
+  <PartCard title="きょうのおすすめ記事" kind="ビルド時" note="記事の一覧を埋めこんで、ランダムに選ぶ"><Recommended /></PartCard>
+  <PartCard title="更新カレンダー（半年）" kind="ビルド時" note="記事を書いた日から、ます目を塗って書き出す"><UpdateCalendar /></PartCard>
+  <PartCard title="ケータイで読む" kind="ビルド時" note="ページごとにQRコードを作っておく"><MobileLink /></PartCard>
+  <PartCard title="お気に入りに追加" kind="ブラウザだけ" note="今のブラウザはボタンで追加できないので、キーを案内"><Bookmark /></PartCard>
+  <PartCard title="最近読んだ本" kind="ビルド時" note="読書メモの記事の情報から集める"><RecentBooks /></PartCard>
+  <PartCard title="近況" kind="ビルド時" note="設定ファイルに一行書くだけ"><Status /></PartCard>
+  <PartCard title="フォトアルバム" kind="ビルド時" note="画像一覧のデータを使い、めくるのはブラウザ"><PhotoAlbum /></PartCard>
+  <PartCard title="BGM" kind="ブラウザだけ" note="Web Audio で音を作る。MIDIのBGMのかわり"><Bgm /></PartCard>
+  <PartCard title="らくがき帳" kind="ブラウザだけ" note="12×12のドット絵。投稿するなら「その2」のお絵かき掲示板へ"><Doodle /></PartCard>
+  <PartCard title="ブログ内検索" kind="ビルド時" note="索引を作っておき、検索はブラウザだけ（Pagefind など）"><SiteSearch /></PartCard>
+  <PartCard title="おかえりなさい" kind="ブラウザだけ" note="訪問の記録は端末にだけ保存。サーバーには送らない"><WelcomeBack /></PartCard>
+</Catalog>

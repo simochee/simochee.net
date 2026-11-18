@@ -1,0 +1,26 @@
+---
+import Button from "../ui/Button.astro";
+import TextField from "../ui/TextField.astro";
+
+// デザインに書かれていた見本のデータ。実データにつなぐときに置き換える。
+const chat = [
+  {time: "21:02", who: "しもちぃ", text: "こんばんは〜", me: true, color: "#ffcc33"},
+  {time: "21:03", who: "まめ", text: "こんばんは！", me: false, color: "#9fd39a"},
+  {time: "21:05", who: "まめ", text: "固めプリン派です", me: false, color: "#9fd39a"},
+  {time: "21:06", who: "しもちぃ", text: "仲間だ…！", me: true, color: "#ffcc33"},
+];
+---
+
+<div class="py-6 px-8">
+<div class="type-small h-130 [overflow-y:auto] py-2 px-6 bg-night text-band">
+{chat.map((m) => (
+<div><span class="text-[#8fb0d0]">{m.time}</span> <b style={`color: ${m.color}`}>{m.who}</b>&gt; {m.text}</div>
+))}
+</div>
+<div class="flex gap-4 mt-4">
+<label class="sr-only" for="bp-chat">チャットに書く</label>
+<TextField class="flex-[1_1_auto] min-w-0 py-1" id="bp-chat" type="text" />
+<Button class="type-small px-8">発言</Button>
+</div>
+<div class="type-small mt-2 text-ink-soft">入室中：3人 ／ ログは24時間で消えます</div>
+</div>

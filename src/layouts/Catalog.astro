@@ -1,0 +1,30 @@
+---
+import Document from "./Document.astro";
+import { site } from "../site";
+
+interface Props {
+  title: string;
+  lead: string;
+  other: { href: string; label: string };
+}
+const { title, lead, other } = Astro.props;
+---
+
+<Document title={title} description={lead}>
+  <div class="mx-auto max-w-1040 border border-frame bg-paper">
+    <header class="border-b-3 border-double border-frame bg-band px-20 pt-16 pb-12">
+      <p class="type-small text-ink-sub"><a href="/">{site.name}</a> &gt; ブログパーツ見本帳</p>
+      <h1 class="text-title font-bold text-ink-strong">{title}</h1>
+      <p class="mt-2 text-ink-sub">{lead} ／ <a href={other.href}>{other.label}</a></p>
+    </header>
+    <main id="main" class="p-16">
+      <slot name="legend" />
+      <div class="grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] items-start gap-14">
+        <slot />
+      </div>
+    </main>
+    <footer class="type-small border-t border-frame bg-band px-10 py-12 text-center">
+      <a href="/">&laquo; ブログトップへ</a> | <a href={other.href}>{other.label}</a>
+    </footer>
+  </div>
+</Document>

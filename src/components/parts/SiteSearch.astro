@@ -1,0 +1,23 @@
+---
+import Icon from "../ui/Icon.astro";
+import TextField from "../ui/TextField.astro";
+
+// デザインに書かれていた見本のデータ。実データにつなぐときに置き換える。
+const results = [
+  {title: "古い喫茶店のプリンを食べ比べ", date: "2026/10/21", excerpt: "固めのプリン派として、3軒まわってきました。", href: "#"},
+];
+---
+
+<div class="p-8">
+<div class="flex gap-4">
+<label class="sr-only" for="bp-q">ブログ内を検索</label>
+<TextField class="flex-[1_1_auto] min-w-0" id="bp-q" type="search" value="プリン" />
+<Icon name="search" class="self-center text-ink-sub" />
+</div>
+<div class="type-small mt-4 text-ink-soft">「プリン」：1件</div>
+<ul class="m-0 p-0 list-none">
+{results.map((r) => (
+<li class="py-2 border-b border-dotted border-line">・<a href={r.href}>{r.title}</a> <span class="type-small text-ink-soft">({r.date})</span></li>
+))}
+</ul>
+</div>

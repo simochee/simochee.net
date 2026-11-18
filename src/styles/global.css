@@ -2,6 +2,7 @@
 @import "./fonts.css";
 @import "./prose.css" layer(components);
 @import "./icons.css" layer(components);
+@import "./parts.css" layer(components);
 
 @theme {
   /* 既定のパレットや文字サイズを残すと、テンプレートにない色や大きさが気づかないうちに混ざる。 */
@@ -41,6 +42,9 @@
   --color-mark: #fff0a8;
   --color-ok: #2b6a2b;
   --color-danger: #9b2c2c;
+  --color-kind-build: #5b3b8c;
+  --color-kind-self: #7a4a00;
+  --color-kind-external: #1f4f86;
   --color-lcd: #111111;
   --color-lcd-ink: #7dff7a;
   --color-menu-divider: rgb(255 255 255 / 0.35);
