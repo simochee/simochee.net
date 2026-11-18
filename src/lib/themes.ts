@@ -6,4 +6,4 @@ export const themes = [
   { id: "mizuiro", name: "みずいろ", color: "#3a6a99" },
 ] as const;
 
-export const defaultTheme = themes.find((theme) => theme.id === "mizuiro")!;
+export const defaultTheme = themes.find((theme) => theme.id === "aka")!;

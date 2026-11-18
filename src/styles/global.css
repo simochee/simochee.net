@@ -12,25 +12,26 @@
   /* このデザインは 1px のマス目で組んである。1 単位を 1px にして、デザインの数値をそのままクラスに書けるようにしている。 */
   --spacing: 1px;
 
-  --color-accent: #3a6a99;
+  --color-accent: #b33a3a;
   --color-on-accent: #ffffff;
-  --color-page: #e6edf3;
+  --color-page: #f4e6e5;
   --color-paper: #ffffff;
-  --color-band: #dbe6f0;
-  --color-tint: #eef3f8;
-  --color-wash: #f4f7fa;
-  --color-code: #f8fafc;
-  --color-frame: #a9bccd;
-  --color-line: #c9d6e2;
-  --color-line-soft: #dde5ec;
+  --color-band: #f0dad8;
+  --color-tint: #f9eeed;
+  --color-wash: #fbf5f4;
+  --color-code: #fdf9f9;
+  --color-frame: #d4aaa6;
+  --color-line: #e7cbc8;
+  --color-line-soft: #efdedc;
   --color-photo: #cccccc;
-  --color-control: #7a8fa3;
+  --color-control: #a57d79;
   --color-ink: #333333;
   --color-ink-soft: #555555;
-  --color-ink-strong: #1f3f60;
-  --color-ink-sub: #4a5f73;
-  --color-link: #2b5a8a;
-  --color-link-hover: #c0392b;
+  --color-ink-strong: #6a1f1f;
+  --color-ink-sub: #734a47;
+  --color-link: #9b2c2c;
+  /* リンク自体が赤いので、ホバーまで赤にするとふれても色が変わったと分からない。 */
+  --color-link-hover: #c25400;
   --color-sunday: #c00000;
   --color-saturday: #0033cc;
   --color-night: #1f2a38;
@@ -81,23 +82,6 @@
     --color-menu-divider: rgb(0 0 0 / 0.12);
     --color-menu-current: rgb(0 0 0 / 0.08);
   }
-  :root[data-theme="aka"] {
-    --color-accent: #b33a3a;
-    --color-page: #f4e6e5;
-    --color-band: #f0dad8;
-    --color-tint: #f9eeed;
-    --color-wash: #fbf5f4;
-    --color-code: #fdf9f9;
-    --color-frame: #d4aaa6;
-    --color-line: #e7cbc8;
-    --color-line-soft: #efdedc;
-    --color-control: #a57d79;
-    --color-ink-strong: #6a1f1f;
-    --color-ink-sub: #734a47;
-    --color-link: #9b2c2c;
-    /* 既定のホバー色も赤なので、そのままだとリンクにふれても色が変わったと分からない。 */
-    --color-link-hover: #c25400;
-  }
   :root[data-theme="sakura"] {
     --color-accent: #bf4d78;
     --color-page: #f6e6ed;
@@ -127,6 +111,22 @@
     --color-ink-strong: #283f17;
     --color-ink-sub: #48593c;
     --color-link: #416725;
+  }
+  :root[data-theme="mizuiro"] {
+    --color-accent: #3a6a99;
+    --color-page: #e6edf3;
+    --color-band: #dbe6f0;
+    --color-tint: #eef3f8;
+    --color-wash: #f4f7fa;
+    --color-code: #f8fafc;
+    --color-frame: #a9bccd;
+    --color-line: #c9d6e2;
+    --color-line-soft: #dde5ec;
+    --color-control: #7a8fa3;
+    --color-ink-strong: #1f3f60;
+    --color-ink-sub: #4a5f73;
+    --color-link: #2b5a8a;
+    --color-link-hover: #c0392b;
   }
   html {
     background: var(--color-page);
