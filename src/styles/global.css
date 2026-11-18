@@ -50,6 +50,8 @@
   /* ドットフォントは 14px・12px の整数倍でしか崩れずに描けない。rem にしているのは、ブラウザの文字サイズ設定を無視しないため。 */
   --font-body: "Shinonome14", "ＭＳ ゴシック", "MS Gothic", "Osaka-Mono", monospace;
   --font-small: "Shinonome12", "ＭＳ ゴシック", "MS Gothic", "Osaka-Mono", monospace;
+  /* コードは英数字と記号が続くので、ドットフォントだと読みづらい。ここだけは読みやすさを優先して OS の等幅フォントを使う。 */
+  --font-code: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
   --text-body: 0.875rem;
   --text-body--line-height: 1.375rem;
   --text-small: 0.75rem;

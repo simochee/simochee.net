@@ -219,11 +219,13 @@
   }
   & pre {
     margin: 0;
-    padding: 8px 10px;
     overflow-x: auto;
-    font-family: var(--font-small);
+    font-family: var(--font-code);
     font-size: var(--text-small);
     line-height: 1.25rem;
+    /* body はドットをにじませないためにアンチエイリアスを切っている。輪郭で描く等幅フォントはそのままだとギザギザになるので戻す。 */
+    -webkit-font-smoothing: auto;
+    text-rendering: auto;
     /* Shiki は背景色を style 属性に書き込むため、テーマの白をテンプレートの色へ戻すには !important が要る。 */
     background: var(--color-code) !important;
     & code {
@@ -233,9 +235,17 @@
       font: inherit;
     }
   }
+  /* 余白を pre ではなく行に持たせているのは、差分や強調の背景を枠の端まで塗るため。pre の余白だと色のつかない縁が残る。 */
   & .line {
     display: inline-block;
     inline-size: 100%;
+    padding-inline: 10px;
+    &:first-child {
+      padding-block-start: 8px;
+    }
+    &:last-child {
+      padding-block-end: 8px;
+    }
   }
   & .line.diff.add {
     background: #dcf2dc;
