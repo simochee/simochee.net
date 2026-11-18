@@ -19,12 +19,6 @@ export function tokyoDay(date: Date) {
   return new Date(date.getTime() + tokyoOffsetMs).toISOString().slice(0, 10);
 }
 
-/** 来訪済みの印を、日本時間の日付が変わるまで持たせるための秒数。 */
-export function secondsUntilTokyoMidnight(now: Date) {
-  const elapsed = (now.getTime() + tokyoOffsetMs) % dayMs;
-  return Math.ceil((dayMs - elapsed) / 1000);
-}
-
 /** その日で終わる 7 日間の日付。古い順。 */
 export function weekEndingOn(day: string) {
   const last = Date.parse(`${day}T00:00:00Z`);

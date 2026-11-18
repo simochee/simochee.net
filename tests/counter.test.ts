@@ -1,14 +1,9 @@
 import { expect, test } from "vitest";
-import { fillWeek, secondsUntilTokyoMidnight, tokyoDay, weekEndingOn } from "../src/lib/counter";
+import { fillWeek, tokyoDay, weekEndingOn } from "../src/lib/counter";
 
 test("来訪の日付は閲覧者や実行環境の時間帯ではなく日本時間で数える", () => {
   expect(tokyoDay(new Date("2026-11-17T15:00:00Z"))).toBe("2026-11-18");
   expect(tokyoDay(new Date("2026-11-17T14:59:59Z"))).toBe("2026-11-17");
-});
-
-test("来訪済みの印は日本時間の 0 時に切れる", () => {
-  expect(secondsUntilTokyoMidnight(new Date("2026-11-18T23:59:00+09:00"))).toBe(60);
-  expect(secondsUntilTokyoMidnight(new Date("2026-11-18T00:00:00+09:00"))).toBe(24 * 60 * 60);
 });
 
 test("1 週間は今日までの 7 日間で、月をまたいでも古い順に並ぶ", () => {
