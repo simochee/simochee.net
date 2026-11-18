@@ -1,0 +1,20 @@
+---
+import Plugin from "../layout/Plugin.astro";
+import PluginList from "../layout/PluginList.astro";
+import { posts } from "../../lib/posts";
+import { categories } from "../../site";
+
+const all = await posts();
+---
+
+<Plugin title="カテゴリ">
+  <PluginList>
+    {
+      Object.entries(categories).map(([type, name]) => (
+        <li>
+          ・<a href={`/${type}/`}>{name}</a> ({all.filter((post) => post.data.type === type).length})
+        </li>
+      ))
+    }
+  </PluginList>
+</Plugin>

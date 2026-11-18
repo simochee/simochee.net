@@ -1,0 +1,80 @@
+---
+import Base from "../layouts/Base.astro";
+import Button from "../components/ui/Button.astro";
+import Icon from "../components/ui/Icon.astro";
+import TextArea from "../components/ui/TextArea.astro";
+import TextField from "../components/ui/TextField.astro";
+
+// デザインに書かれていた見本のデータ。実データにつなぐときに置き換える。
+const colors = [
+  {label: "黒", value: "#333333", checked: true},
+  {label: "紺", value: "#1f3f8f", checked: false},
+  {label: "緑", value: "#2e6b2e", checked: false},
+  {label: "茶", value: "#7a4a1e", checked: false},
+  {label: "桃", value: "#b0306a", checked: false},
+  {label: "紫", value: "#6b3fa0", checked: false},
+];
+const posts = [
+  {no: 128, title: "キリ番踏みました！", name: "ことり", date: "2026/11/17(火) 21:40", color: "#b0306a", body: "こんばんは！ カウンターを見たら 0012300 でした。キリ番、ということでいいですか？笑\nいつもモーニングの記事を楽しみにしています。", reply: "ことりさん、おめでとうございます＆ありがとうございます！ 次は 0012345 なので、ぜひまた狙ってください♪", url: "", hasReply: true, hasUrl: false},
+  {no: 127, title: "はじめまして", name: "通りすがり", date: "2026/11/15(日) 13:02", color: "#1f3f8f", body: "テンプレート変わりましたね。サイドバーのカレンダーがなつかしくて、思わず書き込んでしまいました。", reply: "書き込みありがとうございます！ あのころのブログっぽさを目指してみました。", url: "", hasReply: true, hasUrl: false},
+  {no: 126, title: "相互リンクのお願い", name: "まったり日和", date: "2026/11/10(火) 19:20", color: "#2e6b2e", body: "いつも楽しく読ませてもらっています。うちのブログでもリンクさせていただいたので、よろしければ相互リンクをお願いできますか？", reply: "うれしいです！ さっそくリンクに追加しました。", url: "https://example.com/", hasReply: true, hasUrl: true},
+  {no: 125, title: "銀杏並木", name: "みかん", date: "2026/11/08(日) 10:15", color: "#7a4a1e", body: "銀杏並木の写真、すてきでした！ 今度の休みに行ってみます。", reply: "", url: "", hasReply: false, hasUrl: false},
+];
+---
+
+<Base title="ひとこと掲示板">
+<h1 class="title-box mb-10">ひとこと掲示板</h1>
+
+<div class="type-small mb-12 py-6 px-10 bg-memo border border-memo-line">
+<div class="font-bold text-memo-ink">【ご利用にあたって】</div>
+<div>・どなたでもお気軽にどうぞ。はじめての方も大歓迎です。</div>
+<div>・キリ番（次は 0012345）を踏んだ方は、ここでご報告ください♪</div>
+<div>・宣伝や荒らし、ほかの方がいやな気持ちになる書き込みは、予告なく消します。</div>
+<div>・削除キーを入れておくと、あとから自分で編集・削除できます。</div>
+<div>・送信するときに、迷惑書き込みよけの自動チェックが入ります。</div>
+</div>
+
+<form class="mb-16 py-8 px-10 border border-line grid grid-cols-[auto_minmax(0,1fr)] gap-y-4 gap-x-8 items-center">
+<label for="bbs-name">お名前</label><TextField class="max-w-220" id="bbs-name" type="text" />
+<label for="bbs-mail">メール</label><div class="flex flex-wrap items-center gap-y-2 gap-x-8"><TextField class="flex-[0_1_260px] min-w-0" id="bbs-mail" type="email" /><span class="type-small text-ink-soft">（表示されません）</span></div>
+<label for="bbs-url">URL</label><TextField class="max-w-320" id="bbs-url" type="url" placeholder="http://" />
+<label for="bbs-title">題名</label><TextField class="max-w-320" id="bbs-title" type="text" />
+<label class="self-start" for="bbs-body">本文</label><TextArea id="bbs-body" rows="5"></TextArea>
+<span>文字色</span>
+<div class="flex flex-wrap gap-y-2 gap-x-10" role="radiogroup" aria-label="文字色">
+{colors.map((c) => (
+<label style={`color: ${c.value}`}><input type="radio" name="bbs-color" checked={c.checked} /> ■{c.label}</label>
+))}
+</div>
+<label for="bbs-key">削除キー</label><div class="flex flex-wrap items-center gap-y-2 gap-x-8"><TextField class="flex-[0_1_120px] min-w-0" id="bbs-key" type="password" /><span class="type-small text-ink-soft">（英数字8文字まで）</span></div>
+<span></span><label class="type-small"><input type="checkbox" checked /> お名前とメールを記憶する</label>
+<span></span>
+<div class="flex flex-wrap items-center gap-6">
+<Button class="py-2 px-16">書き込む</Button>
+<Button class="py-2 px-10" variant="plain">リセット</Button>
+
+
+</div>
+</form>
+
+<div class="type-small flex flex-wrap justify-between gap-y-4 gap-x-10 mb-6 text-ink-soft"><span>書き込み：128 件（新しい順）</span><span>1ページ 10件</span></div>
+
+{posts.map((p) => (
+<article class="mb-10 border border-line">
+<div class="flex flex-wrap justify-between items-baseline gap-y-2 gap-x-10 py-2 px-8 bg-tint border-b border-line">
+<b class="text-ink-strong">[{p.no}] {p.title}</b>
+<span class="type-small text-ink-soft">{p.date}</span>
+</div>
+<div class="py-6 px-10">
+<div class="type-small text-ink-soft">名前：<b>{p.name}</b>{p.hasUrl && (<> <Icon name="home" /> <a href="#">HOME</a></>)}</div>
+<div class="mt-4 leading-prose whitespace-pre-line" style={`color: ${p.color}`}>{p.body}</div>
+{p.hasReply && (<>
+<div class="mt-6 ml-[1em] py-4 px-8 bg-memo border border-dotted border-memo-line leading-prose">└ <b class="text-memo-ink">しもちぃ</b>：{p.reply}</div>
+</>)}
+<div class="type-small mt-4 text-right"><Icon name="comment" /> <a href="#">返信する</a> | <Icon name="edit" /> <a href="#">編集・削除</a></div>
+</div>
+</article>
+))}
+
+<div class="text-center p-4 border-y border-dotted border-frame">[<b>1</b>] <a href="#">2</a> <a href="#">3</a> <a href="#">4</a> … <a href="#">13</a> | <a href="#">次の10件 »</a></div>
+</Base>

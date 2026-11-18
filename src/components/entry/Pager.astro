@@ -1,0 +1,33 @@
+---
+interface Step {
+  label: string;
+  href?: string;
+}
+interface Props {
+  label: string;
+  newer?: Step;
+  older?: Step;
+  class?: string;
+}
+const { label, newer, older, class: className } = Astro.props;
+---
+
+<nav class:list={["border-y border-dotted border-frame text-center", className]} aria-label={label}>
+  {
+    newer && (
+      <>
+        {newer.href ? <a href={newer.href} rel="next">&laquo; {newer.label}</a> : <span>&laquo; {newer.label}</span>}
+        {" | "}
+      </>
+    )
+  }
+  <a href="/">ホーム</a>
+  {
+    older && (
+      <>
+        {" | "}
+        {older.href ? <a href={older.href} rel="prev">{older.label} &raquo;</a> : <span>{older.label} &raquo;</span>}
+      </>
+    )
+  }
+</nav>

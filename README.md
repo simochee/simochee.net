@@ -3,6 +3,18 @@
 Astro 7 で生成する日本語の個人ブログです。
 このリポジトリには動作確認用のダミー記事が含まれます。
 
+## デザイン
+
+2008 年ごろのブログテンプレートの見た目を、いまの Web の機能で組んでいます。
+
+- 文言と外部リンクは `src/site.ts` にまとめています。
+- スタイルは Tailwind CSS です。色・書体・文字サイズのデザイントークンは `src/styles/global.css` の `@theme` にあり、1 単位は 1px です（`px-14` は 14px）。
+- 文字は東雲フォント（パブリックドメイン）です。由来と分割の方法は `src/assets/fonts/README.md` にあります。
+- Markdown から生成される本文にはクラスを付けられないので、その装飾だけ `src/styles/prose.css` に素の CSS で書いています。
+- コンポーネントの層分けと置き場所の決めかたは `src/components/README.md` にあります。
+- ページ遷移は Astro の `<ClientRouter />` による view transition です。サイドバーは遷移をまたいで保持します。
+- スクリプトが動かなくても読めます。月の満ち欠け、着せかえ、共有、コードのコピーだけがスクリプトを使い、動かないときは表示しません。
+
 ## 開発
 
 Node.js 24.22 以降と [Vite+](https://viteplus.dev/)（`vp`）を使用します。
@@ -154,7 +166,7 @@ CI で浅い clone を使う場合は、ビルド前に `git fetch --unshallow` 
 `vp` が入っていない CI（Cloudflare Workers Builds など）では、公式インストーラで入れてから実行します。
 
 ```sh
-curl -fsSL https://vite.plus | VP_VERSION=1.5.0 VP_HOME="$HOME/.vite-plus" VP_NODE_MANAGER=no bash
+curl -fsSL https://vite.plus | VP_VERSION=1.7.0 VP_HOME="$HOME/.vite-plus" VP_NODE_MANAGER=no bash
 . "$HOME/.vite-plus/env"
 ```
 

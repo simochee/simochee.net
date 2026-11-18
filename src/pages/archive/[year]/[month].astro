@@ -1,0 +1,20 @@
+---
+import Base from "../../../layouts/Base.astro";
+import EntryList from "../../../components/entry/EntryList.astro";
+import ListHeader from "../../../components/entry/ListHeader.astro";
+import PageNumbers from "../../../components/entry/PageNumbers.astro";
+import { groupByMonth } from "../../../lib/archive";
+import { posts } from "../../../lib/posts";
+
+export async function getStaticPaths() {
+  const months = groupByMonth(await posts());
+  return months.map((month) => ({ params: { year: month.year, month: month.month }, props: { month } }));
+}
+const { month } = Astro.props;
+---
+
+<Base title={`${month.label}の記事`}>
+  <ListHeader crumbs={["月別アーカイブ", month.label]} heading={`${month.label}の記事一覧`} count={month.posts.length} />
+  <EntryList posts={month.posts} />
+  <PageNumbers />
+</Base>

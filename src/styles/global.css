@@ -1,0 +1,139 @@
+@import "tailwindcss";
+@import "./fonts.css";
+@import "./prose.css" layer(components);
+@import "./icons.css" layer(components);
+
+@theme {
+  /* 既定のパレットや文字サイズを残すと、テンプレートにない色や大きさが気づかないうちに混ざる。 */
+  --color-*: initial;
+  --font-*: initial;
+  --text-*: initial;
+
+  /* このデザインは 1px のマス目で組んである。1 単位を 1px にして、デザインの数値をそのままクラスに書けるようにしている。 */
+  --spacing: 1px;
+
+  --color-accent: #3a6a99;
+  --color-on-accent: #ffffff;
+  --color-page: #e6edf3;
+  --color-paper: #ffffff;
+  --color-band: #dbe6f0;
+  --color-tint: #eef3f8;
+  --color-wash: #f4f7fa;
+  --color-code: #f8fafc;
+  --color-frame: #a9bccd;
+  --color-line: #c9d6e2;
+  --color-line-soft: #dde5ec;
+  --color-photo: #cccccc;
+  --color-control: #7a8fa3;
+  --color-ink: #333333;
+  --color-ink-soft: #555555;
+  --color-ink-strong: #1f3f60;
+  --color-ink-sub: #4a5f73;
+  --color-link: #2b5a8a;
+  --color-link-hover: #c0392b;
+  --color-sunday: #c00000;
+  --color-saturday: #0033cc;
+  --color-night: #1f2a38;
+  --color-blank: #eeeeee;
+  --color-memo: #fffbe6;
+  --color-memo-line: #e0cf7a;
+  --color-memo-ink: #6b5200;
+  --color-mark: #fff0a8;
+  --color-ok: #2b6a2b;
+  --color-danger: #9b2c2c;
+  --color-lcd: #111111;
+  --color-lcd-ink: #7dff7a;
+  --color-menu-divider: rgb(255 255 255 / 0.35);
+  --color-menu-current: rgb(0 0 0 / 0.22);
+
+  /* ドットフォントは 14px・12px の整数倍でしか崩れずに描けない。rem にしているのは、ブラウザの文字サイズ設定を無視しないため。 */
+  --font-body: "Shinonome14", "ＭＳ ゴシック", "MS Gothic", "Osaka-Mono", monospace;
+  --font-small: "Shinonome12", "ＭＳ ゴシック", "MS Gothic", "Osaka-Mono", monospace;
+  --text-body: 0.875rem;
+  --text-body--line-height: 1.375rem;
+  --text-small: 0.75rem;
+  --text-small--line-height: 1.125rem;
+  --text-title: 1.75rem;
+  --text-title--line-height: 2.25rem;
+  --leading-prose: 1.5rem;
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+  :root[data-theme="wakakusa"] {
+    --color-accent: #5b7f3a;
+  }
+  :root[data-theme="sakura"] {
+    --color-accent: #a0456b;
+  }
+  :root[data-theme="sumire"] {
+    --color-accent: #6b5b95;
+  }
+  :root[data-theme="kogecha"] {
+    --color-accent: #7a4a1e;
+  }
+  html {
+    background: var(--color-page);
+    scrollbar-gutter: stable;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  body {
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    overflow-wrap: anywhere;
+    line-break: strict;
+    /* アンチエイリアスがかかるとドットの輪郭がにじむ。 */
+    -webkit-font-smoothing: none;
+    font-synthesis: none;
+    font-kerning: none;
+    text-rendering: optimizeSpeed;
+  }
+  a {
+    color: var(--color-link);
+    text-decoration: underline;
+    &:hover {
+      color: var(--color-link-hover);
+    }
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-link-hover);
+    outline-offset: 1px;
+  }
+  /* 2008 年のページは一瞬で切り替わった。枠は動かさず、本文だけを短く切り替える。 */
+  ::view-transition-group(*) {
+    animation-duration: 160ms;
+  }
+  ::view-transition-old(main),
+  ::view-transition-new(main) {
+    animation-duration: 120ms;
+  }
+}
+
+/* 小さい文字は大きさだけでなくフォントも 12px 用に替える。14px 用を縮めるとドットが潰れる。 */
+@utility type-small {
+  font-family: var(--font-small);
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+}
+@utility title-box {
+  padding: 6px 8px;
+  font-weight: bold;
+  color: var(--color-ink-strong);
+  background: var(--color-tint);
+  border: 1px solid var(--color-line);
+  &::before {
+    content: "■ " / "";
+  }
+  & a {
+    color: inherit;
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

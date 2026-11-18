@@ -1,0 +1,18 @@
+---
+import { themes } from "../../lib/themes";
+
+const allowed = themes.map((theme) => theme.id);
+---
+
+{/* 外部ファイルにすると読み込みを待つあいだ既定の色で描かれ、選んだ色へ切り替わる瞬間が見えてしまう。 */}
+<script is:inline define:vars={{ allowed }}>
+  const apply = (root) => {
+    try {
+      const theme = localStorage.getItem("theme");
+      if (allowed.includes(theme)) root.dataset.theme = theme;
+    } catch {}
+  };
+  apply(document.documentElement);
+  // ページ遷移では html 要素の属性も次のページのものへ置き換わる。差し替える前の文書に付けておけば、既定の色が一瞬見えることもない。
+  document.addEventListener("astro:before-swap", (event) => apply(event.newDocument.documentElement));
+</script>

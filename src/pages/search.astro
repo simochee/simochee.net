@@ -1,0 +1,42 @@
+---
+import Base from "../layouts/Base.astro";
+import Button from "../components/ui/Button.astro";
+import Icon from "../components/ui/Icon.astro";
+import TextField from "../components/ui/TextField.astro";
+
+// デザインに書かれていた見本のデータ。実データにつなぐときに置き換える。
+const entries = [
+  {date: "2026/11/18 (水)", title: "久しぶりに喫茶店でモーニング", cat: "日常", comments: 5, tb: 1, pre: "今日は午前休をとったので、駅前の古い", hasHit: true, hit: "喫茶店", post: "へ。厚切りトーストとゆで卵、それにブレンドがついて", href: "#"},
+  {date: "2026/11/10 (火)", title: "このブログで使える書き方まとめ", cat: "お知らせ", comments: 2, tb: 0, pre: "表の書き方の例：駅前の", hasHit: true, hit: "喫茶店", post: "／古本屋の2階のカフェ／川沿いの珈琲店", href: "#"},
+  {date: "2026/10/21 (水)", title: "古い喫茶店のプリンを食べ比べ", cat: "ごはん", comments: 6, tb: 1, pre: "固めのプリン派としては見逃せません。古い", hasHit: true, hit: "喫茶店", post: "を3軒まわって、食べ比べてきました", href: "#"},
+  {date: "2026/09/14 (月)", title: "雨の日の喫茶店", cat: "日常", comments: 2, tb: 0, pre: "雨の音を聞きながら、", hasHit: true, hit: "喫茶店", post: "でぼんやり。こういう日はホットのミルクティー", href: "#"},
+];
+---
+
+<Base title="検索結果">
+<div class="type-small mb-6 text-ink-soft"><a href="/">ホーム</a> &gt; 検索結果</div>
+
+<div class="mb-16 py-6 px-10 bg-wash border border-line">
+<h1 class="font-bold text-ink-strong">「喫茶店」の検索結果</h1>
+<div class="type-small text-ink-soft">7 件見つかりました（1〜4 件目を表示）</div>
+
+<form class="flex flex-wrap items-center gap-4 mt-6">
+<label class="type-small" for="list-q">キーワード</label>
+<TextField class="flex-[0_1_220px] min-w-0" id="list-q" type="search" value="喫茶店" />
+<Button class="py-1 px-10">検索</Button>
+<span class="type-small text-ink-soft">※ 記事のタイトルと本文から探します</span>
+</form>
+
+</div>
+
+{entries.map((e) => (
+<article class="mb-22">
+<div class="type-small text-ink-soft border-b border-dotted border-frame pb-2 mb-6">{e.date}</div>
+<h2 class="title-box mb-8"><a href={e.href}>{e.title}</a></h2>
+<p class="mb-6 px-6 leading-prose">{e.pre}{e.hasHit && (<><mark class="px-1 bg-mark text-ink">{e.hit}</mark>{e.post}</>)}… <a href={e.href}>続きを読む »</a></p>
+<div class="type-small text-ink-soft text-right"><Icon name="folder" /> カテゴリ：<a href="#">{e.cat}</a> | <Icon name="comment" /> <a href={e.href}>コメント({e.comments})</a></div>
+</article>
+))}
+
+<div class="text-center p-4 border-y border-dotted border-frame">« 前のページ | <b>1</b> <a href="#">2</a> | <a href="#">次のページ »</a></div>
+</Base>

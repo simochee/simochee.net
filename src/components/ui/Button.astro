@@ -1,0 +1,17 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+interface Props extends HTMLAttributes<"button"> {
+  /** primary: 送信などの主な操作 / plain: やり直しなどの控えの操作 / soft: 本文のそばに置く小さな操作 / link: 文中のリンクと同じ見た目の操作 */
+  variant?: "primary" | "plain" | "soft" | "link";
+}
+const { variant = "primary", class: className, type = "button", ...rest } = Astro.props;
+const looks = {
+  primary: "border border-control bg-tint text-ink-strong",
+  plain: "border border-control bg-paper text-ink-strong",
+  soft: "border border-frame bg-wash text-ink-strong",
+  link: "text-link underline hover:text-link-hover",
+};
+---
+
+<button type={type} class:list={["cursor-pointer", looks[variant], className]} {...rest}><slot /></button>

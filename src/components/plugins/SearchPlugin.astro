@@ -1,0 +1,13 @@
+---
+import Plugin from "../layout/Plugin.astro";
+import Button from "../ui/Button.astro";
+import TextField from "../ui/TextField.astro";
+---
+
+<Plugin title="検索フォーム">
+<form class="flex gap-4 px-4 py-8" role="search" action="/search/">
+<label class="sr-only" for="search-keyword">ブログ内を検索</label>
+<TextField class="flex-[1_1_auto] min-w-0" id="search-keyword" type="search" name="q" />
+<Button class="flex-none px-8 py-1" type="submit">検索</Button>
+</form>
+</Plugin>

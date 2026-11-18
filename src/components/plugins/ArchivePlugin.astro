@@ -1,0 +1,26 @@
+---
+import Plugin from "../layout/Plugin.astro";
+import PluginList from "../layout/PluginList.astro";
+import { groupByMonth } from "../../lib/archive";
+import { posts } from "../../lib/posts";
+
+const months = groupByMonth(await posts());
+const shown = months.slice(0, 5);
+---
+
+{
+  months.length > 0 && (
+    <Plugin title="月別アーカイブ">
+      <PluginList>
+        {shown.map((month) => (
+          <li>
+            ・<a href={month.path}>{month.year}/{month.month}</a> ({month.posts.length})
+          </li>
+        ))}
+        <li class="border-b-0!">
+          <a href="/archive/">&raquo; 過去の記事をすべて見る</a>
+        </li>
+      </PluginList>
+    </Plugin>
+  )
+}

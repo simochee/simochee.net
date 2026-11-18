@@ -1,6 +1,7 @@
 ---
-import Base from '../layouts/Base.astro';
-import PostList from '../components/PostList.astro';
-import { posts } from '../lib/posts';
+import Base from "../layouts/Base.astro";
+import EntryPage from "../components/entry/EntryPage.astro";
+import { posts } from "../lib/posts";
 ---
-<Base title="simochee.net"><h1>技術と日々の記録</h1><PostList posts={await posts()} /></Base>
+
+<Base><EntryPage posts={await posts()} page={1} /></Base>

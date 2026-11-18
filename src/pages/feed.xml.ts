@@ -1,9 +1,10 @@
 import rss from "@astrojs/rss";
 import { posts } from "../lib/posts";
+import { site } from "../site";
 export async function GET() {
   return rss({
-    title: "simochee.net",
-    description: "技術と日々の記録",
+    title: site.name,
+    description: site.description,
     site: "https://simochee.net",
     customData: "<language>ja</language>",
     items: (await posts())

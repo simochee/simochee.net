@@ -1,0 +1,17 @@
+---
+import Base from "../../layouts/Base.astro";
+import EntryPage from "../../components/entry/EntryPage.astro";
+import { posts } from "../../lib/posts";
+import { pageCount } from "../../lib/paging";
+
+export async function getStaticPaths() {
+  const all = await posts();
+  return Array.from({ length: pageCount(all.length) - 1 }, (_, index) => ({
+    params: { page: String(index + 2) },
+    props: { posts: all, page: index + 2 },
+  }));
+}
+const { posts: all, page } = Astro.props;
+---
+
+<Base title={`${page}ページ目`}><EntryPage posts={all} page={page} /></Base>

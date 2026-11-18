@@ -1,0 +1,14 @@
+---
+import Avatar from "../ui/Avatar.astro";
+import Plugin from "../layout/Plugin.astro";
+import { site } from "../../site";
+---
+
+<Plugin title="プロフィール">
+  <div class="flex flex-col items-start gap-6 px-4 py-8">
+    <Avatar size={80} />
+    <p><b>{site.author.name}</b></p>
+    <p>{site.author.bio}</p>
+    <p><a href="/profile/">&raquo; くわしいプロフィール</a></p>
+  </div>
+</Plugin>
