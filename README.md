@@ -13,7 +13,7 @@ Astro 7 で生成する日本語の個人ブログです。
 - Markdown から生成される本文にはクラスを付けられないので、その装飾だけ `src/styles/prose.css` に素の CSS で書いています。
 - コンポーネントの層分けと置き場所の決めかたは `src/components/README.md` にあります。
 - ページ遷移は Astro の `<ClientRouter />` による view transition です。サイドバーは遷移をまたいで保持します。
-- スクリプトが動かなくても読めます。月の満ち欠け、着せかえ、共有、コードのコピーだけがスクリプトを使い、動かないときは表示しません。
+- スクリプトが動かなくても読めます。月の満ち欠け、アクセスカウンター、着せかえ、共有、コードのコピーだけがスクリプトを使い、動かないときは表示しません。
 
 ## 開発
 
@@ -185,11 +185,25 @@ export const GET: APIRoute = () => Response.json({ ok: true });
 - URL の末尾スラッシュの決まりはページと同じです（`/api/health/`）。
 - KV や D1 などを使うときは、`cloudflare.config.ts` の `worker.env` に binding を足し、ルートの中で `import { env } from "cloudflare:workers"` から読みます。
 
+### アクセスカウンター
+
+サイドバーのアクセスカウンターは、表示したときに `POST /api/counter/` を呼び、累計と今日までの 7 日間の人数を受け取ります。数字にマウスを重ねる（またはフォーカスする）と、7 日間の人数を棒グラフで出します。
+
+- 1 人のブラウザは日本時間の 1 日に 1 回だけ数えます。数えた日は `counted_on` クッキー（日本時間の 0 時まで有効）で覚えます。
+- 人数は D1 の `daily_visitors` テーブルに日ごとに持ち、累計はその合計です。テーブルの定義は `migrations/` にあります。
+- 呼び出しに失敗したとき（GitHub Pages のステージングなど）は、カウンターごと表示しません。
+
 ### 手元で動かす
 
 `vp run dev` で、サーバー側のルートも含めて動きます。Astro の dev サーバーが、サーバー側のコードを Cloudflare のランタイム（workerd）の中で動かします。
 
 - KV や D1 などの binding は、手元ではエミュレータで動きます。Cloudflare へのサインインは要りません。
+- D1 のテーブルは、はじめに手元のエミュレータへマイグレーションを当てて作ります。ID は `cloudflare.config.ts` の `COUNTER_DB` の `id` です。
+
+  ```sh
+  pnpm exec cf d1 migrations apply <COUNTER_DB の id> --local
+  ```
+
 - エミュレータのデータは `.cloudflare/state/` に残り、起動し直しても消えません。消すときはこのディレクトリを削除します。
 - 本番と同じ形（ビルド済みのファイルと Worker）で確かめるときは `vp run preview` を使います。
 
@@ -204,6 +218,13 @@ pnpm exec cf deploy --dry-run   # アップロードせずにビルドと検証�
 ```
 
 デプロイには `cf auth login` でのサインインか、環境変数 `CLOUDFLARE_API_TOKEN` が要ります。
+
+アクセスカウンターの D1 は、はじめてのデプロイの前に作り、`migrations/` を当てておきます。`migrations/` にファイルを足したときも、デプロイの前に当てます。
+
+```sh
+pnpm exec cf d1 create --name simochee-net-counter   # 返ってきた ID を cloudflare.config.ts の COUNTER_DB の id に書く
+pnpm exec cf d1 migrations apply <COUNTER_DB の id>
+```
 
 | ファイル               | 内容                                                                   |
 | ---------------------- | ---------------------------------------------------------------------- |

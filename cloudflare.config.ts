@@ -1,4 +1,4 @@
-import { defineConfig } from "cf/config";
+import { bindings, defineConfig } from "cf/config";
 
 export default defineConfig({
   worker: {
@@ -7,6 +7,13 @@ export default defineConfig({
     assets: {
       htmlHandling: "auto-trailing-slash",
       notFoundHandling: "404-page",
+    },
+    env: {
+      COUNTER_DB: bindings.d1({
+        name: "simochee-net-counter",
+        // 本番のデータベースを作るまでの仮の ID。id を省くと、手元のエミュレータが cf d1 migrations で指定できない ID でデータベースを作る。
+        id: "00000000-0000-4000-8000-000000000000",
+      }),
     },
   },
 });
