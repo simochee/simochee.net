@@ -13,6 +13,7 @@ import {
 import remarkAlerts from "remark-github-blockquote-alert";
 import externalLinks from "rehype-external-links";
 import autolinkHeadings from "rehype-autolink-headings";
+import { rehypeAlerts } from "./src/lib/rehype-alerts";
 import { rehypeCodeFrame } from "./src/lib/rehype-code-frame";
 const contentDir = process.env.SIMOCHEE_CONTENT_DIR;
 export default defineConfig({
@@ -35,6 +36,7 @@ export default defineConfig({
       remarkRehype: { footnoteLabel: "脚注", footnoteBackLabel: "本文へ戻る" },
       rehypePlugins: [
         rehypeCodeFrame,
+        rehypeAlerts,
         [externalLinks, { target: "_blank", rel: ["noopener"] }],
         // Astro は見出しの id をユーザーのプラグインより後に付ける。autolinkHeadings は id のない見出しを素通しするので、先に付けておく。
         rehypeHeadingIds,
