@@ -11,6 +11,7 @@ import {
 import remarkAlerts from "remark-github-blockquote-alert";
 import externalLinks from "rehype-external-links";
 import autolinkHeadings from "rehype-autolink-headings";
+import { rehypeCodeFrame } from "./src/lib/rehype-code-frame";
 const contentDir = process.env.SIMOCHEE_CONTENT_DIR;
 export default defineConfig({
   site: "https://simochee.net",
@@ -21,7 +22,9 @@ export default defineConfig({
   markdown: {
     processor: unified({
       remarkPlugins: [remarkAlerts],
+      remarkRehype: { footnoteLabel: "脚注", footnoteBackLabel: "本文へ戻る" },
       rehypePlugins: [
+        rehypeCodeFrame,
         [externalLinks, { target: "_blank", rel: ["noopener"] }],
         // Astro は見出しの id をユーザーのプラグインより後に付ける。autolinkHeadings は id のない見出しを素通しするので、先に付けておく。
         rehypeHeadingIds,
@@ -30,7 +33,7 @@ export default defineConfig({
           {
             behavior: "append",
             properties: { className: ["heading-anchor"], ariaLabel: "この見出しへのリンク" },
-            content: { type: "text", value: " #" },
+            content: { type: "text", value: "#" },
           },
         ],
       ],
