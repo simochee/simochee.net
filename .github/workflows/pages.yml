@@ -16,11 +16,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
         with:
           # 公開日と更新日を git の履歴から読む。浅い clone は CI ではビルドエラーになる。
           fetch-depth: 0
-      - uses: voidzero-dev/setup-vp@v1
+      - uses: voidzero-dev/setup-vp@v1.15.0
         with:
           node-version: "24"
           run-install: false
@@ -29,8 +29,8 @@ jobs:
         env:
           SIMOCHEE_SITE_URL: https://staging.simochee.net
           SIMOCHEE_NOINDEX: "true"
-      - uses: actions/configure-pages@v6
-      - uses: actions/upload-pages-artifact@v5
+      - uses: actions/configure-pages@v6.0.0
+      - uses: actions/upload-pages-artifact@v5.0.0
         with:
           path: .cloudflare/output/v1/workers/default/assets
 
@@ -45,4 +45,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@v5.0.1
