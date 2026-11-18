@@ -21,6 +21,7 @@ const ambientEnv = {
 };
 const prepare = process.argv[2] === "--prepare";
 const resume = process.argv[2] === "--resume";
+const assets = ".cloudflare/output/v1/workers/default/assets";
 const temp = resume ? resolve(process.argv[3]) : mkdtempSync(join(tmpdir(), "simochee-deploy-"));
 assert(
   resolve(temp).startsWith(resolve(tmpdir()) + "/") &&
@@ -58,9 +59,16 @@ try {
     cpSync(source, site, {
       recursive: true,
       filter: (path) =>
-        ![".git", ".orca", ".astro", ".wrangler", "dist", "node_modules", ".vite-plus"].some(
-          (name) => path === join(source, name),
-        ),
+        ![
+          ".git",
+          ".orca",
+          ".astro",
+          ".wrangler",
+          ".cloudflare",
+          "dist",
+          "node_modules",
+          ".vite-plus",
+        ].some((name) => path === join(source, name)),
     });
   }
   if (prepare) console.log(temp);
@@ -84,10 +92,10 @@ try {
       });
     const result = build("../content/posts");
     assert.equal(result.status, 0, result.stdout + result.stderr);
-    const html = readFileSync(join(site, "dist/posts/deploy-example/index.html"), "utf8");
+    const html = readFileSync(join(site, assets, "posts/deploy-example/index.html"), "utf8");
     assert.match(html, /datetime="2025-02-03T03:00:00.000Z"/);
     assert.match(html, /datetime="2025-02-05T03:00:00.000Z"/);
-    assert.deepEqual(readdirSync(join(site, "dist/posts")), ["deploy-example"]);
+    assert.deepEqual(readdirSync(join(site, assets, "posts")), ["deploy-example"]);
     console.log(
       "Deploy replacement: only deploy-example; published=2025-02-03T03:00:00.000Z, updated=2025-02-05T03:00:00.000Z (JST 12:00).",
     );

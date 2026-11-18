@@ -1,6 +1,7 @@
 import { rehypeHeadingIds, unified } from "@astrojs/markdown-remark";
 import { resolve } from "node:path";
 import { defineConfig } from "astro/config";
+import cloudflare from "@astrojs/cloudflare";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
@@ -17,6 +18,14 @@ const contentDir = process.env.SIMOCHEE_CONTENT_DIR;
 export default defineConfig({
   site: "https://simochee.net",
   output: "static",
+  // アダプターは既定でセッション用の KV を用意する。セッションは使わないので、要らない KV を作らせない。
+  session: false,
+  adapter: cloudflare({
+    // 記事の読み込みは git の履歴を、OGP 画像は sharp を使う。どちらも Node でしか動かないので、事前生成は Node で行う。
+    prerenderEnvironment: "node",
+    // 画像はビルド時に sharp で最適化して静的ファイルにする。既定の Cloudflare Images は、配信のたびに変換する有料の機能。
+    imageService: "compile",
+  }),
   cacheDir: "./.astro/",
   trailingSlash: "always",
   integrations: [mdx(), sitemap({ filter: (page) => !page.endsWith("/404/") })],

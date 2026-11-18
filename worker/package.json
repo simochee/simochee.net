@@ -1,9 +1,0 @@
-{
-  "name": "simochee-net-worker",
-  "private": true,
-  "type": "module",
-  "devDependencies": {
-    "cf": "1.0.0-rc.1",
-    "wrangler": "4.164.0"
-  }
-}

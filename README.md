@@ -27,7 +27,7 @@ vp check
 vp test
 vp run astro:check
 vp run build
-pnpm -C worker exec cf deploy --dry-run
+pnpm exec cf deploy --dry-run
 ```
 
 `vp dev` と `vp build` は通常の Vite 用です。
@@ -169,47 +169,49 @@ SIMOCHEE_CONTENT_DIR= vp run dev
 ライセンスは `fonts/OFL.txt` に含めています。
 システムフォントやビルド中のフォント取得に依存しません。
 
+## サーバーで動かすルート
+
+サイトは基本すべてビルド時に生成します。サーバーが要るものだけを、ルートごとに外します。
+
+```ts
+// src/pages/api/health.ts
+export const prerender = false;
+export const GET: APIRoute = () => Response.json({ ok: true });
+```
+
+- `export const prerender = false` を書いたルートだけが Cloudflare Workers の上で動きます。書いていないページは静的ファイルのままで、配信に Worker は使われません。
+- URL の末尾スラッシュの決まりはページと同じです（`/api/health/`）。
+- KV や D1 などを使うときは、`cloudflare.config.ts` の `worker.env` に binding を足し、ルートの中で `import { env } from "cloudflare:workers"` から読みます。
+
+### 手元で動かす
+
+`vp run dev` で、サーバー側のルートも含めて動きます。Astro の dev サーバーが、サーバー側のコードを Cloudflare のランタイム（workerd）の中で動かします。
+
+- KV や D1 などの binding は、手元ではエミュレータで動きます。Cloudflare へのサインインは要りません。
+- エミュレータのデータは `.cloudflare/state/` に残り、起動し直しても消えません。消すときはこのディレクトリを削除します。
+- 本番と同じ形（ビルド済みのファイルと Worker）で確かめるときは `vp run preview` を使います。
+
 ## デプロイ
 
 Cloudflare Workers にデプロイします。操作には Cloudflare の CLI（`cf`）を使います。
-サイト本体はビルド済みの静的ファイル（`dist/`）で、SSR アダプターは使用しません。
-サーバーが要る機能だけを、同じ Worker の `/api/` 以下で受けます。
 
 ```sh
 vp install --frozen-lockfile
-vp run deploy   # astro build のあと、worker/ で cf deploy
-vp run preview  # astro build のあと、worker/ で cf dev（手元で Worker ごと確認）
+vp run deploy               # ビルドしてデプロイ（cf deploy）
+pnpm exec cf deploy --dry-run   # アップロードせずにビルドと検証だけ
 ```
 
-アップロードせずに確かめるには `pnpm -C worker exec cf deploy --dry-run` を使います。
 デプロイには `cf auth login` でのサインインか、環境変数 `CLOUDFLARE_API_TOKEN` が要ります。
 
-| リクエスト                   | 答えるもの                                          |
-| ---------------------------- | --------------------------------------------------- |
-| ファイルに一致するパス       | 静的配信。Worker は実行されず、実行回数にも数えない |
-| `/api/` 以下                 | Worker。同じパスにファイルがあっても                |
-| どちらにも当てはまらないパス | Worker が静的配信へ戻し、`404.html` が返る          |
+| ファイル               | 内容                                                                   |
+| ---------------------- | ---------------------------------------------------------------------- |
+| `cloudflare.config.ts` | Worker の名前、互換性の日付、静的ファイルの配信の決まり、binding       |
+| `astro.config.ts`      | Cloudflare アダプターの設定（事前生成は Node、画像はビルド時に最適化） |
 
-### Worker の置き場所
+ビルドの出力は `.cloudflare/output/` です。静的ファイルは `.cloudflare/output/v1/workers/default/assets/` に、Worker はその隣に出ます。
+404 は `404-page`、HTML の URL は `auto-trailing-slash` です。
 
-Worker は `worker/` に、サイトとは別のパッケージとして置いています。
-`cf` はプロジェクトに Astro があると Astro のビルドだけを走らせ、Worker をまとめません。パッケージを分けることで、`cf` が `worker/` を素の Worker として扱います。
-
-| ファイル                      | 内容                                                              |
-| ----------------------------- | ----------------------------------------------------------------- |
-| `worker/cloudflare.config.ts` | Worker の名前、互換性の日付、配信の振り分け、binding              |
-| `worker/wrangler.config.ts`   | 配信するファイルの場所（`../dist`）。`cf` が内部で使う bundler 用 |
-| `worker/src/index.ts`         | 入口。`/api/` とそれ以外を振り分ける                              |
-| `worker/src/api.ts`           | パスとメソッドから処理への対応表                                  |
-| `worker/src/routes/`          | 個々の処理                                                        |
-
-サーバーが要る機能を足すときは、次の 3 か所を触ります。
-
-1. `worker/src/routes/` に処理を書く。
-2. `worker/src/api.ts` の `routes` に、パスとメソッドを 1 行足す。
-3. D1 や KV などを使うなら、`worker/cloudflare.config.ts` の `env` に binding を足し、`worker/src/api.ts` の `Env` にも同じ名前で書く。
-
-いまあるのは、Worker に届いていることを確かめる `GET /api/health` だけです。
+`cf` と Cloudflare アダプター（`@astrojs/cloudflare`）は、どちらも正式版の前の版（リリース候補とベータ）を固定して使っています。正式版が出たら上げてください。
 
 `/feed.xml`、サイトマップ、`robots.txt`、canonical と OG / Twitter の meta 情報を生成します。
 CI で浅い clone を使う場合は、ビルド前に `git fetch --unshallow` で履歴を取得してください。
