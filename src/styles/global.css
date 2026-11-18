@@ -104,9 +104,10 @@
     outline: 2px solid var(--color-link-hover);
     outline-offset: 1px;
   }
-  /* 2008 年のページは一瞬で切り替わった。枠は動かさず、本文だけを短く切り替える。 */
+  /* 2008 年のページは一瞬で切り替わった。枠は動かさず、本文だけを短く切り替える。
+     位置の補間を残すと、遷移でスクロール位置が変わったとき枠ごと縦に滑って見える。 */
   ::view-transition-group(*) {
-    animation-duration: 160ms;
+    animation: none;
   }
   ::view-transition-old(main),
   ::view-transition-new(main) {
