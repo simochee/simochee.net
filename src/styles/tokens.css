@@ -1,0 +1,32 @@
+:root {
+  color-scheme: light;
+
+  --accent: #3a6a99;
+  --page: #e6edf3;
+  --paper: #ffffff;
+  --band: #dbe6f0;
+  --tint: #eef3f8;
+  --wash: #f4f7fa;
+  --frame: #a9bccd;
+  --line: #c9d6e2;
+  --line-soft: #dde5ec;
+  --control: #7a8fa3;
+  --ink: #333333;
+  --ink-soft: #555555;
+  --ink-strong: #1f3f60;
+  --ink-sub: #4a5f73;
+  --link: #2b5a8a;
+  --link-hover: #c0392b;
+  --on-accent: #ffffff;
+
+  /* ドットフォントは 14px・12px の整数倍でしか崩れずに描けない。rem にしているのは、ブラウザの文字サイズ設定を無視しないため。 */
+  --font-body: "Shinonome14", "ＭＳ ゴシック", "MS Gothic", "Osaka-Mono", monospace;
+  --font-small: "Shinonome12", "ＭＳ ゴシック", "MS Gothic", "Osaka-Mono", monospace;
+  --text: 0.875rem;
+  --leading: 1.375rem;
+  --text-small: 0.75rem;
+  --leading-small: 1.125rem;
+  --text-title: 1.75rem;
+  --leading-title: 2.25rem;
+  --leading-prose: 1.5rem;
+}

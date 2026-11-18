@@ -1,0 +1,88 @@
+.frame {
+  max-inline-size: 800px;
+  margin-inline: auto;
+  background: var(--paper);
+  border: 1px solid var(--frame);
+}
+.topline {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  padding: 3px 10px;
+  background: var(--wash);
+  border-block-end: 1px solid var(--line);
+}
+.banner {
+  padding: 30px 20px 20px;
+  background: var(--band);
+  border-block-end: 3px double var(--frame);
+  & .site-title {
+    font-size: var(--text-title);
+    line-height: var(--leading-title);
+    font-weight: bold;
+    & a {
+      color: var(--ink-strong);
+      text-decoration: none;
+    }
+  }
+  & .site-description {
+    margin-block-start: 6px;
+    color: var(--ink-sub);
+  }
+}
+.global-nav {
+  background: var(--accent);
+  & ul {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  & a {
+    display: block;
+    padding: 5px 14px;
+    color: var(--on-accent);
+    text-decoration: none;
+    border-inline-end: 1px solid rgb(255 255 255 / 0.35);
+    &:hover {
+      text-decoration: underline;
+    }
+    &:focus-visible {
+      outline-color: var(--on-accent);
+      outline-offset: -3px;
+    }
+    &[aria-current="page"] {
+      background: rgb(0 0 0 / 0.22);
+      font-weight: bold;
+    }
+  }
+  & li:last-child a {
+    border-inline-end: 0;
+  }
+}
+.columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 16px;
+  /* 折り返しの判定を flex に任せている。メディアクエリにすると、サイドバーが下へ回る幅を文字サイズの設定ごとに決め直すことになる。 */
+  & > main {
+    flex: 999 1 520px;
+    min-inline-size: 0;
+  }
+  & > aside {
+    flex: 1 1 210px;
+    min-inline-size: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+.site-footer {
+  padding: 12px 10px;
+  text-align: center;
+  background: var(--band);
+  border-block-start: 1px solid var(--frame);
+}

@@ -1,0 +1,36 @@
+.plugin {
+  & > h2 {
+    padding: 3px 8px;
+    font-family: var(--font-small);
+    font-size: var(--text-small);
+    line-height: var(--leading-small);
+    color: var(--on-accent);
+    background: var(--accent);
+  }
+  & > .plugin-body {
+    padding: 8px 4px;
+  }
+  & > ul,
+  & > ol {
+    margin: 0;
+    padding: 6px 4px;
+    list-style: none;
+    & > li {
+      padding-block: 2px;
+      border-block-end: 1px dotted var(--line);
+    }
+    & > li.plain {
+      border: 0;
+    }
+  }
+}
+.profile-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  & .avatar {
+    border: 1px solid var(--line);
+    background: var(--wash);
+    color: var(--control);
+  }
+}

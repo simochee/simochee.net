@@ -1,0 +1,103 @@
+html {
+  background: var(--page);
+  scrollbar-gutter: stable;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+body {
+  padding: 14px 10px 32px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--text);
+  line-height: var(--leading);
+  overflow-wrap: anywhere;
+  line-break: strict;
+  /* アンチエイリアスがかかるとドットの輪郭がにじむ。 */
+  -webkit-font-smoothing: none;
+  font-synthesis: none;
+  font-kerning: none;
+  text-rendering: optimizeSpeed;
+}
+a {
+  color: var(--link);
+  &:hover {
+    color: var(--link-hover);
+  }
+}
+:focus-visible {
+  outline: 2px solid var(--link-hover);
+  outline-offset: 1px;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  line-height: inherit;
+}
+small,
+.small {
+  font-family: var(--font-small);
+  font-size: var(--text-small);
+  line-height: var(--leading-small);
+}
+.note {
+  color: var(--ink-soft);
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.skip {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  padding: 4px 12px;
+  background: var(--paper);
+  border: 1px solid var(--frame);
+  translate: 0 -200%;
+  &:focus {
+    translate: 0;
+    z-index: 1;
+  }
+}
+.ico {
+  display: inline-block;
+  inline-size: 16px;
+  block-size: 16px;
+  flex: none;
+  vertical-align: -3px;
+  background-color: currentColor;
+  mask: var(--ico) center / 16px 16px no-repeat;
+  @media (forced-colors: active) {
+    background-color: CanvasText;
+  }
+}
+.ico-folder {
+  --ico: url("../assets/icons/folder.svg");
+}
+.ico-share {
+  --ico: url("../assets/icons/share.svg");
+}
+.ico-rss {
+  --ico: url("../assets/icons/rss.svg");
+  background-color: #b35400;
+}
+.ico-calendar {
+  --ico: url("../assets/icons/calendar.svg");
+}
+.ico-clock {
+  --ico: url("../assets/icons/clock.svg");
+}
+.ico-link {
+  --ico: url("../assets/icons/link.svg");
+}
+.ico-archive {
+  --ico: url("../assets/icons/archive.svg");
+}

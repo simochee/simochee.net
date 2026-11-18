@@ -3,12 +3,13 @@ import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import { posts, formatDate } from '../../lib/posts';
 import { tagPath } from '../../lib/tags';
+import { categories } from '../../site';
 export async function getStaticPaths() { return (await posts()).map((post) => ({ params: { slug: post.id }, props: { post } })); }
 const { post } = Astro.props;
 const { Content, headings } = await render(post);
 ---
 <Base title={post.data.title} description={post.data.description} image={`/og/${post.id}.jpg`} article publishedAt={post.data.publishedAt} updatedAt={post.data.updatedAt}>
-  <article><header><p><a href={`/${post.data.type}/`}>{post.data.type === 'tech' ? '技術' : '日々'}</a>{post.data.status === 'draft' && ' · 下書きプレビュー'}</p><h1>{post.data.title}</h1>
+  <article><header><p><a href={`/${post.data.type}/`}>{categories[post.data.type]}</a>{post.data.status === 'draft' && ' · 下書きプレビュー'}</p><h1 class="page-title">■ {post.data.title}</h1>
     <p class="metadata">公開: <time datetime={post.data.publishedAt.toISOString()}>{formatDate(post.data.publishedAt)}</time>{post.data.updatedAt && <> · 更新: <time datetime={post.data.updatedAt.toISOString()}>{formatDate(post.data.updatedAt)}</time></>}</p>
     <ul class="tags">{post.data.tags.map((tag) => <li><a href={tagPath(tag)}>{tag}</a></li>)}</ul>
   </header>

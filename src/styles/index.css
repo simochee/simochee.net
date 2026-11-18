@@ -1,0 +1,36 @@
+@layer reset, tokens, base, layout, parts, content;
+@import "./fonts.css";
+@import "./tokens.css" layer(tokens);
+@import "./base.css" layer(base);
+@import "./layout.css" layer(layout);
+@import "./parts.css" layer(parts);
+@import "./content.css" layer(content);
+
+@layer reset {
+  *,
+  ::before,
+  ::after {
+    box-sizing: border-box;
+  }
+  body,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  figure,
+  blockquote,
+  dl,
+  dd {
+    margin: 0;
+  }
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+    color: inherit;
+  }
+}
