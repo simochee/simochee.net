@@ -1,0 +1,15 @@
+---
+import { fonts, themes } from "../lib/themes";
+
+const allowed = { theme: themes.map((theme) => theme.id), font: fonts.map((font) => font.id) };
+---
+
+{/* 外部ファイルにすると読み込みを待つあいだ既定の色で描かれ、選んだ色へ切り替わる瞬間が見えてしまう。 */}
+<script is:inline define:vars={{ allowed }}>
+  for (const key of ["theme", "font"]) {
+    try {
+      const value = localStorage.getItem(key);
+      if (allowed[key].includes(value)) document.documentElement.dataset[key] = value;
+    } catch {}
+  }
+</script>

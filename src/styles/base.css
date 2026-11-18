@@ -18,6 +18,12 @@ body {
   font-kerning: none;
   text-rendering: optimizeSpeed;
 }
+:root[data-font="smooth"] body {
+  -webkit-font-smoothing: auto;
+  font-synthesis: weight style;
+  font-kerning: auto;
+  text-rendering: auto;
+}
 a {
   color: var(--link);
   &:hover {

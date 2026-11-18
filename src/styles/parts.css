@@ -71,3 +71,48 @@
     background: #1f2a38;
   }
 }
+.theme-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  & [role="group"] {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+  }
+  & .swatch {
+    inline-size: 30px;
+    block-size: 24px;
+    padding: 2px;
+    background: var(--paper);
+    border: 1px solid var(--frame);
+    cursor: pointer;
+    & span {
+      display: block;
+      block-size: 100%;
+    }
+    &[aria-pressed="true"] {
+      padding: 1px;
+      border: 2px solid var(--ink-strong);
+    }
+  }
+}
+.text-button {
+  padding: 0;
+  color: var(--link);
+  text-decoration: underline;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  &:hover {
+    color: var(--link-hover);
+  }
+  &[aria-pressed="true"] {
+    color: var(--ink);
+    font-weight: bold;
+    text-decoration: none;
+    &::before {
+      content: "▶" / "";
+    }
+  }
+}

@@ -1,0 +1,84 @@
+---
+import Plugin from "../Plugin.astro";
+import { fonts, themes } from "../../lib/themes";
+---
+
+<theme-picker hidden>
+  <Plugin title="着せかえ">
+    <div class="plugin-body theme-picker">
+      <div role="group" aria-label="テンプレートの色">
+        {
+          themes.map((theme) => (
+            <button type="button" class="swatch" data-theme-choice={theme.id} aria-pressed="false" aria-label={theme.name} title={theme.name}>
+              <span style={`background: ${theme.color}`} />
+            </button>
+          ))
+        }
+      </div>
+      <p class="small">いまの色：<span data-theme-name></span></p>
+      <div role="group" aria-label="文字の見た目" class="small">
+        {
+          fonts.map((font) => (
+            <button type="button" class="text-button" data-font-choice={font.id} aria-pressed="false">
+              {font.name}
+            </button>
+          ))
+        }
+      </div>
+    </div>
+  </Plugin>
+</theme-picker>
+
+<script>
+  import { fonts, themes } from "../../lib/themes";
+
+  const read = (key: string) => {
+    try {
+      return localStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  };
+  const write = (key: string, value: string) => {
+    try {
+      localStorage.setItem(key, value);
+    } catch {
+      // 保存できない環境（プライベートブラウズなど）でも、このページの見た目は変わる。
+    }
+  };
+
+  customElements.define(
+    "theme-picker",
+    class extends HTMLElement {
+      connectedCallback() {
+        this.addEventListener("click", this);
+        this.hidden = false;
+        this.reflect();
+      }
+      handleEvent(event: Event) {
+        const button = (event.target as Element).closest("button");
+        if (!button) return;
+        const { themeChoice, fontChoice } = button.dataset;
+        if (themeChoice) {
+          document.documentElement.dataset.theme = themeChoice;
+          write("theme", themeChoice);
+        }
+        if (fontChoice) {
+          document.documentElement.dataset.font = fontChoice;
+          write("font", fontChoice);
+        }
+        this.reflect();
+      }
+      reflect() {
+        const theme = document.documentElement.dataset.theme ?? read("theme") ?? themes[0].id;
+        const font = document.documentElement.dataset.font ?? read("font") ?? fonts[0].id;
+        for (const button of this.querySelectorAll("button")) {
+          const { themeChoice, fontChoice } = button.dataset;
+          button.setAttribute("aria-pressed", String(themeChoice === theme || fontChoice === font));
+        }
+        this.querySelector("[data-theme-name]")!.textContent =
+          themes.find((item) => item.id === theme)?.name ?? themes[0].name;
+      }
+    },
+  );
+</script>

@@ -30,3 +30,26 @@
   --leading-title: 2.25rem;
   --leading-prose: 1.5rem;
 }
+
+:root[data-theme="wakakusa"] {
+  --accent: #5b7f3a;
+}
+:root[data-theme="sakura"] {
+  --accent: #a0456b;
+}
+:root[data-theme="sumire"] {
+  --accent: #6b5b95;
+}
+:root[data-theme="kogecha"] {
+  --accent: #7a4a1e;
+}
+/* ドットフォントは読みにくい人もいる。レトロさより読めることを選べるようにしている。 */
+:root[data-font="smooth"] {
+  --font-body: system-ui, "Hiragino Kaku Gothic ProN", "Yu Gothic UI", Meiryo, sans-serif;
+  --font-small: var(--font-body);
+  --text: 0.9375rem;
+  --leading: 1.6rem;
+  --text-small: 0.8125rem;
+  --leading-small: 1.3rem;
+  --leading-prose: 1.75rem;
+}
