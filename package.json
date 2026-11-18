@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "node scripts/dev.ts",
+    "dev:site": "astro dev",
     "build": "astro build",
     "astro:check": "astro check",
     "schema": "node scripts/schema.ts",

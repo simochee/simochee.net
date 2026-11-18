@@ -32,6 +32,23 @@ pnpm -C worker exec cf deploy --dry-run
 
 `vp dev` と `vp build` は通常の Vite 用です。
 Astro は必ず `vp run dev` と `vp run build` で起動してください。
+
+### 手元で動かす
+
+`vp run dev` は、サイトと Worker をまとめて起動します。開くのは http://localhost:4321/ だけです。
+
+| リクエスト   | 答えるもの                                                     |
+| ------------ | -------------------------------------------------------------- |
+| `/api/` 以下 | Worker のローカルサーバー（`cf dev`）。KV や D1 はエミュレータ |
+| それ以外     | Astro の dev サーバー。保存すると自動で読み込み直します        |
+
+- エミュレータは `cf dev` に含まれていて、Cloudflare へのサインインは要りません。binding を `worker/cloudflare.config.ts` に足せば、そのまま手元で使えます。
+- エミュレータのデータは `worker/.cloudflare/state/` に残り、起動し直しても消えません。消すときはこのディレクトリを削除します。
+- KV や D1 の中身は http://localhost:8787/cdn-cgi/local/explorer で見られます。
+- ポートを変えるときは `PORT=5000 vp run dev` のように指定します。Astro はその次の番号、Worker は 8787 を使います。
+- Worker が要らないときは `vp run dev:site`（Astro だけ）を使います。`/api/` は 404 になります。
+- 本番と同じ形（ビルド済みのファイルを Worker が配信）で確かめるときは `vp run preview` を使います。
+
 Astro の Vite 設定には `vite.config.ts` を読ませず、Vite+ の lint、format、test 設定とは分離しています。
 インストール時の `prepare` で `astro sync` を実行し、`vp check` に必要な型を生成します。
 Astro ファイルの型検査は `astro:check` タスクが担当します。
