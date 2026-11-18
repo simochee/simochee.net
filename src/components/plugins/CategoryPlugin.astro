@@ -1,5 +1,6 @@
 ---
 import Plugin from "../Plugin.astro";
+import PluginList from "../PluginList.astro";
 import { posts } from "../../lib/posts";
 import { categories } from "../../site";
 
@@ -7,7 +8,7 @@ const all = await posts();
 ---
 
 <Plugin title="カテゴリ">
-  <ul>
+  <PluginList>
     {
       Object.entries(categories).map(([type, name]) => (
         <li>
@@ -15,5 +16,5 @@ const all = await posts();
         </li>
       ))
     }
-  </ul>
+  </PluginList>
 </Plugin>

@@ -12,24 +12,28 @@ const byCategory = Object.entries(categories).map(([type, name]) => ({
   name,
   posts: all.filter((post) => post.data.type === type),
 }));
+const segment =
+  "block cursor-pointer border border-control bg-paper px-8 py-2 text-ink-strong peer-checked:bg-accent peer-checked:text-on-accent peer-focus-visible:outline-2 peer-focus-visible:outline-offset-1 peer-focus-visible:outline-link-hover";
+const groupTitle = "mb-2 border-b border-line bg-wash px-6 py-2 font-bold text-ink-strong before:content-['▼_']";
 ---
 
 <Base title="全記事一覧" description="これまでに書いた記事を、月ごと・カテゴリごとに。">
-  <h1 class="page-title">全記事一覧</h1>
-  <div class="archive">
-    <div class="archive-bar small note">
+  <h1 class="title-box mb-12">全記事一覧</h1>
+  <div class="group">
+    <div class="type-small mb-12 flex flex-wrap items-center justify-between gap-x-12 gap-y-6 text-ink-soft">
       <span>このブログには、ぜんぶで {all.length} 件の記事があります。</span>
-      <fieldset class="segmented">
-        <legend>表示：</legend>
-        <label><input type="radio" name="view" value="month" checked /><span>月ごと</span></label>
-        <label><input type="radio" name="view" value="category" /><span>カテゴリごと</span></label>
+      <fieldset class="flex items-center">
+        <legend class="float-left">表示：</legend>
+        <label><input class="peer absolute opacity-0" type="radio" name="view" value="month" checked /><span class={segment}>月ごと</span></label>
+        <label><input class="peer absolute opacity-0" type="radio" name="view" value="category" /><span class:list={[segment, "border-l-0"]}>カテゴリごと</span></label>
       </fieldset>
     </div>
-    <div data-view="month">
+    {/* 表示の切り替えに JavaScript を使っていない。ラジオボタンの状態を :has() で読むだけなので、スクリプトが動かなくても切り替わる。 */}
+    <div class="group-has-[[value=category]:checked]:hidden" data-view="month">
       {
         months.map((month) => (
-          <section class="archive-group">
-            <h2>
+          <section class="mb-14">
+            <h2 class={groupTitle}>
               <a href={month.path}>{month.label}</a>（{month.posts.length}件）
             </h2>
             <EntryIndex posts={month.posts} note={(post) => `［${categories[post.data.type]}］`} />
@@ -37,11 +41,11 @@ const byCategory = Object.entries(categories).map(([type, name]) => ({
         ))
       }
     </div>
-    <div data-view="category">
+    <div class="group-has-[[value=month]:checked]:hidden" data-view="category">
       {
         byCategory.map((category) => (
-          <section class="archive-group">
-            <h2>
+          <section class="mb-14">
+            <h2 class={groupTitle}>
               <a href={`/${category.type}/`}>{category.name}</a>（{category.posts.length}件）
             </h2>
             <EntryIndex posts={category.posts} note={() => ""} />
@@ -50,5 +54,5 @@ const byCategory = Object.entries(categories).map(([type, name]) => ({
       }
     </div>
   </div>
-  <p class="to-top small"><a href="#main">▲ ページの先頭へ</a></p>
+  <p class="type-small mt-12 text-right"><a href="#main">▲ ページの先頭へ</a></p>
 </Base>

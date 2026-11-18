@@ -5,7 +5,7 @@ interface Props {
 const { title } = Astro.props;
 ---
 
-<section class="plugin">
-  <h2>{title}</h2>
+<section>
+  <h2 class="type-small bg-accent px-8 py-3 font-bold text-on-accent">{title}</h2>
   <slot />
 </section>

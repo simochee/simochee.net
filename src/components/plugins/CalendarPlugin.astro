@@ -6,18 +6,19 @@ import { posts } from "../../lib/posts";
 const months = groupByMonth(await posts());
 const [current, previous] = months;
 const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
+const weekend = "data-[weekday=0]:text-sunday data-[weekday=6]:text-saturday";
 ---
 
 {
   current && (
     <Plugin title="カレンダー">
-      <div class="plugin-body">
-        <table class="calendar small">
-          <caption>{current.label}</caption>
+      <div class="px-4 py-8">
+        <table class="type-small w-full table-fixed border-collapse text-center">
+          <caption class="mb-4 font-bold">{current.label}</caption>
           <thead>
             <tr>
               {weekdays.map((name, weekday) => (
-                <th scope="col" data-weekday={weekday}>
+                <th class:list={["border-b border-line font-normal", weekend]} scope="col" data-weekday={weekday}>
                   {name}
                 </th>
               ))}
@@ -27,9 +28,9 @@ const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
             {calendarWeeks(current).map((week) => (
               <tr>
                 {week.map((cell) => (
-                  <td data-weekday={cell?.weekday}>
+                  <td class={weekend} data-weekday={cell?.weekday}>
                     {cell?.posts[0] ? (
-                      <a href={`/posts/${cell.posts[0].id}/`} aria-label={`${cell.day}日の記事「${cell.posts[0].data.title}」`}>
+                      <a class="block bg-posted font-bold" href={`/posts/${cell.posts[0].id}/`} aria-label={`${cell.day}日の記事「${cell.posts[0].data.title}」`}>
                         {cell.day}
                       </a>
                     ) : (
@@ -42,7 +43,7 @@ const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
           </tbody>
         </table>
         {previous && (
-          <p class="small">
+          <p class="type-small">
             <a href={previous.path}>&laquo; {Number(previous.month)}月</a>
           </p>
         )}

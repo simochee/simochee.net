@@ -9,15 +9,15 @@ interface Props {
 const { posts, note } = Astro.props;
 ---
 
-<ul class="entry-index">
+<ul>
   {
     posts.map((post) => (
-      <li>
-        <time class="small note" datetime={post.data.publishedAt.toISOString()}>
+      <li class="flex flex-wrap items-baseline gap-x-10 border-b border-dotted border-line px-4 py-3">
+        <time class="type-small text-ink-soft" datetime={post.data.publishedAt.toISOString()}>
           {formatDay(post.data.publishedAt).slice(0, 10)}
         </time>
-        <a href={`/posts/${post.id}/`}>{post.data.title}</a>
-        <span class="small note">{note(post)}</span>
+        <a class="min-w-0 flex-[1_1_14em]" href={`/posts/${post.id}/`}>{post.data.title}</a>
+        <span class="type-small text-ink-soft">{note(post)}</span>
       </li>
     ))
   }

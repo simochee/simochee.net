@@ -1,9 +1,10 @@
 ---
 import Plugin from "../Plugin.astro";
+import PluginList from "../PluginList.astro";
 ---
 
 <Plugin title="RSS">
-  <ul>
-    <li class="plain"><span class="ico ico-rss" aria-hidden="true"></span> <a href="/feed.xml">最近記事のRSS</a></li>
-  </ul>
+  <PluginList>
+    <li class="border-b-0!"><span class="ico ico-rss" aria-hidden="true"></span> <a href="/feed.xml">最近記事のRSS</a></li>
+  </PluginList>
 </Plugin>

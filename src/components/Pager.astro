@@ -11,7 +11,7 @@ interface Props {
 const { label, newer, older } = Astro.props;
 ---
 
-<nav class="pager" aria-label={label}>
+<nav class="grid grid-cols-[1fr_auto_1fr] gap-x-12 gap-y-4 border-y border-dotted border-frame p-4 first:mb-12 *:last:text-right" aria-label={label}>
   {newer ? <a href={newer.href} rel="next">&laquo; {newer.label}</a> : <span></span>}
   <a href="/">ホーム</a>
   {older ? <a href={older.href} rel="prev">{older.label} &raquo;</a> : <span></span>}

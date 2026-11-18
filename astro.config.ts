@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { defineConfig } from "astro/config";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
+import tailwindcss from "@tailwindcss/vite";
 import {
   transformerNotationDiff,
   transformerNotationHighlight,
@@ -50,6 +51,7 @@ export default defineConfig({
   // vite.config.ts は Vite+ 用で、Astro の Vite に読み込ませると衝突する。型定義に configFile がないため断言で渡す。
   vite: {
     configFile: false,
+    plugins: [tailwindcss()],
     // 既定の許可範囲は site ルートのみで、外部の記事ディレクトリの画像が dev で 403 になる。
     server: { fs: { allow: [process.cwd(), ...(contentDir ? [resolve(contentDir)] : [])] } },
   } as Record<string, unknown>,

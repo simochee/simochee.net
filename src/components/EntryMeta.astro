@@ -10,7 +10,7 @@ interface Props {
 const { id, data } = Astro.props.post;
 ---
 
-<footer class="entry-meta small">
+<footer class="type-small border-t border-line-soft pt-5 text-right text-ink-soft">
   <p>
     <span class="ico ico-folder" aria-hidden="true"></span> カテゴリ：<a href={`/${data.type}/`}>{categories[data.type]}</a>
     {
@@ -25,7 +25,7 @@ const { id, data } = Astro.props.post;
     <share-button hidden data-title={data.title} data-url={`/posts/${id}/`}>
       {" | "}
       <span class="ico ico-share" aria-hidden="true"></span>
-      <button type="button" class="text-button" aria-label={`「${data.title}」を共有する`}>共有する</button>
+      <button type="button" class="cursor-pointer text-link underline hover:text-link-hover" aria-label={`「${data.title}」を共有する`}>共有する</button>
     </share-button>
   </p>
   {
