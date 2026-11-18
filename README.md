@@ -165,7 +165,7 @@ CI で浅い clone を使う場合は、ビルド前に `git fetch --unshallow` 
 `vp` が入っていない CI（Cloudflare Workers Builds など）では、公式インストーラで入れてから実行します。
 
 ```sh
-curl -fsSL https://vite.plus | VP_VERSION=1.5.0 VP_HOME="$HOME/.vite-plus" VP_NODE_MANAGER=no bash
+curl -fsSL https://vite.plus | VP_VERSION=1.7.0 VP_HOME="$HOME/.vite-plus" VP_NODE_MANAGER=no bash
 . "$HOME/.vite-plus/env"
 ```
 
