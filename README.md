@@ -135,13 +135,15 @@ Workers Builds は `CI=true` と `WORKERS_CI=1` を設定します（[公式資�
 
 ## 環境変数
 
-| 環境変数                    | 既定値                                                                      | 用途                                                                                   |
-| --------------------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `SIMOCHEE_CONTENT_DIR`      | `content/posts`                                                             | 記事ディレクトリ（絶対パス、またはサイトのルートからの相対パス）。空文字は未設定と同じ |
-| `SIMOCHEE_CONTENT_GIT_ROOT` | `SIMOCHEE_CONTENT_DIR` の git ルート、未設定ならこのサイトのルート          | 日付を読む git リポジトリのルート                                                      |
-| `SIMOCHEE_CONTENT_GIT_PATH` | `SIMOCHEE_CONTENT_DIR` のリポジトリ内の相対パス、未設定なら `content/posts` | そのリポジトリ内の記事ディレクトリ                                                     |
-| `SIMOCHEE_INCLUDE_DRAFTS`   | 無効                                                                        | ローカル dev で `1` のときだけ下書きを含める                                           |
-| `CI` / `WORKERS_CI`         | 未設定                                                                      | いずれかが設定されていれば履歴検証を厳格にする                                         |
+| 環境変数                    | 既定値                                                                      | 用途                                                                                    |
+| --------------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `SIMOCHEE_CONTENT_DIR`      | `content/posts`                                                             | 記事ディレクトリ（絶対パス、またはサイトのルートからの相対パス）。空文字は未設定と同じ  |
+| `SIMOCHEE_CONTENT_GIT_ROOT` | `SIMOCHEE_CONTENT_DIR` の git ルート、未設定ならこのサイトのルート          | 日付を読む git リポジトリのルート                                                       |
+| `SIMOCHEE_CONTENT_GIT_PATH` | `SIMOCHEE_CONTENT_DIR` のリポジトリ内の相対パス、未設定なら `content/posts` | そのリポジトリ内の記事ディレクトリ                                                      |
+| `SIMOCHEE_INCLUDE_DRAFTS`   | 無効                                                                        | ローカル dev で `1` のときだけ下書きを含める                                            |
+| `SIMOCHEE_SITE_URL`         | `https://simochee.net`                                                      | canonical、OG、RSS、`robots.txt` に使うサイトの URL。空文字は未設定と同じ               |
+| `SIMOCHEE_NOINDEX`          | `false`                                                                     | `true` のとき全ページに `noindex, nofollow` を付け、`robots.txt` からサイトマップを外す |
+| `CI` / `WORKERS_CI`         | 未設定                                                                      | いずれかが設定されていれば履歴検証を厳格にする                                          |
 
 `SIMOCHEE_CONTENT_DIR` を指定すると、日時はそのディレクトリを含む git リポジトリの履歴から取得します。
 サムネイル、OG 画像、本文の相対画像、MDX は `vp run dev` と `vp run build` のどちらでも指定先から読み込み、dev では編集を監視して再読み込みします。
@@ -222,6 +224,12 @@ CI で浅い clone を使う場合は、ビルド前に `git fetch --unshallow` 
 curl -fsSL https://vite.plus | VP_VERSION=1.7.0 VP_HOME="$HOME/.vite-plus" VP_NODE_MANAGER=no bash
 . "$HOME/.vite-plus/env"
 ```
+
+## ステージング
+
+`main` に push すると、GitHub Actions（`.github/workflows/pages.yml`）がダミー記事でビルドし、GitHub Pages の https://staging.simochee.net/ に公開します。
+検索エンジンに載らないよう、`SIMOCHEE_NOINDEX=true` でビルドします。
+GitHub Pages では静的ファイルだけが配信され、`prerender = false` のルート（`/api/health/` など）は 404 になります。
 
 ## 検証用スクリプト
 

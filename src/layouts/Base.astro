@@ -1,5 +1,6 @@
 ---
 import { ClientRouter } from "astro:transitions";
+import { SIMOCHEE_NOINDEX } from "astro:env/server";
 import "../styles/global.css";
 import bodyFont from "../assets/fonts/shinonome14-regular-kana.woff2?url";
 import Sidebar from "../components/layout/Sidebar.astro";
@@ -35,6 +36,7 @@ const menu = [
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title ? `${title} - ${site.name}` : site.name}</title>
     <meta name="description" content={description} />
+    {SIMOCHEE_NOINDEX && <meta name="robots" content="noindex, nofollow" />}
     <link rel="canonical" href={canonical} />
     <link rel="alternate" type="application/rss+xml" title={site.name} href="/feed.xml" />
     <link rel="alternate" type="application/rss+xml" title={`${site.name}（最新コメント）`} href="/comments.xml" />

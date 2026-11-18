@@ -1,11 +1,12 @@
 import rss from "@astrojs/rss";
+import type { APIContext } from "astro";
 import { posts } from "../lib/posts";
 import { site } from "../site";
-export async function GET() {
+export async function GET(context: APIContext) {
   return rss({
     title: site.name,
     description: site.description,
-    site: "https://simochee.net",
+    site: context.site!,
     customData: "<language>ja</language>",
     items: (await posts())
       .filter((post) => post.data.status === "published")
