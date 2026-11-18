@@ -219,10 +219,9 @@
   }
   & pre {
     margin: 0;
-    padding: 8px 10px;
     overflow-x: auto;
     font-family: var(--font-code);
-    font-size: 0.8125rem;
+    font-size: var(--text-small);
     line-height: 1.25rem;
     /* body はドットをにじませないためにアンチエイリアスを切っている。輪郭で描く等幅フォントはそのままだとギザギザになるので戻す。 */
     -webkit-font-smoothing: auto;
@@ -236,9 +235,17 @@
       font: inherit;
     }
   }
+  /* 余白を pre ではなく行に持たせているのは、差分や強調の背景を枠の端まで塗るため。pre の余白だと色のつかない縁が残る。 */
   & .line {
     display: inline-block;
     inline-size: 100%;
+    padding-inline: 10px;
+    &:first-child {
+      padding-block-start: 8px;
+    }
+    &:last-child {
+      padding-block-end: 8px;
+    }
   }
   & .line.diff.add {
     background: #dcf2dc;
