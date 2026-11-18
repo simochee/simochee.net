@@ -221,9 +221,12 @@
     margin: 0;
     padding: 8px 10px;
     overflow-x: auto;
-    font-family: var(--font-small);
-    font-size: var(--text-small);
+    font-family: var(--font-code);
+    font-size: 0.8125rem;
     line-height: 1.25rem;
+    /* body はドットをにじませないためにアンチエイリアスを切っている。輪郭で描く等幅フォントはそのままだとギザギザになるので戻す。 */
+    -webkit-font-smoothing: auto;
+    text-rendering: auto;
     /* Shiki は背景色を style 属性に書き込むため、テーマの白をテンプレートの色へ戻すには !important が要る。 */
     background: var(--color-code) !important;
     & code {
