@@ -12,25 +12,26 @@
   /* このデザインは 1px のマス目で組んである。1 単位を 1px にして、デザインの数値をそのままクラスに書けるようにしている。 */
   --spacing: 1px;
 
-  --color-accent: #3a6a99;
+  --color-accent: #b33a3a;
   --color-on-accent: #ffffff;
-  --color-page: #e6edf3;
+  --color-page: #f4e6e5;
   --color-paper: #ffffff;
-  --color-band: #dbe6f0;
-  --color-tint: #eef3f8;
-  --color-wash: #f4f7fa;
-  --color-code: #f8fafc;
-  --color-frame: #a9bccd;
-  --color-line: #c9d6e2;
-  --color-line-soft: #dde5ec;
+  --color-band: #f0dad8;
+  --color-tint: #f9eeed;
+  --color-wash: #fbf5f4;
+  --color-code: #fdf9f9;
+  --color-frame: #d4aaa6;
+  --color-line: #e7cbc8;
+  --color-line-soft: #efdedc;
   --color-photo: #cccccc;
-  --color-control: #7a8fa3;
+  --color-control: #a57d79;
   --color-ink: #333333;
   --color-ink-soft: #555555;
-  --color-ink-strong: #1f3f60;
-  --color-ink-sub: #4a5f73;
-  --color-link: #2b5a8a;
-  --color-link-hover: #c0392b;
+  --color-ink-strong: #6a1f1f;
+  --color-ink-sub: #734a47;
+  --color-link: #9b2c2c;
+  /* リンク自体が赤いので、ホバーまで赤にするとふれても色が変わったと分からない。 */
+  --color-link-hover: #c25400;
   --color-sunday: #c00000;
   --color-saturday: #0033cc;
   --color-night: #1f2a38;
@@ -49,6 +50,8 @@
   /* ドットフォントは 14px・12px の整数倍でしか崩れずに描けない。rem にしているのは、ブラウザの文字サイズ設定を無視しないため。 */
   --font-body: "Shinonome14", "ＭＳ ゴシック", "MS Gothic", "Osaka-Mono", monospace;
   --font-small: "Shinonome12", "ＭＳ ゴシック", "MS Gothic", "Osaka-Mono", monospace;
+  /* コードは英数字と記号が続くので、ドットフォントだと読みづらい。ここだけは読みやすさを優先して OS の等幅フォントを使う。 */
+  --font-code: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
   --text-body: 0.875rem;
   --text-body--line-height: 1.375rem;
   --text-small: 0.75rem;
@@ -62,17 +65,70 @@
   :root {
     color-scheme: light;
   }
-  :root[data-theme="wakakusa"] {
-    --color-accent: #5b7f3a;
+  /* 着せかえで替えるのは色みを持つトークンだけ。本文の墨色や日曜・土曜の赤青、注意書きの色は、どのテーマでも意味が変わらないように残す。 */
+  :root[data-theme="shiro"] {
+    --color-accent: #e8e8e8;
+    --color-on-accent: #333333;
+    --color-page: #f4f4f4;
+    --color-band: #fafafa;
+    --color-tint: #f7f7f7;
+    --color-wash: #fafafa;
+    --color-code: #fbfbfb;
+    --color-frame: #c4c4c4;
+    --color-line: #dcdcdc;
+    --color-line-soft: #e8e8e8;
+    --color-control: #8c8c8c;
+    --color-ink-strong: #333333;
+    --color-ink-sub: #666666;
+    --color-link: #444444;
+    --color-menu-divider: rgb(0 0 0 / 0.12);
+    --color-menu-current: rgb(0 0 0 / 0.08);
   }
   :root[data-theme="sakura"] {
-    --color-accent: #a0456b;
+    --color-accent: #bf4d78;
+    --color-page: #f6e6ed;
+    --color-band: #f3dbe5;
+    --color-tint: #fbeff4;
+    --color-wash: #fcf5f8;
+    --color-code: #fdf9fb;
+    --color-frame: #d8a9bd;
+    --color-line: #ebc9d7;
+    --color-line-soft: #f1dde6;
+    --color-control: #a87a8d;
+    --color-ink-strong: #6b2141;
+    --color-ink-sub: #77495c;
+    --color-link: #9a325c;
   }
-  :root[data-theme="sumire"] {
-    --color-accent: #6b5b95;
+  :root[data-theme="wakakusa"] {
+    --color-accent: #4f7833;
+    --color-page: #ecf2e7;
+    --color-band: #e4efdc;
+    --color-tint: #f2f8ee;
+    --color-wash: #f7faf4;
+    --color-code: #fafcf8;
+    --color-frame: #b8cbab;
+    --color-line: #d4e1ca;
+    --color-line-soft: #e3ebde;
+    --color-control: #778e66;
+    --color-ink-strong: #283f17;
+    --color-ink-sub: #48593c;
+    --color-link: #416725;
   }
-  :root[data-theme="kogecha"] {
-    --color-accent: #7a4a1e;
+  :root[data-theme="mizuiro"] {
+    --color-accent: #3a6a99;
+    --color-page: #e6edf3;
+    --color-band: #dbe6f0;
+    --color-tint: #eef3f8;
+    --color-wash: #f4f7fa;
+    --color-code: #f8fafc;
+    --color-frame: #a9bccd;
+    --color-line: #c9d6e2;
+    --color-line-soft: #dde5ec;
+    --color-control: #7a8fa3;
+    --color-ink-strong: #1f3f60;
+    --color-ink-sub: #4a5f73;
+    --color-link: #2b5a8a;
+    --color-link-hover: #c0392b;
   }
   html {
     background: var(--color-page);
@@ -92,6 +148,9 @@
     font-synthesis: none;
     font-kerning: none;
     text-rendering: optimizeSpeed;
+    /* 東雲フォントは下線位置を持たず、漢字やかなが字面の最下段まで埋まっているので、既定の下線は字の底に重なる。
+       px で下げるとブラウザの文字サイズを上げたときにまた重なるため、字面の下端を基準にする。 */
+    text-underline-position: under;
   }
   a {
     color: var(--color-link);
@@ -104,9 +163,10 @@
     outline: 2px solid var(--color-link-hover);
     outline-offset: 1px;
   }
-  /* 2008 年のページは一瞬で切り替わった。枠は動かさず、本文だけを短く切り替える。 */
+  /* 2008 年のページは一瞬で切り替わった。枠は動かさず、本文だけを短く切り替える。
+     位置の補間を残すと、遷移でスクロール位置が変わったとき枠ごと縦に滑って見える。 */
   ::view-transition-group(*) {
-    animation-duration: 160ms;
+    animation: none;
   }
   ::view-transition-old(main),
   ::view-transition-new(main) {

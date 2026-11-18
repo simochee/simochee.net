@@ -1,7 +1,9 @@
 export const themes = [
+  { id: "shiro", name: "しろ", color: "#ffffff" },
+  { id: "aka", name: "あか", color: "#b33a3a" },
+  { id: "sakura", name: "さくら", color: "#bf4d78" },
+  { id: "wakakusa", name: "わかくさ", color: "#4f7833" },
   { id: "mizuiro", name: "みずいろ", color: "#3a6a99" },
-  { id: "wakakusa", name: "わかくさ", color: "#5b7f3a" },
-  { id: "sakura", name: "さくら", color: "#a0456b" },
-  { id: "sumire", name: "すみれ", color: "#6b5b95" },
-  { id: "kogecha", name: "こげちゃ", color: "#7a4a1e" },
 ] as const;
+
+export const defaultTheme = themes.find((theme) => theme.id === "aka")!;

@@ -16,6 +16,7 @@ import externalLinks from "rehype-external-links";
 import autolinkHeadings from "rehype-autolink-headings";
 import { rehypeAlerts } from "./src/lib/rehype-alerts";
 import { rehypeCodeFrame } from "./src/lib/rehype-code-frame";
+import { hasNoLink } from "./src/lib/heading-links";
 const contentDir = process.env.SIMOCHEE_CONTENT_DIR;
 export default defineConfig({
   site: process.env.SIMOCHEE_SITE_URL || "https://simochee.net",
@@ -49,11 +50,7 @@ export default defineConfig({
         rehypeHeadingIds,
         [
           autolinkHeadings,
-          {
-            behavior: "append",
-            properties: { className: ["heading-anchor"], ariaLabel: "この見出しへのリンク" },
-            content: { type: "text", value: "#" },
-          },
+          { behavior: "wrap", properties: { className: ["heading-anchor"] }, test: hasNoLink },
         ],
       ],
     }),

@@ -1,5 +1,4 @@
 ---
-import Button from "../ui/Button.astro";
 import Plugin from "../layout/Plugin.astro";
 import { themes } from "../../lib/themes";
 ---
@@ -11,29 +10,22 @@ import { themes } from "../../lib/themes";
         {
           themes.map((theme) => (
             <button type="button" class="h-20 w-30 cursor-pointer border border-frame bg-paper p-2 aria-pressed:border-2 aria-pressed:border-ink-strong aria-pressed:p-1" data-theme-choice={theme.id} aria-pressed="false" aria-label={theme.name} title={theme.name}>
-              <span class="block h-full" style={`background: ${theme.color}`} />
+              <span class="block h-full border border-line" style={`background: ${theme.color}`} />
             </button>
           ))
         }
       </div>
-      <p class="type-small mt-4">
-        いまの色：<span data-theme-name></span>
-        <span data-theme-reset hidden>
-          | <Button variant="link" data-theme-choice="">もとにもどす</Button>
-        </span>
-      </p>
     </div>
   </Plugin>
 </theme-picker>
 
 <script>
-  import { themes } from "../../lib/themes";
+  import { defaultTheme, themes } from "../../lib/themes";
 
   const key = "theme";
   const save = (theme: string) => {
     try {
-      if (theme) localStorage.setItem(key, theme);
-      else localStorage.removeItem(key);
+      localStorage.setItem(key, theme);
     } catch {
       // 保存できない環境（プライベートブラウズなど）でも、このページの見た目は変わる。
     }
@@ -49,19 +41,15 @@ import { themes } from "../../lib/themes";
       }
       handleEvent(event: Event) {
         const choice = (event.target as Element).closest("button")?.dataset.themeChoice;
-        if (choice === undefined) return;
-        if (choice) document.documentElement.dataset.theme = choice;
-        else delete document.documentElement.dataset.theme;
+        if (!choice) return;
+        document.documentElement.dataset.theme = choice;
         save(choice);
         this.reflect();
       }
       reflect() {
-        const chosen = document.documentElement.dataset.theme;
-        const theme = themes.find((item) => item.id === chosen) ?? themes[0];
+        const theme = themes.find((item) => item.id === document.documentElement.dataset.theme) ?? defaultTheme;
         for (const button of this.querySelectorAll<HTMLElement>("[aria-pressed]"))
           button.setAttribute("aria-pressed", String(button.dataset.themeChoice === theme.id));
-        this.querySelector("[data-theme-name]")!.textContent = theme.name;
-        this.querySelector<HTMLElement>("[data-theme-reset]")!.hidden = !chosen;
       }
     },
   );

@@ -1,53 +1,139 @@
 ---
 import Plugin from "../layout/Plugin.astro";
-import { calendarWeeks, groupByMonth } from "../../lib/archive";
-import { posts } from "../../lib/posts";
+import Button from "../ui/Button.astro";
 
-const months = groupByMonth(await posts());
-const [current, previous] = months;
 const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
-const weekend = "data-[weekday=0]:text-sunday data-[weekday=6]:text-saturday";
 ---
 
-{
-  current && (
-    <Plugin title="カレンダー">
-      <div class="type-small px-2 py-8">
-        <div class="mb-4 flex justify-between">
-          <span>{previous && <a href={previous.path}>&laquo; {Number(previous.month)}月</a>}</span>
-          <b aria-hidden="true">{current.label}</b>
-          <span />
-        </div>
-        <table class="w-full table-fixed border-collapse text-center">
-          <caption class="sr-only">{current.label}</caption>
-          <thead>
-            <tr>
-              {weekdays.map((name, weekday) => (
-                <th class:list={["border-b border-line font-normal", weekend]} scope="col" data-weekday={weekday}>
+<post-calendar hidden>
+  <Plugin title="カレンダー">
+    <div class="type-small px-2 py-8">
+      <div class="mb-4 grid grid-cols-[1fr_auto_1fr] items-baseline gap-4">
+        <Button variant="link" class="justify-self-start disabled:invisible" data-calendar-step="-1" />
+        <b id="calendar-label"></b>
+        <Button variant="link" class="justify-self-end disabled:invisible" data-calendar-step="1" />
+      </div>
+      <table class="w-full table-fixed border-collapse text-center" aria-labelledby="calendar-label">
+        <thead>
+          <tr>
+            {
+              weekdays.map((name, weekday) => (
+                <th class="border-b border-line font-normal data-[weekday=0]:text-sunday data-[weekday=6]:text-saturday" scope="col" data-weekday={weekday}>
                   {name}
                 </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {calendarWeeks(current).map((week) => (
-              <tr>
-                {week.map((cell) => (
-                  <td class={weekend} data-weekday={cell?.weekday}>
-                    {cell?.posts[0] ? (
-                      <a class="font-bold" href={`/posts/${cell.posts[0].id}/`} aria-label={`${cell.day}日の記事「${cell.posts[0].data.title}」`}>
-                        {cell.day}
-                      </a>
-                    ) : (
-                      cell?.day
-                    )}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </Plugin>
-  )
-}
+              ))
+            }
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </Plugin>
+</post-calendar>
+
+<script>
+  import {
+    addMonths,
+    calendarWeeks,
+    groupByMonth,
+    type CalendarPost,
+    type YearMonth,
+  } from "../../lib/archive";
+  import { dayKey } from "../../lib/dates";
+
+  interface Post {
+    id: string;
+    data: { title: string; publishedAt: Date };
+  }
+  const cellClass =
+    "data-[weekday=0]:text-sunday data-[weekday=6]:text-saturday aria-[current=date]:bg-mark";
+  const keyOf = ({ year, month }: YearMonth) => `${year}/${month}`;
+
+  // 静的に書き出したページなので、ビルド時に描くと次のデプロイまで同じ月と同じ「今日」が出続ける。
+  // 記事の一覧は全ページの HTML に埋め込まず JSON で取りに行く。サイドバーは view transition で残るので、取るのは最初の 1 回だけ。
+  customElements.define(
+    "post-calendar",
+    class extends HTMLElement {
+      #posts: Post[] = [];
+      #today = "";
+      #current!: YearMonth;
+      #shown!: YearMonth;
+
+      connectedCallback() {
+        this.#today = dayKey(new Date());
+        const [year, month] = this.#today.split("/") as [string, string];
+        this.#current = this.#shown = { year, month };
+        this.addEventListener("click", this);
+        this.render();
+        this.hidden = false;
+        void this.load();
+      }
+
+      async load() {
+        try {
+          const response = await fetch("/calendar.json");
+          if (!response.ok) return;
+          const posts = (await response.json()) as CalendarPost[];
+          this.#posts = posts.map(({ id, title, publishedAt }) => ({
+            id,
+            data: { title, publishedAt: new Date(publishedAt) },
+          }));
+          this.render();
+        } catch {
+          // 記事が読めなくても、日付だけのカレンダーとしては使える。
+        }
+      }
+
+      handleEvent(event: Event) {
+        const step = (event.target as Element).closest<HTMLElement>("[data-calendar-step]");
+        if (!step) return;
+        this.#shown = addMonths(this.#shown, Number(step.dataset.calendarStep));
+        this.render();
+      }
+
+      render() {
+        const months = groupByMonth(this.#posts);
+        const shown = months.find((month) => keyOf(month) === keyOf(this.#shown));
+        const reachable = [this.#current, ...months].map(keyOf).sort();
+        for (const button of this.querySelectorAll<HTMLButtonElement>("[data-calendar-step]")) {
+          const step = Number(button.dataset.calendarStep);
+          const target = addMonths(this.#shown, step);
+          button.disabled =
+            step < 0 ? keyOf(target) < reachable[0]! : keyOf(target) > reachable.at(-1)!;
+          button.textContent =
+            step < 0 ? `« ${Number(target.month)}月` : `${Number(target.month)}月 »`;
+        }
+
+        this.querySelector("#calendar-label")!.textContent =
+          `${this.#shown.year}年${this.#shown.month}月`;
+
+        const weeks = calendarWeeks({ ...this.#shown, posts: shown?.posts ?? [] });
+        this.querySelector("tbody")!.replaceChildren(
+          ...weeks.map((week) => {
+            const row = document.createElement("tr");
+            row.append(
+              ...week.map((cell) => {
+                const td = document.createElement("td");
+                td.className = cellClass;
+                if (!cell) return td;
+                td.dataset.weekday = String(cell.weekday);
+                if (cell.date === this.#today) td.setAttribute("aria-current", "date");
+                const [post] = cell.posts;
+                if (post) {
+                  const link = document.createElement("a");
+                  link.className = "font-bold";
+                  link.href = `/posts/${post.id}/`;
+                  link.ariaLabel = `${cell.day}日の記事「${post.data.title}」`;
+                  link.textContent = String(cell.day);
+                  td.append(link);
+                } else td.append(String(cell.day));
+                return td;
+              }),
+            );
+            return row;
+          }),
+        );
+      }
+    },
+  );
+</script>
