@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./fonts.css";
+@import "./prose.css" layer(components);
 
 @theme {
   /* 既定のパレットや文字サイズを残すと、テンプレートにない色や大きさが気づかないうちに混ざる。 */

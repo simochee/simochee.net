@@ -1,0 +1,295 @@
+.prose {
+  & > * + * {
+    margin-block-start: 1em;
+  }
+  & :is(h2, h3, h4, h5, h6) {
+    font-weight: bold;
+  }
+  & ul {
+    list-style: disc;
+  }
+  & ol {
+    list-style: decimal;
+  }
+  /* Preflight は code と kbd を等幅フォントの一覧へ切り替える。ドットフォントは全角・半角がそろっているので、本文と同じ書体のままにする。 */
+  & :is(code, kbd, samp) {
+    font-family: inherit;
+    font-size: inherit;
+  }
+  & img {
+    display: block;
+    max-inline-size: 100%;
+    block-size: auto;
+    border: 1px solid var(--color-photo);
+  }
+  & h2 {
+    margin-block: 1.6em 0.5em;
+    padding: 2px 4px;
+    color: var(--color-ink-strong);
+    border-block-end: 1px dashed var(--color-frame);
+    &::before {
+      content: "◆ " / "";
+    }
+  }
+  & h3 {
+    margin-block: 1.4em 0.4em;
+    color: var(--color-ink-strong);
+    &::before {
+      content: "● " / "";
+    }
+  }
+  & :is(h4, h5, h6) {
+    margin-block: 1.2em 0.4em;
+    color: var(--color-ink-sub);
+    &::before {
+      content: "・" / "";
+    }
+  }
+  & :is(h2, h3, h4, h5, h6) {
+    scroll-margin-block-start: 8px;
+    & + * {
+      margin-block-start: 0;
+    }
+  }
+  & .heading-anchor {
+    margin-inline-start: 6px;
+    font-family: var(--font-small);
+    font-size: var(--text-small);
+    font-weight: normal;
+    text-decoration: none;
+    /* 見出しごとに「#」が並ぶと 2008 年の見た目から外れるので普段は隠す。キーボードとタッチでは hover が起きないため、そちらでは常に見せる。 */
+    @media (hover: hover) {
+      opacity: 0;
+      :is(h2, h3, h4, h5, h6):hover > &,
+      &:focus-visible {
+        opacity: 1;
+      }
+    }
+  }
+  & :is(ul, ol) {
+    padding-inline-start: 1.6em;
+    & :is(ul, ol) {
+      margin-block-start: 0;
+      padding-inline-start: 1.4em;
+    }
+    & ul {
+      list-style-type: circle;
+    }
+  }
+  & .contains-task-list {
+    padding-inline-start: 0.2em;
+    list-style: none;
+  }
+  & del {
+    color: #5e5e5e;
+  }
+  & :not(pre) > code {
+    padding: 0 3px;
+    background: var(--color-wash);
+    border: 1px solid var(--color-line-soft);
+  }
+  & kbd {
+    padding: 0 4px;
+    font: inherit;
+    background: var(--color-wash);
+    border: 1px solid var(--color-frame);
+    border-block-end-width: 2px;
+  }
+  & blockquote {
+    padding: 6px 12px;
+    background: var(--color-wash);
+    border: 1px dotted var(--color-frame);
+    & > * + * {
+      margin-block-start: 0.5em;
+    }
+  }
+  & hr {
+    margin-block: 1.2em;
+    border: 0;
+    border-block-start: 1px dashed var(--color-frame);
+  }
+  & figcaption {
+    margin-block-start: 2px;
+    font-family: var(--font-small);
+    font-size: var(--text-small);
+    line-height: var(--text-small--line-height);
+    color: var(--color-ink-soft);
+  }
+  & table {
+    display: block;
+    inline-size: fit-content;
+    max-inline-size: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    font-family: var(--font-small);
+    font-size: var(--text-small);
+    line-height: var(--text-small--line-height);
+  }
+  & :is(th, td) {
+    padding: 3px 12px;
+    border: 1px solid var(--color-line);
+  }
+  & th {
+    background: var(--color-tint);
+  }
+  & tbody tr:nth-child(even) {
+    background: var(--color-code);
+  }
+  & details {
+    padding: 4px 10px;
+    background: var(--color-wash);
+    border: 1px solid var(--color-line);
+    & > summary {
+      font-weight: bold;
+      color: var(--color-ink-strong);
+      cursor: pointer;
+      list-style: none;
+      &::-webkit-details-marker {
+        display: none;
+      }
+      &::before {
+        content: "＋ " / "";
+      }
+    }
+    &[open] > summary::before {
+      content: "－ " / "";
+    }
+    & > :not(summary) {
+      margin-block-start: 4px;
+    }
+  }
+  & sup {
+    font-family: var(--font-small);
+    font-size: var(--text-small);
+    line-height: 0;
+    vertical-align: baseline;
+    & a::before {
+      content: "[※";
+    }
+    & a::after {
+      content: "]";
+    }
+  }
+  & .footnotes {
+    margin-block-start: 1.2em;
+    padding-block-start: 1.2em;
+    font-family: var(--font-small);
+    font-size: var(--text-small);
+    line-height: var(--text-small--line-height);
+    color: var(--color-ink-soft);
+    border-block-start: 1px dashed var(--color-frame);
+    & ol {
+      padding-inline-start: 2.4em;
+    }
+    & li::marker {
+      content: "※" counter(list-item) " ";
+    }
+  }
+  & .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+.code-block {
+  border: 1px solid var(--color-line);
+  & .code-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 1px 4px 1px 8px;
+    font-family: var(--font-small);
+    font-size: var(--text-small);
+    line-height: var(--text-small--line-height);
+    color: var(--color-ink-soft);
+    background: var(--color-tint);
+    border-block-end: 1px solid var(--color-line);
+  }
+  & pre {
+    margin: 0;
+    padding: 8px 10px;
+    overflow-x: auto;
+    font-family: var(--font-small);
+    font-size: var(--text-small);
+    line-height: 1.25rem;
+    /* Shiki は背景色を style 属性に書き込むため、テーマの白をテンプレートの色へ戻すには !important が要る。 */
+    background: var(--color-code) !important;
+    & code {
+      display: block;
+      inline-size: fit-content;
+      min-inline-size: 100%;
+      font: inherit;
+    }
+  }
+  & .line {
+    display: inline-block;
+    inline-size: 100%;
+  }
+  & .line.diff.add {
+    background: #dcf2dc;
+  }
+  & .line.diff.remove {
+    background: #fbe0e0;
+  }
+  & .line.highlighted {
+    background: #fff4c2;
+  }
+  & .highlighted-word {
+    background: #fff4c2;
+    outline: 1px solid #e3c77a;
+  }
+}
+
+.markdown-alert {
+  --alert-ink: #1f4f86;
+  padding: 4px 10px;
+  background: #eef4fb;
+  border: 1px solid #9fb8d6;
+  /* プラグインが出す題名は英語（NOTE など）とアイコンで、2008 年風の【メモ】表記にならない。題名を消し、本文の頭へ日本語の題名を足している。 */
+  & > .markdown-alert-title {
+    display: none;
+  }
+  & > .markdown-alert-title + *::before {
+    content: var(--alert-label);
+    font-weight: bold;
+    color: var(--alert-ink);
+  }
+  & > * + * {
+    margin-block-start: 0.5em;
+  }
+  & > .markdown-alert-title + * {
+    margin-block-start: 0;
+  }
+}
+.markdown-alert-note {
+  --alert-label: "【メモ】 ";
+}
+.markdown-alert-tip {
+  --alert-label: "【ヒント】 ";
+  --alert-ink: #2b6a2b;
+  background: #eef7ee;
+  border-color: #a6cfa6;
+}
+.markdown-alert-important {
+  --alert-label: "【重要】 ";
+  --alert-ink: #5b3b8c;
+  background: #f4effa;
+  border-color: #c5b3e0;
+}
+.markdown-alert-warning {
+  --alert-label: "【注意】 ";
+  --alert-ink: #7a5600;
+  background: #fff8e6;
+  border-color: #e3c77a;
+}
+.markdown-alert-caution {
+  --alert-label: "【警告】 ";
+  --alert-ink: #9b2c2c;
+  background: #fdeeee;
+  border-color: #e2a8a8;
+}
