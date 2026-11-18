@@ -1,8 +1,10 @@
 ---
-import type { Post } from "../lib/posts";
-import { formatDay } from "../lib/dates";
-import { tagPath } from "../lib/tags";
-import { categories } from "../site";
+import Icon from "../ui/Icon.astro";
+import Button from "../ui/Button.astro";
+import type { Post } from "../../lib/posts";
+import { formatDay } from "../../lib/dates";
+import { tagPath } from "../../lib/tags";
+import { categories } from "../../site";
 
 interface Props {
   post: Post;
@@ -12,20 +14,20 @@ const { id, data } = Astro.props.post;
 
 <footer class="type-small border-t border-line-soft pt-5 text-right text-ink-soft">
   <p>
-    <span class="ico ico-folder" aria-hidden="true"></span> カテゴリ：<a href={`/${data.type}/`}>{categories[data.type]}</a>
+    <Icon name="folder" /> カテゴリ：<a href={`/${data.type}/`}>{categories[data.type]}</a>
     {
       data.updatedAt && (
         <>
           {" | "}
-          <span class="ico ico-clock" aria-hidden="true" /> 更新：
+          <Icon name="clock" /> 更新：
           <time datetime={data.updatedAt.toISOString()}>{formatDay(data.updatedAt)}</time>
         </>
       )
     }
     <share-button hidden data-title={data.title} data-url={`/posts/${id}/`}>
       {" | "}
-      <span class="ico ico-share" aria-hidden="true"></span>
-      <button type="button" class="cursor-pointer text-link underline hover:text-link-hover" aria-label={`「${data.title}」を共有する`}>共有する</button>
+      <Icon name="share" />
+      <Button variant="link" aria-label={`「${data.title}」を共有する`}>共有する</Button>
     </share-button>
   </p>
   {

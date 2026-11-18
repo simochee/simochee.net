@@ -1,7 +1,8 @@
 ---
-import type { Post } from "../lib/posts";
-import { formatDay } from "../lib/dates";
-import { categories } from "../site";
+import Icon from "../ui/Icon.astro";
+import type { Post } from "../../lib/posts";
+import { formatDay } from "../../lib/dates";
+import { categories } from "../../site";
 
 interface Props {
   post: Post;
@@ -20,6 +21,6 @@ const href = `/posts/${post.id}/`;
     {post.data.description}… <a href={href} aria-label={`「${post.data.title}」の続きを読む`}>続きを読む &raquo;</a>
   </p>
   <p class="type-small text-right text-ink-soft">
-    <span class="ico ico-folder" aria-hidden="true"></span> カテゴリ：<a href={`/${post.data.type}/`}>{categories[post.data.type]}</a>
+    <Icon name="folder" /> カテゴリ：<a href={`/${post.data.type}/`}>{categories[post.data.type]}</a>
   </p>
 </article>

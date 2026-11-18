@@ -1,0 +1,17 @@
+---
+interface Props {
+  name: string;
+  /** 意味を持つアイコンにだけ渡す。省くと飾りとして読み上げから外れる。 */
+  label?: string;
+  class?: string;
+}
+const { name, label, class: className } = Astro.props;
+---
+
+{
+  label ? (
+    <span class:list={["ico", `ico-${name}`, className]} role="img" aria-label={label} title={label} />
+  ) : (
+    <span class:list={["ico", `ico-${name}`, className]} aria-hidden="true" />
+  )
+}

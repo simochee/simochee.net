@@ -1,0 +1,131 @@
+/* Icon コンポーネントは名前からクラスを組み立てる。Tailwind はソースに書かれた文字列しか拾えないので、ユーティリティにせず全部を書き出している。 */
+.ico {
+  display: inline-block;
+  inline-size: 16px;
+  block-size: 16px;
+  flex: none;
+  vertical-align: -3px;
+  background-color: currentColor;
+  mask: var(--ico) center / 16px 16px no-repeat;
+  @media (forced-colors: active) {
+    background-color: CanvasText;
+  }
+}
+.ico-archive {
+  --ico: url("../assets/icons/archive.svg");
+}
+.ico-bell {
+  --ico: url("../assets/icons/bell.svg");
+}
+.ico-board {
+  --ico: url("../assets/icons/board.svg");
+}
+.ico-book {
+  --ico: url("../assets/icons/book.svg");
+}
+.ico-bsky {
+  --ico: url("../assets/icons/bsky.svg");
+  background-color: #1185fe;
+}
+.ico-calendar {
+  --ico: url("../assets/icons/calendar.svg");
+}
+.ico-clap {
+  --ico: url("../assets/icons/clap.svg");
+}
+.ico-clip {
+  --ico: url("../assets/icons/clip.svg");
+}
+.ico-clock {
+  --ico: url("../assets/icons/clock.svg");
+}
+.ico-coffee {
+  --ico: url("../assets/icons/coffee.svg");
+}
+.ico-comment {
+  --ico: url("../assets/icons/comment.svg");
+}
+.ico-edit {
+  --ico: url("../assets/icons/edit.svg");
+}
+.ico-eye {
+  --ico: url("../assets/icons/eye.svg");
+}
+.ico-fire {
+  --ico: url("../assets/icons/fire.svg");
+}
+.ico-flag {
+  --ico: url("../assets/icons/flag.svg");
+}
+.ico-folder {
+  --ico: url("../assets/icons/folder.svg");
+}
+.ico-home {
+  --ico: url("../assets/icons/home.svg");
+}
+.ico-image {
+  --ico: url("../assets/icons/image.svg");
+}
+.ico-info {
+  --ico: url("../assets/icons/info.svg");
+}
+.ico-link {
+  --ico: url("../assets/icons/link.svg");
+}
+.ico-list {
+  --ico: url("../assets/icons/list.svg");
+}
+.ico-mail {
+  --ico: url("../assets/icons/mail.svg");
+}
+.ico-mastodon {
+  --ico: url("../assets/icons/mastodon.svg");
+  background-color: #6364ff;
+}
+.ico-news {
+  --ico: url("../assets/icons/news.svg");
+}
+.ico-note {
+  --ico: url("../assets/icons/note.svg");
+}
+.ico-phone {
+  --ico: url("../assets/icons/phone.svg");
+}
+.ico-poll {
+  --ico: url("../assets/icons/poll.svg");
+}
+.ico-profile {
+  --ico: url("../assets/icons/profile.svg");
+}
+.ico-ring {
+  --ico: url("../assets/icons/ring.svg");
+}
+.ico-rss {
+  --ico: url("../assets/icons/rss.svg");
+  background-color: #e06a00;
+}
+.ico-search {
+  --ico: url("../assets/icons/search.svg");
+}
+.ico-share {
+  --ico: url("../assets/icons/share.svg");
+}
+.ico-sign {
+  --ico: url("../assets/icons/sign.svg");
+}
+.ico-snow {
+  --ico: url("../assets/icons/snow.svg");
+}
+.ico-trophy {
+  --ico: url("../assets/icons/trophy.svg");
+}
+.ico-walk {
+  --ico: url("../assets/icons/walk.svg");
+}
+.ico-weather {
+  --ico: url("../assets/icons/weather.svg");
+}
+.ico-x {
+  --ico: url("../assets/icons/x.svg");
+  background-color: #000000;
+}

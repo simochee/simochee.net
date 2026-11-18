@@ -52,6 +52,8 @@ export default defineConfig({
   vite: {
     configFile: false,
     plugins: [tailwindcss()],
+    // 既定ではドット絵アイコンのような小さなファイルが data URI として CSS へ埋め込まれ、使わないアイコンまで毎回読み込むことになる。
+    build: { assetsInlineLimit: 0 },
     // 既定の許可範囲は site ルートのみで、外部の記事ディレクトリの画像が dev で 403 になる。
     server: { fs: { allow: [process.cwd(), ...(contentDir ? [resolve(contentDir)] : [])] } },
   } as Record<string, unknown>,

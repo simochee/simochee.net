@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "./fonts.css";
 @import "./prose.css" layer(components);
+@import "./icons.css" layer(components);
 
 @theme {
   /* 既定のパレットや文字サイズを残すと、テンプレートにない色や大きさが気づかないうちに混ざる。 */
@@ -32,8 +33,16 @@
   --color-link-hover: #c0392b;
   --color-sunday: #c00000;
   --color-saturday: #0033cc;
-  --color-feed: #b35400;
   --color-night: #1f2a38;
+  --color-blank: #eeeeee;
+  --color-memo: #fffbe6;
+  --color-memo-line: #e0cf7a;
+  --color-memo-ink: #6b5200;
+  --color-mark: #fff0a8;
+  --color-ok: #2b6a2b;
+  --color-danger: #9b2c2c;
+  --color-lcd: #111111;
+  --color-lcd-ink: #7dff7a;
   --color-menu-divider: rgb(255 255 255 / 0.35);
   --color-menu-current: rgb(0 0 0 / 0.22);
 
@@ -127,29 +136,4 @@
       text-decoration: underline;
     }
   }
-}
-@utility ico {
-  display: inline-block;
-  inline-size: 16px;
-  block-size: 16px;
-  flex: none;
-  vertical-align: -3px;
-  background-color: currentColor;
-  mask: var(--ico) center / 16px 16px no-repeat;
-  @media (forced-colors: active) {
-    background-color: CanvasText;
-  }
-}
-@utility ico-folder {
-  --ico: url("../assets/icons/folder.svg");
-}
-@utility ico-share {
-  --ico: url("../assets/icons/share.svg");
-}
-@utility ico-clock {
-  --ico: url("../assets/icons/clock.svg");
-}
-@utility ico-rss {
-  --ico: url("../assets/icons/rss.svg");
-  background-color: var(--color-feed);
 }
