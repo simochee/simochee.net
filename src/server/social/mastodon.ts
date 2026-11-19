@@ -1,4 +1,4 @@
-import { announcement, mastodonText, type MastodonAccount } from "../../lib/social";
+import { announcement, httpUrl, mastodonText, type MastodonAccount } from "../../lib/social";
 import type { Reply } from "../comments";
 import { ok, type SocialService } from "./service";
 
@@ -45,7 +45,7 @@ export function mastodon(account: MastodonAccount, token: string): SocialService
           source: status.uri,
           name: status.account.display_name || status.account.acct,
           body: mastodonText(status.content),
-          url: status.url ?? status.uri,
+          url: httpUrl(status.url) ?? httpUrl(status.uri) ?? "",
           at: new Date(status.created_at).toISOString(),
         }));
     },

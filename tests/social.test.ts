@@ -2,6 +2,7 @@ import { expect, test } from "vitest";
 import {
   announcement,
   blueskyPostUrl,
+  httpUrl,
   linkFacets,
   mastodonText,
   parseMastodonAccount,
@@ -58,4 +59,15 @@ test("Mastodon の返信は、先頭の宛先を落としたふつうの文に�
 test("切り詰めは、絵文字や合成した文字を途中で割らない", () => {
   expect(truncate("👨‍👩‍👧あいう", 3)).toBe("👨‍👩‍👧あ…");
   expect(truncate("あいう", 3)).toBe("あいう");
+});
+
+test("文字にならない番号の文字参照は、例外にせず置き換え文字にする", () => {
+  expect(mastodonText("<p>&#99999999; と &#x0; と &#65;</p>")).toBe("\ufffd と \ufffd と A");
+});
+
+test("外から来た URL は、http と https のものだけをリンクにする", () => {
+  expect(httpUrl("https://m.example/@a/1")).toBe("https://m.example/@a/1");
+  expect(httpUrl("javascript:alert(1)")).toBeUndefined();
+  expect(httpUrl("not a url")).toBeUndefined();
+  expect(httpUrl(null)).toBeUndefined();
 });

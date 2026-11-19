@@ -8,11 +8,16 @@ export const announceWithin = 24 * hour;
 /** 公開からこの日数のあいだ、返信を取り込みつづける。 */
 export const watchWithin = 30 * 24 * hour;
 
+/**
+ * 1 回の定期実行で返信を見にいく投稿の数。Workers の無料枠は 1 回の実行で外へ出せるリクエストが 50 までなので、
+ * 記事が増えても収まるよう、見にいった時刻の古いものから順に回す。
+ */
+export const watchPerRun = 8;
+
 const age = (post: PublishedPost, now: Date) => now.getTime() - Date.parse(post.publishedAt);
 
 export const isFresh = (post: PublishedPost, now: Date) =>
   age(post, now) >= 0 && age(post, now) <= announceWithin;
-export const isWatched = (post: PublishedPost, now: Date) => age(post, now) <= watchWithin;
 
 /**
  * 記事を知らせる権利を取る。取れたときだけ投稿する。
@@ -48,12 +53,24 @@ export async function release(db: D1Database, slug: string, via: Service) {
     .run();
 }
 
-export async function announced(db: D1Database, via: Service) {
+/** 返信を見にいく投稿。知らせてから 30 日以内のものを、前に見にいった時刻の古い順に返す。 */
+export async function watchList(db: D1Database, via: Service, now = new Date()) {
   const { results } = await db
-    .prepare("SELECT slug, remote_id FROM syndications WHERE service = ? AND remote_id != ''")
-    .bind(via)
+    .prepare(
+      `SELECT slug, remote_id FROM syndications
+       WHERE service = ? AND remote_id != '' AND created_at >= ?
+       ORDER BY checked_at, created_at DESC LIMIT ?`,
+    )
+    .bind(via, new Date(now.getTime() - watchWithin).toISOString(), watchPerRun)
     .all<{ slug: string; remote_id: string }>();
   return results.map((row) => ({ slug: row.slug, remoteId: row.remote_id }));
+}
+
+export async function markChecked(db: D1Database, slug: string, via: Service, now = new Date()) {
+  await db
+    .prepare("UPDATE syndications SET checked_at = ? WHERE slug = ? AND service = ?")
+    .bind(now.toISOString(), slug, via)
+    .run();
 }
 
 export async function announcedSlugs(db: D1Database, via: Service) {

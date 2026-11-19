@@ -13,7 +13,8 @@ export function visitorOf(cookies: AstroCookies) {
   cookies.set(name, id, {
     path: "/api/",
     httpOnly: true,
-    secure: true,
+    // dev を手元の別の端末から http で開いても cookie が保存されるよう、Secure は本番だけにする。
+    secure: !import.meta.env.DEV,
     sameSite: "lax",
     maxAge: 60 * 60 * 24 * 400,
   });

@@ -55,9 +55,11 @@ const entities: Record<string, string> = {
 };
 function decodeEntities(text: string) {
   return text.replace(/&(#x[0-9a-f]+|#[0-9]+|[a-z]+);/gi, (whole, entity: string) => {
-    if (entity.startsWith("#x") || entity.startsWith("#X"))
-      return String.fromCodePoint(parseInt(entity.slice(2), 16));
-    if (entity.startsWith("#")) return String.fromCodePoint(Number(entity.slice(1)));
+    if (entity.startsWith("#")) {
+      const code = /^#x/i.test(entity) ? parseInt(entity.slice(2), 16) : Number(entity.slice(1));
+      // 文字にならない番号は、例外にせず置き換え文字にする。返信 1 件のせいで取り込み全体を止めないため。
+      return code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : "\ufffd";
+    }
     return entities[entity.toLowerCase()] ?? whole;
   });
 }
@@ -74,4 +76,15 @@ export function mastodonText(html: string) {
       .replace(/<[^>]*>/g, ""),
   );
   return text.replace(/^(?:\s*@[A-Za-z0-9_]+(?:@[A-Za-z0-9.-]+)?)+\s*/, "").trim();
+}
+
+/** 外から来た URL のうち、リンクにしてよい http と https だけを通す。 */
+export function httpUrl(value: string | null | undefined) {
+  if (!value) return undefined;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" || url.protocol === "http:" ? url.href : undefined;
+  } catch {
+    return undefined;
+  }
 }

@@ -108,7 +108,7 @@ raw URL（https://raw.githubusercontent.com/simochee/simochee.net/main/schema/fr
 - 公開されていない記事（下書き、または記事のない slug）のコメントは、件数にも一覧にも RSS にも出ません。
 - 「非公開コメント」にチェックしたコメントは、管理画面でだけ読めます。
 - パスワードを入れて書いたコメントは、同じパスワードで本人が編集・削除できます。
-- 管理人の名前（`src/site.ts` の `author.name`）では、管理画面でログインしているときしか書けません。
+- 管理人の名前（`src/site.ts` の `author.name` と `simochee`。全角半角やカタカナなど書き方を変えたものも含む）では、管理画面でログインしているときしか書けません。
 - 記事を Bluesky・Mastodon に知らせた投稿への返信も、コメントとして取り込みます（後述）。
 
 集計の SQL は `src/server/comments.ts` にあり、`tests/comments.test.ts` が Node の SQLite で同じ SQL を確かめます。
@@ -227,12 +227,14 @@ export const GET: APIRoute = () => Response.json({ ok: true });
 
 `/admin/` は管理人用のページです（どこからもリンクせず、検索とサイトマップから外しています）。
 `ADMIN_PASSWORD` でログインすると、非公開を含むコメントと掲示板の書き込みを読み、削除し、掲示板に返信できます。
+ログインは 30 日つづきます（`admin_sessions` 表）。全員をログアウトさせるときは、この表を空にします。
 Bluesky・Mastodon から取り込んだ返信は、削除すると非公開になります（消しても次の同期で戻ってくるため）。
 
 ### Bluesky・Mastodon
 
 - 公開から 1 日以内の記事を「ブログを書きました：題名」と URL で知らせます。初めて動かしたときに過去の記事をまとめて流さないためです。
-- 知らせた投稿への返信は、公開から 30 日のあいだ取り込みます。向こうで消された返信はこちらからも消えます。
+- 知らせた投稿への返信は、知らせてから 30 日のあいだ取り込みます。1 回の定期実行で見にいくのはサービスごとに 8 件までで、前に見にいった時刻の古いものから順に回します（無料枠の外向きリクエストの上限に収めるため）。
+- 向こうで消された返信はこちらからも消えます。ただし管理人が非公開にした返信は残します。
 - Bluesky は `BLUESKY_APP_PASSWORD`、Mastodon は `SIMOCHEE_MASTODON_ACCOUNT` と `MASTODON_ACCESS_TOKEN` があるときだけ動きます。
 - Bluesky はアプリパスワード（設定 → プライバシーとセキュリティ → アプリパスワード）を使います。Bluesky のサーバー（bsky.social）にあるアカウントを前提にしています。
 - Mastodon のアクセストークンは、そのサーバーの「設定 → 開発 → 新規アプリ」で `read:statuses` と `write:statuses` を付けて作ります。
@@ -254,12 +256,12 @@ pnpm exec cf deploy --dry-run   # アップロードせずにビルドと検証�
 1. Turnstile のウィジェットを Cloudflare のダッシュボードで作り、サイトキーをビルドの環境変数 `TURNSTILE_SITE_KEY` に入れます。
 2. Worker の秘密の値を登録します。ダッシュボードの Worker の「設定 → 変数とシークレット」か、`pnpm exec cf workers secrets update <名前> --worker simochee-net --text <値>` で入れます。
 
-| 秘密の値                | 用途                                           | ないとき                                 |
-| ----------------------- | ---------------------------------------------- | ---------------------------------------- |
-| `TURNSTILE_SECRET_KEY`  | Turnstile のシークレットキー                   | コメントと掲示板の書き込みを受け付けない |
-| `ADMIN_PASSWORD`        | 管理画面のパスワード（変えると全員ログアウト） | 管理画面に入れない                       |
-| `BLUESKY_APP_PASSWORD`  | Bluesky のアプリパスワード                     | Bluesky に知らせない                     |
-| `MASTODON_ACCESS_TOKEN` | Mastodon のアクセストークン                    | Mastodon に知らせない                    |
+| 秘密の値                | 用途                         | ないとき                                 |
+| ----------------------- | ---------------------------- | ---------------------------------------- |
+| `TURNSTILE_SECRET_KEY`  | Turnstile のシークレットキー | コメントと掲示板の書き込みを受け付けない |
+| `ADMIN_PASSWORD`        | 管理画面のパスワード         | 管理画面に入れない                       |
+| `BLUESKY_APP_PASSWORD`  | Bluesky のアプリパスワード   | Bluesky に知らせない                     |
+| `MASTODON_ACCESS_TOKEN` | Mastodon のアクセストークン  | Mastodon に知らせない                    |
 
 3. D1 のデータベース（`simochee-net`）と送信回数の制限は、`cloudflare.config.ts` の binding からデプロイ時に用意されます。テーブルは Worker が最初のリクエストで作ります。
 4. `SIMOCHEE_MASTODON_ACCOUNT` を決めたら、ビルドの環境変数に入れます。

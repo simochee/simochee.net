@@ -137,3 +137,14 @@ test("取り込んだ返信を管理人が消すと非公開になり、次の�
   expect(await threadOf(db, "morning")).toEqual([]);
   expect((await inboxComments(db, 10))[0]?.private).toBe(true);
 });
+
+test("管理人が非公開にした返信は、取ってきた一覧から一時的に消えても残り、戻ってきても非公開のまま", async () => {
+  const db = await migratedD1();
+  await syncReplies(db, "morning", "bsky", [reply("a")], "Blueskyからの返信");
+  const [imported] = await threadOf(db, "morning");
+  await removeComment(db, imported!.id, { admin: true });
+  await syncReplies(db, "morning", "bsky", [], "Blueskyからの返信");
+  await syncReplies(db, "morning", "bsky", [reply("a")], "Blueskyからの返信");
+  expect(await threadOf(db, "morning")).toEqual([]);
+  expect(await inboxComments(db, 10)).toHaveLength(1);
+});

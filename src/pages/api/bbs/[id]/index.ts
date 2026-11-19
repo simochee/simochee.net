@@ -1,5 +1,6 @@
 import { env } from "cloudflare:workers";
 import { z } from "zod";
+import { limits } from "../../../../lib/limits";
 import { isAdmin } from "../../../../server/admin";
 import { editBbsPost, removeBbsPost } from "../../../../server/bbs";
 import { database } from "../../../../server/db";
@@ -8,7 +9,7 @@ import { clientAddress, handler, json, parseId, readJson, throttle } from "../..
 
 export const prerender = false;
 
-const key = z.string().optional();
+const key = z.string().max(limits.password).optional();
 
 export const PATCH = handler(async (context) => {
   const id = parseId(context.params.id);

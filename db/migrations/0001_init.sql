@@ -67,5 +67,11 @@ CREATE TABLE syndications (
   remote_id TEXT NOT NULL,
   url TEXT NOT NULL,
   created_at TEXT NOT NULL,
+  checked_at TEXT,
   PRIMARY KEY (slug, service)
+);
+
+CREATE TABLE admin_sessions (
+  token_hash TEXT PRIMARY KEY,
+  expires_at INTEGER NOT NULL
 );

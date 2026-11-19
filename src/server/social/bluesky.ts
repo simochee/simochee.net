@@ -44,16 +44,22 @@ export function bluesky(handle: string, password: string, origin: string): Socia
       return { token: created.accessJwt, did: created.did, pds: pds?.serviceEndpoint ?? entryway };
     })());
 
+  /** 記事の OG 画像をカードの絵にする。載せられなくても、知らせること自体はやめない。 */
   async function thumbnail(post: PublishedPost, pds: string, token: string) {
-    const image = await fetchAsset(`/og/${post.id}.jpg`, origin);
-    if (!image.ok) return undefined;
-    const response = await fetch(`${pds}/xrpc/com.atproto.repo.uploadBlob`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}`, "Content-Type": "image/jpeg" },
-      body: await image.arrayBuffer(),
-    });
-    return ((await (await ok(response, "Bluesky への画像の送信")).json()) as { blob: unknown })
-      .blob;
+    try {
+      const image = await fetchAsset(`/og/${post.id}.jpg`, origin);
+      if (!image.ok) return undefined;
+      const response = await fetch(`${pds}/xrpc/com.atproto.repo.uploadBlob`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "image/jpeg" },
+        body: await image.arrayBuffer(),
+      });
+      return ((await (await ok(response, "Bluesky への画像の送信")).json()) as { blob: unknown })
+        .blob;
+    } catch (error) {
+      console.error(error);
+      return undefined;
+    }
   }
 
   return {
@@ -90,11 +96,14 @@ export function bluesky(handle: string, password: string, origin: string): Socia
       return { remoteId: uri, url: blueskyPostUrl(uri)! };
     },
     async replies(uri) {
-      const query = new URLSearchParams({ uri, depth: "10", parentHeight: "0" });
+      const query = new URLSearchParams({ uri, depth: "100", parentHeight: "0" });
       const response = await fetch(`${appView}/xrpc/app.bsky.feed.getPostThread?${query}`);
       const { thread } = (await (await ok(response, "Bluesky の返信の取得")).json()) as {
         thread: Thread;
       };
+      // 元の投稿が消えたときも 200 で返る。返信がなくなったと取り違えて取り込み済みの返信を消さないよう、失敗として扱う。
+      if (thread.$type !== "app.bsky.feed.defs#threadViewPost")
+        throw new Error(`Bluesky の投稿が見つかりません: ${thread.$type}`);
       return flatten(thread).map((post): Reply => ({
         source: post.uri,
         name: post.author.displayName || post.author.handle,

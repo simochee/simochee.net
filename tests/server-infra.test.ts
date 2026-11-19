@@ -1,7 +1,16 @@
 import { expect, test } from "vitest";
 import { applyMigrations, statements } from "../src/server/migrations";
-import { hashSecret, matchesSecret, signUntil, verifySigned } from "../src/server/secrets";
-import { claim, complete, isFresh, isWatched, release } from "../src/server/social/syndications";
+import { hashSecret, matchesSecret } from "../src/server/secrets";
+import { closeSession, hasSession, openSession } from "../src/server/sessions";
+import {
+  claim,
+  complete,
+  isFresh,
+  markChecked,
+  release,
+  watchList,
+  watchPerRun,
+} from "../src/server/social/syndications";
 import type { PublishedPost } from "../src/server/posts";
 import { memoryD1, migratedD1 } from "./support/d1";
 
@@ -41,12 +50,24 @@ test("削除キーは元の値と照らし合わせられるが、保存した�
   expect(await hashSecret("abc123")).not.toBe(stored);
 });
 
-test("ログインの署名は、期限内で鍵が同じときだけ通る", async () => {
-  const token = await signUntil("password", 2_000);
-  expect(await verifySigned("password", token, 1_000)).toBe(true);
-  expect(await verifySigned("password", token, 3_000)).toBe(false);
-  expect(await verifySigned("changed", token, 1_000)).toBe(false);
-  expect(await verifySigned("password", token.replace(/.$/, "0"), 1_000)).toBe(false);
+test("管理人のログインは、期限内で、ログアウトしていないあいだだけ通る", async () => {
+  const db = await migratedD1();
+  const token = await openSession(db, 60, 1_000);
+  expect(await hasSession(db, token, 2_000)).toBe(true);
+  expect(await hasSession(db, token, 61_001)).toBe(false);
+  expect(await hasSession(db, "でたらめ", 2_000)).toBe(false);
+  expect(await hasSession(db, undefined, 2_000)).toBe(false);
+  await closeSession(db, token);
+  expect(await hasSession(db, token, 2_000)).toBe(false);
+});
+
+test("ログインの cookie の値そのものは、データベースに残さない", async () => {
+  const db = await migratedD1();
+  const token = await openSession(db, 60);
+  const { results } = await db
+    .prepare("SELECT token_hash FROM admin_sessions")
+    .all<{ token_hash: string }>();
+  expect(results.map((row) => row.token_hash)).not.toContain(token);
 });
 
 const post = (publishedAt: string): PublishedPost => ({
@@ -65,9 +86,19 @@ test("SNS には、公開から 1 日以内の記事だけを知らせる", () =
   expect(isFresh(post("2026-11-19T13:00:00Z"), now)).toBe(false);
 });
 
-test("返信は、公開から 30 日のあいだ取り込む", () => {
-  expect(isWatched(post("2026-10-21T12:00:00Z"), now)).toBe(true);
-  expect(isWatched(post("2026-10-19T12:00:00Z"), now)).toBe(false);
+test("返信は、知らせてから 30 日のあいだ、前に見にいった時刻の古いものから順に見にいく", async () => {
+  const db = await migratedD1();
+  const announce = async (slug: string, at: string) => {
+    await claim(db, slug, "bsky", new Date(at));
+    await complete(db, slug, "bsky", { remoteId: `at://${slug}`, url: "" });
+  };
+  await announce("old", "2026-10-19T12:00:00Z");
+  for (let i = 0; i <= watchPerRun; i++) await announce(`p${i}`, `2026-11-${10 + i}T12:00:00Z`);
+  const first = await watchList(db, "bsky", now);
+  expect(first).toHaveLength(watchPerRun);
+  expect(first.map((item) => item.slug)).not.toContain("old");
+  for (const { slug } of first) await markChecked(db, slug, "bsky", now);
+  expect((await watchList(db, "bsky", now))[0]!.slug).toBe("p0");
 });
 
 test("同じ記事を知らせる権利は 1 回しか取れず、失敗して手放せばまた取れる", async () => {

@@ -231,7 +231,8 @@ export async function syncReplies(
   title: string,
 ) {
   const { results } = await db
-    .prepare("SELECT source FROM comments WHERE slug = ? AND via = ?")
+    // 管理人が非公開にした返信は残す。取ってきた一覧から一時的に消えただけでも消すと、次に戻ってきたとき公開に戻ってしまう。
+    .prepare("SELECT source FROM comments WHERE slug = ? AND via = ? AND private = 0")
     .bind(slug, via)
     .all<{ source: string }>();
   const current = new Set(replies.map((reply) => reply.source));

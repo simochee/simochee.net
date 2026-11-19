@@ -8,13 +8,13 @@ import { bluesky } from "./bluesky";
 import { mastodon } from "./mastodon";
 import type { SocialService } from "./service";
 import {
-  announced,
   announcedSlugs,
   claim,
   complete,
   isFresh,
-  isWatched,
+  markChecked,
   release,
+  watchList,
 } from "./syndications";
 
 export interface SyncReport {
@@ -49,21 +49,26 @@ export async function syncSocial(origin: string, now = new Date()): Promise<Sync
     for (const post of posts.values()) {
       if (done.has(post.id) || !isFresh(post, now) || !(await claim(db, post.id, service.via, now)))
         continue;
+      let remote: Awaited<ReturnType<SocialService["publish"]>>;
       try {
-        const remote = await service.publish(
+        remote = await service.publish(
           post,
           new URL(`/posts/${post.id}/`, import.meta.env.SITE).href,
         );
-        await complete(db, post.id, service.via, remote);
-        report.announced.push(`${service.via}:${post.id}`);
       } catch (error) {
         await release(db, post.id, service.via);
         failed(`${services[service.via]}への投稿（${post.id}）`, error);
+        continue;
       }
+      // 投稿はできている。ここで失敗しても権利は手放さない（手放すと次の回でもう一度知らせてしまう）。
+      await complete(db, post.id, service.via, remote).catch((error: unknown) =>
+        failed(`${services[service.via]}への投稿の記録（${post.id}）`, error),
+      );
+      report.announced.push(`${service.via}:${post.id}`);
     }
-    for (const { slug, remoteId } of await announced(db, service.via)) {
-      const post = posts.get(slug);
-      if (!post || !isWatched(post, now)) continue;
+    for (const { slug, remoteId } of await watchList(db, service.via, now)) {
+      await markChecked(db, slug, service.via, now);
+      if (!posts.has(slug)) continue;
       try {
         const replies = await service.replies(remoteId);
         await syncReplies(db, slug, service.via, replies, `${services[service.via]}からの返信`);

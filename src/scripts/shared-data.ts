@@ -1,8 +1,11 @@
 import type { Counts, SidebarData } from "../lib/api";
 import { call, perPage } from "./api";
+import { commentsChanged } from "./events";
 
 /** 記事ごとの拍手とコメントの数。一覧の記事ぶんをまとめて 1 回で読む。 */
 export const counts = perPage(() => call<Counts>("/api/counts/"));
+// コメントの数を出している要素より先に登録されるので、要素が読みなおすときには新しい数を取りにいく。
+document.addEventListener(commentsChanged, () => counts.refresh());
 
 let latest: SidebarData | undefined;
 let loading: Promise<void> | undefined;
