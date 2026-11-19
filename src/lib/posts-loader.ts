@@ -12,13 +12,26 @@ import { frontmatterSchema } from "../content/schema";
 import { resolveContentSource } from "./content-source";
 import { isCI, readHistory, resolveDates, type History } from "./git-dates";
 
-export function excerpt(body: string): string {
-  const tree = unified().use(remarkParse).use(remarkMdx).parse(body);
+function parseBody(body: string) {
+  return unified().use(remarkParse).use(remarkMdx).parse(body);
+}
+export function plainText(body: string): string {
   const text: string[] = [];
-  visit(tree, (node) => {
+  visit(parseBody(body), (node) => {
     if (node.type === "text" || node.type === "inlineCode") text.push(node.value);
   });
-  return text.join(" ").replace(/\s+/g, " ").trim().slice(0, 160);
+  return text.join(" ").replace(/\s+/g, " ").trim();
+}
+export function excerpt(body: string): string {
+  return plainText(body).slice(0, 160);
+}
+/** 本文に相対パスで書かれた画像。サムネイルと同じく、Astro が解決できるよう ./ 始まりのものだけを拾う。 */
+export function bodyImages(body: string): { src: string; alt: string }[] {
+  const found = new Map<string, string>();
+  visit(parseBody(body), "image", (node) => {
+    if (/^\.\/[^?#]+$/.test(node.url) && !found.has(node.url)) found.set(node.url, node.alt ?? "");
+  });
+  return [...found].map(([src, alt]) => ({ src, alt }));
 }
 export function includeDrafts(command: string, env: NodeJS.ProcessEnv = process.env) {
   return command === "dev" && !isCI(env) && env.SIMOCHEE_INCLUDE_DRAFTS === "1";
@@ -59,11 +72,16 @@ export function postsLoader(): Loader {
           )
             continue;
           selected.push(file);
+          const thumbnail = thumbnails[0] ? `./${thumbnails[0]}` : undefined;
+          const images = bodyImages(content);
+          if (thumbnail && !images.some((image) => image.src === thumbnail))
+            images.push({ src: thumbnail, alt: "" });
           metadata.set(dir.name, {
             ...frontmatter,
             description: frontmatter.description ?? excerpt(content),
             ...resolveDates(frontmatter, history.get(dir.name)),
-            thumbnail: thumbnails[0] ? `./${thumbnails[0]}` : undefined,
+            thumbnail,
+            images,
             thumbnailPath: thumbnails[0] ? resolve(base, dir.name, thumbnails[0]) : undefined,
           });
         }

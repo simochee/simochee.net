@@ -17,6 +17,9 @@ for (const path of [
   "tags/sample/index.html",
   "tags/日本語/index.html",
   "tags/CI~2fCD/index.html",
+  "search/index.html",
+  "search.json",
+  "gallery/index.html",
   "404.html",
   "feed.xml",
   "sitemap-index.xml",
@@ -77,3 +80,11 @@ assert.match(
 console.log(
   "No draft/material markers in the build output, .astro, node_modules/.astro; Markdown/MDX decoration verified.",
 );
+const search: { id: string; text: string }[] = JSON.parse(
+  await readFile(`${assets}/search.json`, "utf8"),
+);
+assert.deepEqual(search.map((entry) => entry.id).sort(), expected);
+const gallery = await readFile(`${assets}/gallery/index.html`, "utf8");
+assert.match(gallery, /<gallery-viewer/);
+assert.match(gallery, /\/_astro\/napolitan\.[^" ]+\.webp/);
+console.log(`search.json: ${search.length} posts; gallery page rendered.`);

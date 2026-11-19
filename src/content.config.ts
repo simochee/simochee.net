@@ -16,6 +16,7 @@ export const collections = {
         publishedAt: z.date(),
         updatedAt: z.date().optional(),
         thumbnail: image().optional(),
+        images: z.array(z.object({ src: image(), alt: z.string() })).default([]),
         thumbnailPath: z.string().optional(),
       }),
   }),

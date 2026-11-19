@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { expect, test } from "vitest";
 import { frontmatterSchema, frontmatterJSONSchema } from "../src/content/schema";
-import { excerpt, includeDrafts } from "../src/lib/posts-loader";
+import { bodyImages, excerpt, includeDrafts, plainText } from "../src/lib/posts-loader";
 const valid = { title: "サンプル", status: "published", type: "tech" };
 test("コミットされた JSON Schema は frontmatter と一致する", () => {
   expect(
@@ -28,4 +28,19 @@ test("抜粋には Markdown 記法や MDX 要素を含めない", () => {
   expect(excerpt("## 見出し\n\n**本文**と[リンク](https://example.com)\n\n<div>文章</div>")).toBe(
     "見出し 本文 と リンク 文章",
   );
+});
+test("抜粋は 160 文字までで、全文のプレーンテキストは切らない", () => {
+  const body = "あ".repeat(300);
+  expect(excerpt(body)).toHaveLength(160);
+  expect(plainText(body)).toHaveLength(300);
+});
+test("本文の画像は ./ で始まる相対パスだけを、重複を除いて拾う", () => {
+  expect(
+    bodyImages(
+      "![朝](./a.png)\n\n![](./b.png)\n\n![再掲](./a.png)\n\n![外](https://example.com/c.png)\n\n![上](../d.png)",
+    ),
+  ).toEqual([
+    { src: "./a.png", alt: "朝" },
+    { src: "./b.png", alt: "" },
+  ]);
 });
