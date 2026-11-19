@@ -228,6 +228,9 @@ importers:
       unist-util-visit:
         specifier: 5.2.0
         version: 5.2.0
+      uqr:
+        specifier: 0.1.3
+        version: 0.1.3
       yaml:
         specifier: 2.9.1
         version: 2.9.1
@@ -3272,6 +3275,9 @@ packages:
         optional: true
       uploadthing:
         optional: true
+
+  uqr@0.1.3:
+    resolution: {integrity: sha512-0rjE8iEJe4YmT9TOhwsZtqCMRLc5DXZUI2UEYUUg63ikBkqqE5EYWaI0etFe/5KUcmcYwLih2RND1kq+hrUJXA==}
 
   verkit@0.5.0:
     resolution: {integrity: sha512-u4J1hr6Y+C/hit34GwL3eIcUf3wngT8TlYUjK7tk0jxydKLAq3sYvifjdTDA6U3KCKRcQCQDGf/srjxfZF3l7g==}
@@ -6824,6 +6830,8 @@ snapshots:
       node-fetch-native: 1.6.7
       ofetch: 1.5.1
       ufo: 1.6.4
+
+  uqr@0.1.3: {}
 
   verkit@0.5.0: {}
 
