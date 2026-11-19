@@ -14,7 +14,7 @@ Astro 7 で生成する日本語の個人ブログです。
 - コンポーネントの層分けと置き場所の決めかたは `src/components/README.md` にあります。
 - ページ遷移は Astro の `<ClientRouter />` による view transition です。サイドバーは遷移をまたいで保持します。
 - 遷移後のスクロール位置は `src/lib/landing.ts` で決めます。戻る・進むは離れたときの位置、`#` 付きの URL はその要素、それ以外は本文の先頭です。ヘッダーが見えている位置から移ったときは動かしません。
-- スクリプトが動かなくても読めます。月の満ち欠け、着せかえ、共有、コードのコピー、検索、画像一覧の切り替えだけがスクリプトを使い、動かないときは表示しません。
+- 記事はスクリプトが動かなくても読めます。月の満ち欠け、着せかえ、共有、コードのコピー、検索、画像一覧の切り替えと、サーバーとやりとりする部品（コメント、拍手、掲示板、アンケート、カウンター、閲覧者数、人気記事）はスクリプトを使い、動かないときは表示しません。
 
 ## 開発
 
@@ -101,24 +101,17 @@ raw URL（https://raw.githubusercontent.com/simochee/simochee.net/main/schema/fr
 
 ## コメント
 
-記事に付いたコメントは `content/comments/<記事の slug>.yaml` に書きます。
-いまはビルド時に読むテスト用のデータで、保存先ができたらそちらに置き換えます。
-
-```yaml
-comments:
-  - title: コメントの題名
-    name: 書いた人
-    at: 2026-11-18T10:12:34+09:00
-    body: コメントの本文
-    via: bsky # 任意。bsky または mastodon
-    url: https://example.com/ # 任意。http と https のみ
-```
-
-未知のキーはエラーです。
+コメントは記事ページの投稿欄から書き込み、Cloudflare D1 に保存します（後述の「サーバーで動く部品」）。
 記事ページのコメント欄は古い順、サイドバーの「最新コメント」と `/comments.xml` は新しい順に並びます。
-記事の下と全記事一覧の「コメント(n)」は、この件数です。
-公開されていない記事（下書き、または記事のない slug）のコメントは、件数にも一覧にも RSS にも出ません。
-集計の定義は `src/lib/comments.ts`、書式の定義は `src/content/comment-schema.ts` です。
+記事の下と全記事一覧の「コメント(n)」は、公開コメントの件数です。
+
+- 公開されていない記事（下書き、または記事のない slug）のコメントは、件数にも一覧にも RSS にも出ません。
+- 「非公開コメント」にチェックしたコメントは、管理画面でだけ読めます。
+- パスワードを入れて書いたコメントは、同じパスワードで本人が編集・削除できます。
+- 管理人の名前（`src/site.ts` の `author.name`）では、管理画面でログインしているときしか書けません。
+- 記事を Bluesky・Mastodon に知らせた投稿への返信も、コメントとして取り込みます（後述）。
+
+集計の SQL は `src/server/comments.ts` にあり、`tests/comments.test.ts` が Node の SQLite で同じ SQL を確かめます。
 
 ## 日付
 
@@ -144,6 +137,9 @@ Workers Builds は `CI=true` と `WORKERS_CI=1` を設定します（[公式資�
 | `SIMOCHEE_INCLUDE_DRAFTS`   | 無効                                                                        | ローカル dev で `1` のときだけ下書きを含める                                            |
 | `SIMOCHEE_SITE_URL`         | `https://simochee.net`                                                      | canonical、OG、RSS、`robots.txt` に使うサイトの URL。空文字は未設定と同じ               |
 | `SIMOCHEE_NOINDEX`          | `false`                                                                     | `true` のとき全ページに `noindex, nofollow` を付け、`robots.txt` からサイトマップを外す |
+| `SIMOCHEE_BLUESKY_HANDLE`   | `simochee.net`                                                              | フォローの案内と、新しい記事を知らせる Bluesky のハンドル                               |
+| `SIMOCHEE_MASTODON_ACCOUNT` | 未設定                                                                      | `@user@server` の形の Mastodon のアカウント。未設定のあいだは Mastodon の案内を出さない |
+| `TURNSTILE_SITE_KEY`        | Cloudflare の試験用の鍵                                                     | コメントと掲示板の迷惑書き込みよけ（Turnstile）のサイトキー                             |
 | `CI` / `WORKERS_CI`         | 未設定                                                                      | いずれかが設定されていれば履歴検証を厳格にする                                          |
 
 `SIMOCHEE_CONTENT_DIR` を指定すると、日時はそのディレクトリを含む git リポジトリの履歴から取得します。
@@ -192,7 +188,9 @@ export const GET: APIRoute = () => Response.json({ ok: true });
 
 - `export const prerender = false` を書いたルートだけが Cloudflare Workers の上で動きます。書いていないページは静的ファイルのままで、配信に Worker は使われません。
 - URL の末尾スラッシュの決まりはページと同じです（`/api/health/`）。
-- KV や D1 などを使うときは、`cloudflare.config.ts` の `worker.env` に binding を足し、ルートの中で `import { env } from "cloudflare:workers"` から読みます。
+- KV や D1 などを使うときは、`cloudflare.config.ts` の `worker.env` に binding を足し、ルートの中で `import { env } from "cloudflare:workers"` から読みます。型は `src/env.d.ts` の `Env` に足します。
+- サーバー側の処理は `src/server/` に置きます。データベースを引数で受け取る形にして、`tests/` から Node の SQLite で確かめます（`tests/support/d1.ts`）。
+- Worker の入口は `src/worker.ts` です。ページとルートは Astro に渡し、定期実行（`scheduled`）だけを自分で受けます。
 
 ### 手元で動かす
 
@@ -201,6 +199,43 @@ export const GET: APIRoute = () => Response.json({ ok: true });
 - KV や D1 などの binding は、手元ではエミュレータで動きます。Cloudflare へのサインインは要りません。
 - エミュレータのデータは `.cloudflare/state/` に残り、起動し直しても消えません。消すときはこのディレクトリを削除します。
 - 本番と同じ形（ビルド済みのファイルと Worker）で確かめるときは `vp run preview` を使います。
+- dev ではデータベースに見本のデータ（`db/dev-seed.sql`）が入ります。本番には入りません。
+- 秘密の値は `.dev.vars` に書きます。`.dev.vars.example` をコピーして使ってください。Turnstile の鍵がないときは、手元では確認を飛ばして投稿できます。
+- 定期実行は dev では動きません。管理画面の「今すぐ同期する」で同じ処理を呼べます。
+
+## サーバーで動く部品
+
+| 部品                         | 保存先・仕組み                                                                   |
+| ---------------------------- | -------------------------------------------------------------------------------- |
+| コメント（投稿・編集・削除） | D1。投稿には Turnstile と送信回数の制限                                          |
+| 拍手                         | D1。記事ごとの回数                                                               |
+| ひとこと掲示板               | D1。`/bbs/` とサイドバー。削除キーで本人が編集・削除、管理人が返信               |
+| アンケート                   | D1。質問と選択肢は `src/site.ts` の `poll`。1 人 1 票（cookie で見分ける）       |
+| アクセスカウンター           | D1。ブラウザのセッションごとに 1 回数える。キリ番の決まりは `src/lib/kiriban.ts` |
+| 現在の閲覧者数               | D1。この 5 分のあいだにページを開いていた人                                      |
+| 人気記事                     | D1。この 30 日の記事ごとの閲覧数                                                 |
+| 最新コメントの RSS           | `/comments.xml` をリクエストのたびに作る                                         |
+| Bluesky・Mastodon            | 10 分おきの定期実行で、新しい記事を知らせ、その投稿への返信をコメントに取り込む  |
+
+ページは静的なままで、これらの部品はスクリプトが `/api/` のルートを呼んで中身を入れます。
+
+- テーブルは `db/migrations/` の SQL です。Worker が最初のリクエストで、まだ当てていないものを当てます（記録は `d1_migrations` 表で、`cf d1 migrations apply --dir db/migrations` と同じ形）。テーブルを変えるときは、番号を進めた SQL ファイルを足します。
+- 送信回数の制限は Workers の Rate Limiting です。書き込み（コメント・掲示板・ログイン）は 1 分 5 回、拍手や投票などは 1 分 30 回まで（IP ごと）。
+- 記事の一覧は、ビルドで書き出した `/posts.json` を Worker が読みます。記事の本文を Worker に抱えさせないためです。
+
+### 管理画面
+
+`/admin/` は管理人用のページです（どこからもリンクせず、検索とサイトマップから外しています）。
+`ADMIN_PASSWORD` でログインすると、非公開を含むコメントと掲示板の書き込みを読み、削除し、掲示板に返信できます。
+Bluesky・Mastodon から取り込んだ返信は、削除すると非公開になります（消しても次の同期で戻ってくるため）。
+
+### Bluesky・Mastodon
+
+- 公開から 1 日以内の記事を「ブログを書きました：題名」と URL で知らせます。初めて動かしたときに過去の記事をまとめて流さないためです。
+- 知らせた投稿への返信は、公開から 30 日のあいだ取り込みます。向こうで消された返信はこちらからも消えます。
+- Bluesky は `BLUESKY_APP_PASSWORD`、Mastodon は `SIMOCHEE_MASTODON_ACCOUNT` と `MASTODON_ACCESS_TOKEN` があるときだけ動きます。
+- Bluesky はアプリパスワード（設定 → プライバシーとセキュリティ → アプリパスワード）を使います。Bluesky のサーバー（bsky.social）にあるアカウントを前提にしています。
+- Mastodon のアクセストークンは、そのサーバーの「設定 → 開発 → 新規アプリ」で `read:statuses` と `write:statuses` を付けて作ります。
 
 ## デプロイ
 
@@ -214,10 +249,25 @@ pnpm exec cf deploy --dry-run   # アップロードせずにビルドと検証�
 
 デプロイには `cf auth login` でのサインインか、環境変数 `CLOUDFLARE_API_TOKEN` が要ります。
 
-| ファイル               | 内容                                                                   |
-| ---------------------- | ---------------------------------------------------------------------- |
-| `cloudflare.config.ts` | Worker の名前、互換性の日付、静的ファイルの配信の決まり、binding       |
-| `astro.config.ts`      | Cloudflare アダプターの設定（事前生成は Node、画像はビルド時に最適化） |
+### 初めてデプロイする前に
+
+1. Turnstile のウィジェットを Cloudflare のダッシュボードで作り、サイトキーをビルドの環境変数 `TURNSTILE_SITE_KEY` に入れます。
+2. Worker の秘密の値を登録します。ダッシュボードの Worker の「設定 → 変数とシークレット」か、`pnpm exec cf workers secrets update <名前> --worker simochee-net --text <値>` で入れます。
+
+| 秘密の値                | 用途                                           | ないとき                                 |
+| ----------------------- | ---------------------------------------------- | ---------------------------------------- |
+| `TURNSTILE_SECRET_KEY`  | Turnstile のシークレットキー                   | コメントと掲示板の書き込みを受け付けない |
+| `ADMIN_PASSWORD`        | 管理画面のパスワード（変えると全員ログアウト） | 管理画面に入れない                       |
+| `BLUESKY_APP_PASSWORD`  | Bluesky のアプリパスワード                     | Bluesky に知らせない                     |
+| `MASTODON_ACCESS_TOKEN` | Mastodon のアクセストークン                    | Mastodon に知らせない                    |
+
+3. D1 のデータベース（`simochee-net`）と送信回数の制限は、`cloudflare.config.ts` の binding からデプロイ時に用意されます。テーブルは Worker が最初のリクエストで作ります。
+4. `SIMOCHEE_MASTODON_ACCOUNT` を決めたら、ビルドの環境変数に入れます。
+
+| ファイル               | 内容                                                                             |
+| ---------------------- | -------------------------------------------------------------------------------- |
+| `cloudflare.config.ts` | Worker の名前、入口、互換性の日付、静的ファイルの配信の決まり、定期実行、binding |
+| `astro.config.ts`      | Cloudflare アダプターの設定（事前生成は Node、画像はビルド時に最適化）           |
 
 ビルドの出力は `.cloudflare/output/` です。静的ファイルは `.cloudflare/output/v1/workers/default/assets/` に、Worker はその隣に出ます。
 404 は `404-page`、HTML の URL は `auto-trailing-slash` です。
@@ -238,7 +288,7 @@ curl -fsSL https://vite.plus | VP_VERSION=1.7.0 VP_HOME="$HOME/.vite-plus" VP_NO
 
 `main` に push すると、GitHub Actions（`.github/workflows/pages.yml`）がダミー記事でビルドし、GitHub Pages の https://staging.simochee.net/ に公開します。
 検索エンジンに載らないよう、`SIMOCHEE_NOINDEX=true` でビルドします。
-GitHub Pages では静的ファイルだけが配信され、`prerender = false` のルート（`/api/health/` など）は 404 になります。
+GitHub Pages では静的ファイルだけが配信され、`prerender = false` のルート（`/api/` や `/comments.xml`）は 404 になります。コメントや掲示板などサーバーで動く部品は、ステージングでは表示されません。
 
 ## 検証用スクリプト
 

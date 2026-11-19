@@ -14,8 +14,11 @@ interface Props {
   article?: boolean;
   publishedAt?: Date;
   updatedAt?: Date;
+  /** 検索に載せないページ。SIMOCHEE_NOINDEX のときは全ページがこうなる。 */
+  noindex?: boolean;
 }
 const { title, description = site.description, image = "/og.jpg", article, publishedAt, updatedAt } = Astro.props;
+const noindex = SIMOCHEE_NOINDEX || Astro.props.noindex;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const imageURL = new URL(image, Astro.site);
 const isHome = Astro.url.pathname === "/";
@@ -36,7 +39,7 @@ const menu = [
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title ? `${title} - ${site.name}` : site.name}</title>
     <meta name="description" content={description} />
-    {SIMOCHEE_NOINDEX && <meta name="robots" content="noindex, nofollow" />}
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="canonical" href={canonical} />
     <link rel="alternate" type="application/rss+xml" title={site.name} href="/feed.xml" />
     <link rel="alternate" type="application/rss+xml" title={`${site.name}（最新コメント）`} href="/comments.xml" />
@@ -106,6 +109,7 @@ const menu = [
     <script>
       import "../scripts/elements";
       import "../scripts/landing";
+      import "../scripts/visit";
     </script>
   </body>
 </html>

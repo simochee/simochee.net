@@ -27,6 +27,6 @@ const href = `/posts/${post.id}/`;
     <p>{post.data.description}</p>
   </div>
   <p class="mx-6 my-8 text-right"><a href={href} aria-label={`「${post.data.title}」の続きを読む`}>続きを読む &raquo;</a></p>
-  <Clap />
+  <Clap slug={post.id} />
   <EntryMeta post={post} />
 </article>

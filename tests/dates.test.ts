@@ -1,5 +1,11 @@
 import { expect, test } from "vitest";
-import { dayKey, formatDay, formatMonthDay, formatTimestamp } from "../src/lib/dates";
+import {
+  dayKey,
+  formatDay,
+  formatMinutes,
+  formatMonthDay,
+  formatTimestamp,
+} from "../src/lib/dates";
 
 test("日付は年月日と曜日を 2008 年のブログ風に並べる", () => {
   expect(formatDay(new Date("2026-11-18T12:00:00+09:00"))).toBe("2026/11/18 (水)");
@@ -18,4 +24,8 @@ test("月日だけの表記は 1 桁の月日を 0 で埋める", () => {
 test("コメントの日時は日本時間の秒まで、24 時間表記で並べる", () => {
   expect(formatTimestamp(new Date("2026-11-18T01:12:34Z"))).toBe("2026/11/18(水) 10:12:34");
   expect(formatTimestamp(new Date("2026-11-18T15:00:00Z"))).toBe("2026/11/19(木) 00:00:00");
+});
+test("掲示板の日時は日本時間の分まで、24 時間表記で並べる", () => {
+  expect(formatMinutes(new Date("2026-11-17T12:40:59Z"))).toBe("2026/11/17(火) 21:40");
+  expect(formatMinutes(new Date("2026-11-17T15:05:00Z"))).toBe("2026/11/18(水) 00:05");
 });

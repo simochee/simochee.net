@@ -4,77 +4,300 @@ import Button from "../components/ui/Button.astro";
 import Icon from "../components/ui/Icon.astro";
 import TextArea from "../components/ui/TextArea.astro";
 import TextField from "../components/ui/TextField.astro";
-
-// デザインに書かれていた見本のデータ。実データにつなぐときに置き換える。
-const colors = [
-  {label: "黒", value: "#333333", checked: true},
-  {label: "紺", value: "#1f3f8f", checked: false},
-  {label: "緑", value: "#2e6b2e", checked: false},
-  {label: "茶", value: "#7a4a1e", checked: false},
-  {label: "桃", value: "#b0306a", checked: false},
-  {label: "紫", value: "#6b3fa0", checked: false},
-];
-const posts = [
-  {no: 128, title: "キリ番踏みました！", name: "ことり", date: "2026/11/17(火) 21:40", color: "#b0306a", body: "こんばんは！ カウンターを見たら 0012300 でした。キリ番、ということでいいですか？笑\nいつもモーニングの記事を楽しみにしています。", reply: "ことりさん、おめでとうございます＆ありがとうございます！ 次は 0012345 なので、ぜひまた狙ってください♪", url: "", hasReply: true, hasUrl: false},
-  {no: 127, title: "はじめまして", name: "通りすがり", date: "2026/11/15(日) 13:02", color: "#1f3f8f", body: "テンプレート変わりましたね。サイドバーのカレンダーがなつかしくて、思わず書き込んでしまいました。", reply: "書き込みありがとうございます！ あのころのブログっぽさを目指してみました。", url: "", hasReply: true, hasUrl: false},
-  {no: 126, title: "相互リンクのお願い", name: "まったり日和", date: "2026/11/10(火) 19:20", color: "#2e6b2e", body: "いつも楽しく読ませてもらっています。うちのブログでもリンクさせていただいたので、よろしければ相互リンクをお願いできますか？", reply: "うれしいです！ さっそくリンクに追加しました。", url: "https://example.com/", hasReply: true, hasUrl: true},
-  {no: 125, title: "銀杏並木", name: "みかん", date: "2026/11/08(日) 10:15", color: "#7a4a1e", body: "銀杏並木の写真、すてきでした！ 今度の休みに行ってみます。", reply: "", url: "", hasReply: false, hasUrl: false},
-];
+import Turnstile from "../components/ui/Turnstile.astro";
+import { bbsPageSize, inkColors } from "../lib/bbs";
+import { deleteKeyPattern, limits } from "../lib/limits";
+import { site } from "../site";
 ---
 
-<Base title="ひとこと掲示板">
-<h1 class="title-box mb-10">ひとこと掲示板</h1>
+<Base title="ひとこと掲示板" description="どなたでもお気軽に書き込める掲示板です。">
+  <h1 class="title-box mb-10">ひとこと掲示板</h1>
 
-<div class="type-small mb-12 py-6 px-10 bg-memo border border-memo-line">
-<div class="font-bold text-memo-ink">【ご利用にあたって】</div>
-<div>・どなたでもお気軽にどうぞ。はじめての方も大歓迎です。</div>
-<div>・キリ番（次は 0012345）を踏んだ方は、ここでご報告ください♪</div>
-<div>・宣伝や荒らし、ほかの方がいやな気持ちになる書き込みは、予告なく消します。</div>
-<div>・削除キーを入れておくと、あとから自分で編集・削除できます。</div>
-<div>・送信するときに、迷惑書き込みよけの自動チェックが入ります。</div>
-</div>
+  <div class="type-small mb-12 border border-memo-line bg-memo px-10 py-6">
+    <div class="font-bold text-memo-ink">【ご利用にあたって】</div>
+    <div>・どなたでもお気軽にどうぞ。はじめての方も大歓迎です。</div>
+    <div>・キリ番<visit-stat hidden data-show="next">（次は <span data-slot="value"></span>）</visit-stat>を踏んだ方は、ここでご報告ください♪</div>
+    <div>・宣伝や荒らし、ほかの方がいやな気持ちになる書き込みは、予告なく消します。</div>
+    <div>・削除キーを入れておくと、あとから自分で編集・削除できます。</div>
+    <div>・送信するときに、迷惑書き込みよけの自動チェックが入ります。</div>
+  </div>
 
-<form class="mb-16 py-8 px-10 border border-line grid grid-cols-[auto_minmax(0,1fr)] gap-y-4 gap-x-8 items-center">
-<label for="bbs-name">お名前</label><TextField class="max-w-220" id="bbs-name" type="text" />
-<label for="bbs-mail">メール</label><div class="flex flex-wrap items-center gap-y-2 gap-x-8"><TextField class="flex-[0_1_260px] min-w-0" id="bbs-mail" type="email" /><span class="type-small text-ink-soft">（表示されません）</span></div>
-<label for="bbs-url">URL</label><TextField class="max-w-320" id="bbs-url" type="url" placeholder="http://" />
-<label for="bbs-title">題名</label><TextField class="max-w-320" id="bbs-title" type="text" />
-<label class="self-start" for="bbs-body">本文</label><TextArea id="bbs-body" rows="5"></TextArea>
-<span>文字色</span>
-<div class="flex flex-wrap gap-y-2 gap-x-10" role="radiogroup" aria-label="文字色">
-{colors.map((c) => (
-<label style={`color: ${c.value}`}><input type="radio" name="bbs-color" checked={c.checked} /> ■{c.label}</label>
-))}
-</div>
-<label for="bbs-key">削除キー</label><div class="flex flex-wrap items-center gap-y-2 gap-x-8"><TextField class="flex-[0_1_120px] min-w-0" id="bbs-key" type="password" /><span class="type-small text-ink-soft">（英数字8文字まで）</span></div>
-<span></span><label class="type-small"><input type="checkbox" checked /> お名前とメールを記憶する</label>
-<span></span>
-<div class="flex flex-wrap items-center gap-6">
-<Button class="py-2 px-16">書き込む</Button>
-<Button class="py-2 px-10" variant="plain">リセット</Button>
+  <noscript><p class="mb-12">掲示板を読み書きするには、JavaScript を有効にしてください。</p></noscript>
 
+  <bbs-board hidden data-page-size={bbsPageSize}>
+    <form class="mb-16 grid scroll-mt-16 grid-cols-[auto_minmax(0,1fr)] items-center gap-x-8 gap-y-4 border border-line px-10 py-8" id="bbs-form" data-slot="form">
+      <label for="bbs-name">お名前</label><TextField class="max-w-220" id="bbs-name" name="name" autocomplete="name" maxlength={limits.name} required />
+      <label for="bbs-mail">メール</label>
+      <div class="flex flex-wrap items-center gap-x-8 gap-y-2"><TextField class="min-w-0 flex-[0_1_260px]" id="bbs-mail" name="email" type="email" autocomplete="email" maxlength={limits.email} /><span class="type-small text-ink-soft">（表示されません）</span></div>
+      <label for="bbs-url">URL</label><TextField class="max-w-320" id="bbs-url" name="url" type="url" autocomplete="url" maxlength={limits.url} placeholder="https://" />
+      <label for="bbs-title">題名</label><TextField class="max-w-320" id="bbs-title" name="title" maxlength={limits.title} />
+      <label class="self-start" for="bbs-body">本文</label><TextArea id="bbs-body" name="body" rows="5" maxlength={limits.body} required />
+      <span>文字色</span>
+      <div class="flex flex-wrap gap-x-10 gap-y-2" role="radiogroup" aria-label="文字色">
+      {
+        inkColors.map((ink, index) => (
+          <label style={`color: ${ink.value}`}>
+            <input type="radio" name="color" value={ink.value} checked={index === 0} /> ■{ink.label}
+          </label>
+        ))
+      }
+      </div>
+      <label for="bbs-key">削除キー</label>
+      <div class="flex flex-wrap items-center gap-x-8 gap-y-2"><TextField class="min-w-0 flex-[0_1_120px]" id="bbs-key" name="key" type="password" autocomplete="off" pattern={deleteKeyPattern} maxlength={8} title="英数字8文字まで" /><span class="type-small text-ink-soft">（英数字8文字まで）</span></div>
+      <span></span><label class="type-small"><input type="checkbox" name="remember" checked /> お名前とメールを記憶する</label>
+      <span></span><Turnstile />
+      <span></span>
+      <div class="flex flex-wrap items-center gap-6">
+        <Button class="px-16 py-2" type="submit">書き込む</Button>
+        <Button class="px-10 py-2" variant="plain" type="reset">リセット</Button>
+      </div>
+      <span></span>
+      <p role="status" hidden data-slot="status"></p>
+    </form>
 
-</div>
-</form>
+    <div class="type-small mb-6 flex flex-wrap justify-between gap-x-10 gap-y-4 text-ink-soft">
+      <span data-slot="summary">書き込みを読み込んでいます…</span><span>1ページ {bbsPageSize}件</span>
+    </div>
 
-<div class="type-small flex flex-wrap justify-between gap-y-4 gap-x-10 mb-6 text-ink-soft"><span>書き込み：128 件（新しい順）</span><span>1ページ 10件</span></div>
+    <div data-slot="posts"></div>
+    <nav class="border-y border-dotted border-frame p-4 text-center" aria-label="ページ番号" data-slot="pager"></nav>
 
-{posts.map((p) => (
-<article class="mb-10 border border-line">
-<div class="flex flex-wrap justify-between items-baseline gap-y-2 gap-x-10 py-2 px-8 bg-tint border-b border-line">
-<b class="text-ink-strong">[{p.no}] {p.title}</b>
-<span class="type-small text-ink-soft">{p.date}</span>
-</div>
-<div class="py-6 px-10">
-<div class="type-small text-ink-soft">名前：<b>{p.name}</b>{p.hasUrl && (<> <Icon name="home" /> <a href="#">HOME</a></>)}</div>
-<div class="mt-4 leading-prose whitespace-pre-line" style={`color: ${p.color}`}>{p.body}</div>
-{p.hasReply && (<>
-<div class="mt-6 ml-[1em] py-4 px-8 bg-memo border border-dotted border-memo-line leading-prose">└ <b class="text-memo-ink">しもちぃ</b>：{p.reply}</div>
-</>)}
-<div class="type-small mt-4 text-right"><Icon name="comment" /> <a href="#">返信する</a> | <Icon name="edit" /> <a href="#">編集・削除</a></div>
-</div>
-</article>
-))}
-
-<div class="text-center p-4 border-y border-dotted border-frame">[<b>1</b>] <a href="#">2</a> <a href="#">3</a> <a href="#">4</a> … <a href="#">13</a> | <a href="#">次の10件 »</a></div>
+    <template data-slot="post">
+      <article class="mb-10 scroll-mt-16 border border-line">
+        <div class="flex flex-wrap items-baseline justify-between gap-x-10 gap-y-2 border-b border-line bg-tint px-8 py-2">
+          <b class="text-ink-strong" data-slot="heading"></b>
+          <span class="type-small text-ink-soft" data-slot="date"></span>
+        </div>
+        <div class="px-10 py-6">
+          <div class="type-small text-ink-soft">名前：<b data-slot="name"></b><span data-slot="home"> <Icon name="home" /> <a rel="nofollow ugc noopener">HOME</a></span></div>
+          <div class="mt-4 leading-prose whitespace-pre-line" data-slot="body"></div>
+          <div class="mt-6 ml-[1em] border border-dotted border-memo-line bg-memo px-8 py-4 leading-prose whitespace-pre-line" data-slot="reply">└ <b class="text-memo-ink">{site.author.name}</b>：<span data-slot="reply-text"></span></div>
+          <div class="type-small mt-4 text-right">
+            <Icon name="comment" /> <a href="#bbs-form" data-action="quote">返信する</a>
+            <span data-slot="edit"> | <Icon name="edit" /> <Button variant="link" data-action="edit" aria-expanded="false">編集・削除</Button></span>
+          </div>
+          <form class="type-small mt-6 flex flex-col gap-4 border border-line bg-wash px-8 py-6" data-slot="editor" hidden>
+            <label class="grid grid-cols-[5em_minmax(0,1fr)] items-center gap-x-8">削除キー<TextField class="max-w-120" type="password" name="key" autocomplete="off" required /></label>
+            <label class="grid grid-cols-[5em_minmax(0,1fr)] items-center gap-x-8">題名<TextField class="max-w-320" name="title" maxlength={limits.title} /></label>
+            <label class="grid grid-cols-[5em_minmax(0,1fr)] items-start gap-x-8">本文<TextArea name="body" rows="4" maxlength={limits.body} required /></label>
+            <div class="grid grid-cols-[5em_minmax(0,1fr)] gap-x-8">
+              <span>文字色</span>
+              <div class="flex flex-wrap gap-x-10 gap-y-2" role="radiogroup" aria-label="文字色">
+      {
+        inkColors.map((ink, index) => (
+          <label style={`color: ${ink.value}`}>
+            <input type="radio" name="color" value={ink.value} checked={index === 0} /> ■{ink.label}
+          </label>
+        ))
+      }
+      </div>
+            </div>
+            <div class="flex flex-wrap gap-6 pl-[calc(5em+8px)]">
+              <Button class="px-12 py-1" type="submit">更新する</Button>
+              <Button class="px-12 py-1" variant="plain" data-action="delete">削除する</Button>
+              <Button class="px-12 py-1" variant="plain" data-action="close">やめる</Button>
+            </div>
+            <p class="pl-[calc(5em+8px)]" role="alert" data-slot="error" hidden></p>
+          </form>
+        </div>
+      </article>
+    </template>
+  </bbs-board>
 </Base>
+
+<script>
+  import type { BbsPage, BbsPost } from "../lib/api";
+  import { formatMinutes } from "../lib/dates";
+  import { pageNumbers } from "../lib/paging";
+  import { ApiError, call } from "../scripts/api";
+  import { refreshSidebar } from "../scripts/shared-data";
+  import { report, stamp, textFields } from "../scripts/template";
+  import type { TurnstileField } from "../scripts/turnstile";
+  import "../scripts/visit-stat";
+
+  const rememberKey = "bbs-author";
+  const remembered = ["name", "email", "url"] as const;
+  const storage = {
+    load(): Record<string, string> {
+      try {
+        return JSON.parse(localStorage.getItem(rememberKey) ?? "{}") as Record<string, string>;
+      } catch {
+        return {};
+      }
+    },
+    save(values: Record<string, string> | undefined) {
+      try {
+        if (values) localStorage.setItem(rememberKey, JSON.stringify(values));
+        else localStorage.removeItem(rememberKey);
+      } catch {
+        // 覚えておけない環境では、毎回入力してもらう。
+      }
+    },
+  };
+
+  const pageHref = (page: number) => (page === 1 ? "/bbs/" : `/bbs/?page=${page}`);
+
+  customElements.define(
+    "bbs-board",
+    class extends HTMLElement {
+      #shown: string | undefined;
+
+      #slot<T extends HTMLElement = HTMLElement>(name: string) {
+        return this.querySelector<T>(`[data-slot="${name}"]`)!;
+      }
+      get #form() {
+        return this.#slot<HTMLFormElement>("form");
+      }
+
+      connectedCallback() {
+        const saved = storage.load();
+        for (const name of remembered)
+          (this.#form.elements.namedItem(name) as HTMLInputElement).value = saved[name] ?? "";
+        this.addEventListener("submit", this);
+        this.addEventListener("click", this);
+        // ClientRouter は要素を差し替えたあとで location を更新するので、ページ番号はそのあとにもう一度読む。
+        document.addEventListener("astro:after-swap", this);
+        this.hidden = false;
+        void this.#load();
+      }
+      disconnectedCallback() {
+        document.removeEventListener("astro:after-swap", this);
+      }
+
+      async #load(focus?: number) {
+        const page = Number(new URLSearchParams(location.search).get("page") ?? 1);
+        this.#shown = location.search;
+        try {
+          this.#render(await call<BbsPage>(`/api/bbs/?page=${Number.isSafeInteger(page) ? page : 1}`));
+          if (focus) this.querySelector(`[data-id="${focus}"]`)?.scrollIntoView({ block: "start" });
+        } catch (error) {
+          this.#slot("summary").textContent =
+            error instanceof ApiError ? error.message : "書き込みを読み込めませんでした。";
+        }
+      }
+
+      #render({ posts, total, page, pages }: BbsPage) {
+        this.#slot("summary").textContent = `書き込み：${total} 件（新しい順）`;
+        const template = this.#slot<HTMLTemplateElement>("post");
+        this.#slot("posts").replaceChildren(...posts.map((post) => this.#post(template, post)));
+        const pager = this.#slot("pager");
+        pager.hidden = pages <= 1;
+        pager.replaceChildren(
+          ...pageNumbers(page, pages).flatMap((number) => {
+            if (number === undefined) return ["… "];
+            if (number === page)
+              return ["[", Object.assign(document.createElement("b"), { textContent: String(number) }), "] "];
+            return [Object.assign(document.createElement("a"), { href: pageHref(number), textContent: String(number) }), " "];
+          }),
+          ...(page < pages
+            ? ["| ", Object.assign(document.createElement("a"), { href: pageHref(page + 1), rel: "next", textContent: `次の${this.dataset.pageSize}件 »` })]
+            : []),
+        );
+      }
+
+      #post(template: HTMLTemplateElement, post: BbsPost) {
+        const { fragment, slot } = stamp(template);
+        const article = fragment.querySelector("article")!;
+        article.id = `bbs-${post.id}`;
+        article.dataset.id = String(post.id);
+        article.dataset.title = post.title;
+        slot("heading").textContent = `[${post.id}] ${post.title}`;
+        slot("date").textContent = formatMinutes(new Date(post.at));
+        slot("name").textContent = post.name;
+        if (post.url) slot("home").querySelector("a")!.href = post.url;
+        else slot("home").remove();
+        slot("body").textContent = post.body;
+        slot("body").style.color = post.color;
+        if (post.reply) slot("reply-text").textContent = post.reply;
+        else slot("reply").remove();
+        if (post.editable) {
+          const editor = slot<HTMLFormElement>("editor");
+          (editor.elements.namedItem("title") as HTMLInputElement).defaultValue = post.title;
+          (editor.elements.namedItem("body") as HTMLTextAreaElement).defaultValue = post.body;
+          for (const radio of editor.querySelectorAll<HTMLInputElement>("[name=color]"))
+            radio.defaultChecked = radio.value === post.color;
+        } else {
+          slot("edit").remove();
+          slot("editor").remove();
+        }
+        return fragment;
+      }
+
+      handleEvent(event: Event) {
+        if (event.type === "astro:after-swap") {
+          if (this.#shown !== location.search) void this.#load();
+          return;
+        }
+        const target = event.target as Element;
+        if (event.type === "submit") {
+          event.preventDefault();
+          const editor = target.closest<HTMLFormElement>("[data-slot=editor]");
+          if (editor) void this.#change(editor, "PATCH");
+          else void this.#submit();
+          return;
+        }
+        const action = target.closest<HTMLElement>("[data-action]")?.dataset.action;
+        const article = target.closest<HTMLElement>("article[data-id]");
+        if (!action || !article) return;
+        const editor = article.querySelector<HTMLFormElement>("[data-slot=editor]");
+        const toggle = article.querySelector<HTMLElement>("[data-action=edit]");
+        const open = (shown: boolean) => {
+          editor!.hidden = !shown;
+          toggle!.setAttribute("aria-expanded", String(shown));
+          if (shown) editor!.querySelector("input")!.focus();
+        };
+        if (action === "quote") {
+          event.preventDefault();
+          const title = this.#form.elements.namedItem("title") as HTMLInputElement;
+          title.value = `Re: ${article.dataset.title}`;
+          this.#form.scrollIntoView({ block: "start" });
+          (this.#form.elements.namedItem("body") as HTMLTextAreaElement).focus({ preventScroll: true });
+        } else if (action === "edit") open(Boolean(editor!.hidden));
+        else if (action === "close") open(false);
+        else if (action === "delete" && editor!.reportValidity() && confirm("この書き込みを削除しますか？"))
+          void this.#change(editor!, "DELETE");
+      }
+
+      async #submit() {
+        const form = this.#form;
+        const status = this.#slot("status");
+        const submit = form.querySelector<HTMLButtonElement>("[type=submit]")!;
+        const { remember, ...values } = textFields(form);
+        submit.disabled = true;
+        try {
+          const { id } = await call<{ id: number }>("/api/bbs/", { body: values });
+          storage.save(remember ? Object.fromEntries(remembered.map((name) => [name, values[name] ?? ""])) : undefined);
+          for (const name of ["title", "body", "key"]) (form.elements.namedItem(name) as HTMLInputElement).value = "";
+          report(status, "書き込みました。ありがとうございます！");
+          refreshSidebar();
+          if (location.search) history.replaceState(history.state, "", "/bbs/");
+          await this.#load(id);
+        } catch (error) {
+          report(status, error instanceof ApiError ? error.message : "書き込めませんでした。", "error");
+        } finally {
+          submit.disabled = false;
+          form.querySelector<TurnstileField>("turnstile-field")?.reset();
+        }
+      }
+
+      async #change(editor: HTMLFormElement, method: "PATCH" | "DELETE") {
+        const article = editor.closest<HTMLElement>("article")!;
+        const { key, title, body, color } = textFields(editor);
+        try {
+          await call(`/api/bbs/${article.dataset.id}/`, {
+            method,
+            body: method === "PATCH" ? { key, title, body, color } : { key },
+          });
+          refreshSidebar();
+          await this.#load();
+        } catch (error) {
+          report(
+            editor.querySelector<HTMLElement>("[data-slot=error]")!,
+            error instanceof ApiError ? error.message : "うまく送れませんでした。",
+            "error",
+          );
+        }
+      }
+    },
+  );
+</script>

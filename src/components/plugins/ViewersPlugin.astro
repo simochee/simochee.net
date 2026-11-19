@@ -2,6 +2,24 @@
 import Plugin from "../layout/Plugin.astro";
 ---
 
-<Plugin title="現在の閲覧者数">
-<div class="py-8 px-4">現在の閲覧者数：<b>3</b>人</div>
-</Plugin>
+<current-viewers hidden>
+  <Plugin title="現在の閲覧者数">
+    <div class="px-4 py-8">現在の閲覧者数：<b data-slot="viewers"></b>人</div>
+  </Plugin>
+</current-viewers>
+
+<script>
+  import { onVisit } from "../../scripts/visit";
+
+  customElements.define(
+    "current-viewers",
+    class extends HTMLElement {
+      connectedCallback() {
+        onVisit(({ viewers }) => {
+          this.querySelector("[data-slot=viewers]")!.textContent = String(viewers);
+          this.hidden = false;
+        });
+      }
+    },
+  );
+</script>

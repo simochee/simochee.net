@@ -1,0 +1,7 @@
+# 手元の dev で使う秘密の値。.dev.vars にコピーして書き換える（.dev.vars は git に入らない）。
+# Turnstile の鍵を入れないと、手元では迷惑書き込みよけの確認を飛ばす。
+# 下は Cloudflare の試験用の鍵で、確認は必ず通る。
+# TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
+ADMIN_PASSWORD=dev-password
+# BLUESKY_APP_PASSWORD=
+# MASTODON_ACCESS_TOKEN=

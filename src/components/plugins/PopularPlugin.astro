@@ -1,20 +1,31 @@
 ---
 import Plugin from "../layout/Plugin.astro";
-
-// デザインに書かれていた見本のデータ。実データにつなぐときに置き換える。
-const popular = [
-  "固めプリンの名店まとめ",
-  "はじめてのネルドリップ",
-  "久しぶりに喫茶店でモーニング",
-  "古本屋のまわりかた",
-  "雨の日の喫茶店",
-];
 ---
 
-<Plugin title="人気記事">
-<ol class="list-decimal py-6 pr-4 pl-24 *:border-b *:border-dotted *:border-line *:py-2">
-{popular.map((p) => (
-<li><a href="#">{p}</a></li>
-))}
-</ol>
-</Plugin>
+<popular-posts hidden>
+  <Plugin title="人気記事">
+    <ol class="list-decimal py-6 pr-4 pl-24 *:border-b *:border-dotted *:border-line *:py-2"></ol>
+  </Plugin>
+</popular-posts>
+
+<script>
+  import { onSidebar } from "../../scripts/shared-data";
+
+  customElements.define(
+    "popular-posts",
+    class extends HTMLElement {
+      connectedCallback() {
+        onSidebar(({ popular }) => {
+          this.querySelector("ol")!.replaceChildren(
+            ...popular.map(({ slug, title }) => {
+              const item = document.createElement("li");
+              item.append(Object.assign(document.createElement("a"), { href: `/posts/${slug}/`, textContent: title }));
+              return item;
+            }),
+          );
+          this.hidden = popular.length === 0;
+        });
+      }
+    },
+  );
+</script>

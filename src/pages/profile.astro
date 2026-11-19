@@ -2,9 +2,11 @@
 import Icon from "../components/ui/Icon.astro";
 import Base from "../layouts/Base.astro";
 import Avatar from "../components/ui/Avatar.astro";
+import { accounts } from "../lib/accounts";
 import { site } from "../site";
 
 const { profile } = site;
+const { bluesky, mastodon } = accounts;
 const cell = "border border-line px-8 py-3";
 ---
 
@@ -57,11 +59,15 @@ const cell = "border border-line px-8 py-3";
     <h2>ほかの場所でも</h2>
     <p>このブログは、SNS からもフォローできます。新しい記事を書くと、そちらにも届きます。</p>
     <div class="flex flex-col gap-4 border border-line bg-wash px-10 py-6">
-      <p><Icon name="bsky" /> Bluesky：<a href="#">@simochee.net</a></p>
-      <p>
-        <Icon name="mastodon" /> Mastodon：<a href="#">@simochee@（サーバー未定）</a>
-        <span class="type-small text-ink-soft">（検索窓に入れるとフォローできます）</span>
-      </p>
+      <p><Icon name="bsky" /> Bluesky：<a href={bluesky.profile} rel="me noopener">@{bluesky.handle}</a></p>
+      {
+        mastodon && (
+          <p>
+            <Icon name="mastodon" /> Mastodon：<a href={mastodon.profile} rel="me noopener">{mastodon.handle}</a>
+            <span class="type-small text-ink-soft">（検索窓に入れるとフォローできます）</span>
+          </p>
+        )
+      }
       <p><Icon name="rss" /> RSS：<a href="/feed.xml">{new URL("/feed.xml", Astro.site)}</a></p>
     </div>
     <h2>このブログのあゆみ</h2>
@@ -77,6 +83,12 @@ const cell = "border border-line px-8 py-3";
         }
       </tbody>
     </table>
-    <p class="type-small text-ink-soft">このブログに来てくれた人：<b>0012341</b> 人（2024年4月1日から）</p>
+    <visit-stat hidden data-show="total">
+      <p class="type-small text-ink-soft">このブログに来てくれた人：<b data-slot="value"></b> 人</p>
+    </visit-stat>
   </div>
 </Base>
+
+<script>
+  import "../scripts/visit-stat";
+</script>

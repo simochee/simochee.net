@@ -12,6 +12,12 @@ export const site = {
     { label: "Qiita", href: "https://qiita.com/simochee", note: "技術" },
     { label: "しずかなインターネット", href: "https://sizu.me/simochee", note: "日記" },
   ],
+  /** サイドバーのアンケート。質問を変えるときは id も変え、前の質問の票と混ざらないようにする。 */
+  poll: {
+    id: "2026-winter-kissaten",
+    question: "冬の喫茶店で頼むのは？",
+    options: ["ブレンド", "カフェオレ", "ココア", "クリームソーダ"],
+  },
   /** プロフィールページの文言。デザインに書かれていた仮の内容のまま。 */
   profile: {
     facts: [

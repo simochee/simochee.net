@@ -1,26 +1,45 @@
 ---
 import Plugin from "../layout/Plugin.astro";
-
-// デザインに書かれていた見本のデータ。実データにつなぐときに置き換える。
-const counter = [
-  "0",
-  "0",
-  "1",
-  "2",
-  "3",
-  "4",
-  "1",
-];
 ---
 
-<Plugin title="アクセスカウンター">
-<div class="py-8 px-4 text-center">
-<div class="inline-flex gap-2">
-{counter.map((d) => (
-<span class="inline-block w-14 py-1 bg-lcd text-lcd-ink font-bold">{d}</span>
-))}
-</div>
-<div class="type-small mt-4">あなたは 0012341 人目のお客様です</div>
-<div class="type-small text-ink-soft">次のキリ番は 0012345 です。<br />踏んだ方は掲示板でご報告ください♪</div>
-</div>
-</Plugin>
+<access-counter hidden>
+  <Plugin title="アクセスカウンター">
+    <div class="px-4 py-8 text-center">
+      <div class="inline-flex gap-2" role="img" data-slot="digits"></div>
+      <div class="type-small mt-4">あなたは <span data-slot="number"></span> 人目のお客様です</div>
+      <div class="type-small font-bold text-ink-strong" data-slot="kiriban" hidden>キリ番おめでとうございます！</div>
+      <div class="type-small text-ink-soft">次のキリ番は <span data-slot="next"></span> です。<br />踏んだ方は<a href="/bbs/">掲示板</a>でご報告ください♪</div>
+    </div>
+  </Plugin>
+</access-counter>
+
+<script>
+  import { counterDigits, isKiriban, nextKiriban } from "../../lib/kiriban";
+  import { onVisit } from "../../scripts/visit";
+
+  customElements.define(
+    "access-counter",
+    class extends HTMLElement {
+      connectedCallback() {
+        const slot = (name: string) => this.querySelector<HTMLElement>(`[data-slot="${name}"]`)!;
+        onVisit(({ number, total }) => {
+          const digits = counterDigits(total);
+          slot("digits").setAttribute("aria-label", `これまでのお客様 ${total} 人`);
+          slot("digits").replaceChildren(
+            ...[...digits].map((digit) =>
+              Object.assign(document.createElement("span"), {
+                className: "inline-block w-14 bg-lcd py-1 font-bold text-lcd-ink",
+                textContent: digit,
+              }),
+            ),
+          );
+          const mine = number ?? total;
+          slot("number").textContent = counterDigits(mine);
+          slot("kiriban").hidden = !isKiriban(mine);
+          slot("next").textContent = counterDigits(nextKiriban(total));
+          this.hidden = false;
+        });
+      }
+    },
+  );
+</script>
