@@ -1,27 +1,132 @@
 ---
 import Plugin from "../layout/Plugin.astro";
 import Button from "../ui/Button.astro";
+import { site } from "../../site";
 
-// デザインに書かれていた見本のデータ。実データにつなぐときに置き換える。
-const pollOptions = [
-  {label: "ブレンド", checked: true, pct: "42%"},
-  {label: "カフェオレ", checked: false, pct: "18%"},
-  {label: "ココア", checked: false, pct: "25%"},
-  {label: "クリームソーダ", checked: false, pct: "15%"},
-];
+const { poll } = site;
 ---
 
-<Plugin title="アンケート">
-<div class="py-8 px-4">
-<p class="mb-4 font-bold">冬の喫茶店で頼むのは？</p>
+<sidebar-poll hidden data-poll={poll.id}>
+  <Plugin title="アンケート">
+    <div class="px-4 py-8">
+      <p class="mb-4 font-bold" id="poll-question">{poll.question}</p>
+      <form class="flex flex-col gap-1" aria-labelledby="poll-question" data-slot="form">
+        {
+          poll.options.map((option, index) => (
+            <label class="flex items-center gap-4">
+              <input type="radio" name="choice" value={index} required />
+              {option}
+            </label>
+          ))
+        }
+        <div class="mt-4 flex items-center justify-between">
+          <Button class="px-10 py-1" type="submit">投票</Button>
+          <Button variant="link" data-action="results">結果を見る</Button>
+        </div>
+      </form>
+      <div data-slot="results" hidden>
+        <ul class="flex flex-col gap-4">
+          {
+            poll.options.map((option) => (
+              <li>
+                <div class="flex justify-between gap-4">
+                  <span data-slot="option">{option}</span>
+                  <span class="type-small text-ink-soft" data-slot="share"></span>
+                </div>
+                <div class="h-6 border border-line bg-paper">
+                  <div class="h-full bg-accent" data-slot="bar"></div>
+                </div>
+              </li>
+            ))
+          }
+        </ul>
+        <p class="type-small mt-4 text-ink-soft" data-slot="total"></p>
+        <p class="type-small mt-2 text-right"><Button variant="link" data-action="vote">投票にもどる</Button></p>
+      </div>
+      <p class="type-small mt-4 text-danger" role="alert" data-slot="error" hidden></p>
+    </div>
+  </Plugin>
+</sidebar-poll>
 
-<form class="flex flex-col gap-1">
-{pollOptions.map((o) => (
-<label class="flex items-center gap-4"><input type="radio" name="poll" checked={o.checked} />{o.label}</label>
-))}
-<div class="flex justify-between items-center mt-4"><Button class="py-1 px-10">投票</Button><a href="#">結果を見る</a></div>
-</form>
+<script>
+  import type { PollResponse } from "../../lib/api";
+  import { shares } from "../../lib/poll";
+  import { ApiError, call } from "../../scripts/api";
+  import { report } from "../../scripts/template";
 
+  let first: Promise<PollResponse> | undefined;
+  /**
+   * ページを開いたときの投票の状態。読むのは最初の 1 回だけにする。
+   * ページを移るとき、ClientRouter は新しいページ側のサイドバーをいったん文書に入れてから、残しておいたサイドバーと差し替える。
+   * 要素ごとに読むと、その一瞬つながった複製の分まで毎回読んでしまう。
+   */
+  const initial = () =>
+    (first ??= call<PollResponse>("/api/poll/").catch((error: unknown) => {
+      first = undefined;
+      throw error;
+    }));
 
-</div>
-</Plugin>
+  customElements.define(
+    "sidebar-poll",
+    class extends HTMLElement {
+      #slot(name: string) {
+        return this.querySelector<HTMLElement>(`[data-slot="${name}"]`)!;
+      }
+      #slots(name: string) {
+        return [...this.querySelectorAll<HTMLElement>(`[data-slot="${name}"]`)];
+      }
+
+      connectedCallback() {
+        this.addEventListener("click", this);
+        this.addEventListener("submit", this);
+        this.hidden = false;
+        initial().then(
+          (result) => {
+            if (result.choice !== null) this.#show(result);
+          },
+          () => {},
+        );
+      }
+
+      async handleEvent(event: Event) {
+        const action = (event.target as Element).closest<HTMLElement>("[data-action]")?.dataset.action;
+        if (event.type === "submit") {
+          event.preventDefault();
+          const choice = new FormData(this.#slot("form") as HTMLFormElement).get("choice");
+          await this.#load({ body: { poll: this.dataset.poll, choice: Number(choice) } });
+        } else if (action === "results") await this.#load();
+        else if (action === "vote") this.#toggle(false);
+      }
+
+      async #load(init?: { body: unknown }) {
+        try {
+          this.#show(await call<PollResponse>("/api/poll/", init));
+          report(this.#slot("error"), "");
+        } catch (error) {
+          report(this.#slot("error"), error instanceof ApiError ? error.message : "読み込めませんでした。", "error");
+        }
+      }
+
+      #toggle(results: boolean) {
+        this.#slot("form").hidden = results;
+        this.#slot("results").hidden = !results;
+      }
+
+      #show(result: PollResponse) {
+        const percents = shares(result.votes);
+        this.#slots("share").forEach((cell, index) => (cell.textContent = `${percents[index]}%（${result.votes[index]}票）`));
+        this.#slots("bar").forEach((bar, index) => (bar.style.width = `${percents[index]}%`));
+        this.#slots("option").forEach((option, index) =>
+          option.classList.toggle("font-bold", index === result.choice),
+        );
+        this.#slot("total").textContent =
+          result.choice === null
+            ? `これまでに ${result.total} 票`
+            : `これまでに ${result.total} 票。投票ありがとうございました！`;
+        // 投票したあとは結果だけを見せる。1 人 1 票なので、投票欄にもどっても押せない。
+        this.querySelector<HTMLElement>("[data-action=vote]")!.hidden = result.choice !== null;
+        this.#toggle(true);
+      }
+    },
+  );
+</script>

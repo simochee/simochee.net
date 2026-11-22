@@ -1,0 +1,12 @@
+---
+/** 迷惑書き込みよけの自動チェック。フォームの中に置く。 */
+interface Props {
+  class?: string;
+}
+---
+
+<turnstile-field class:list={["block min-h-65", Astro.props.class]}></turnstile-field>
+
+<script>
+  import "../../scripts/turnstile";
+</script>

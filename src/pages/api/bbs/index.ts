@@ -1,0 +1,39 @@
+import { env } from "cloudflare:workers";
+import { z } from "zod";
+import type { BbsPage } from "../../../lib/api";
+import { bbsPageSize } from "../../../lib/bbs";
+import { addBbsPost, bbsPage } from "../../../server/bbs";
+import { database } from "../../../server/db";
+import { fields } from "../../../server/fields";
+import { clientAddress, handler, json, readJson, throttle } from "../../../server/http";
+import { verifyHuman } from "../../../server/turnstile";
+
+export const prerender = false;
+
+export const GET = handler(async ({ url }) => {
+  const page = Number(url.searchParams.get("page") ?? 1);
+  return json(
+    (await bbsPage(
+      await database(),
+      Number.isSafeInteger(page) ? page : 1,
+      bbsPageSize,
+    )) satisfies BbsPage,
+  );
+});
+
+const schema = z.object({
+  name: fields.name,
+  url: fields.url,
+  title: fields.title,
+  body: fields.body,
+  color: fields.inkColor,
+  key: fields.deleteKey,
+  turnstile: fields.turnstile,
+});
+
+export const POST = handler(async (context) => {
+  const input = await readJson(context.request, schema);
+  await throttle(env.POST_LIMIT, `bbs:${clientAddress(context)}`);
+  await verifyHuman(input.turnstile);
+  return json({ id: await addBbsPost(await database(), input) }, 201);
+});

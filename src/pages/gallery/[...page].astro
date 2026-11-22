@@ -1,0 +1,114 @@
+---
+import { getImage, Image } from "astro:assets";
+import Base from "../../layouts/Base.astro";
+import Button from "../../components/ui/Button.astro";
+import PageNumbers from "../../components/entry/PageNumbers.astro";
+import { dayKey } from "../../lib/dates";
+import { galleryPageSize, photos } from "../../lib/gallery";
+import { pageCount, pageOf, pageParams } from "../../lib/paging";
+import { posts } from "../../lib/posts";
+
+export async function getStaticPaths() {
+  const all = photos(await posts());
+  return pageParams(all.length, galleryPageSize).map(({ page, param }) => ({
+    params: { page: param },
+    props: { all, page },
+  }));
+}
+const { all, page } = Astro.props;
+const shown = await Promise.all(
+  pageOf(all, page, galleryPageSize).map(async (photo) => {
+    const [large, retina] = await Promise.all([
+      getImage({ src: photo.src, width: 400, format: "webp" }),
+      getImage({ src: photo.src, width: 800, format: "webp" }),
+    ]);
+    return {
+      ...photo,
+      href: `/posts/${photo.postId}/`,
+      date: dayKey(photo.publishedAt),
+      large: {
+        src: large.src,
+        srcset: `${large.src} 1x, ${retina.src} 2x`,
+        width: 400,
+        height: Math.round((photo.src.height * 400) / photo.src.width),
+      },
+    };
+  }),
+);
+const [first] = shown;
+---
+
+<Base title={page > 1 ? `画像一覧（${page}ページ目）` : "画像一覧"}>
+  <h1 class="title-box mb-4">画像一覧</h1>
+  <p class="type-small mb-10 text-ink-soft">
+    記事にのせた写真を、新しい順に並べています。小さい写真を押すと、上に大きく表示されます。（全 {all.length} 枚）
+  </p>
+
+  {
+    first ? (
+      <gallery-viewer>
+        <div class="mb-14 border border-line bg-wash p-10 text-center">
+          <img
+            class="mx-auto block h-auto max-h-300 max-w-full border border-photo object-contain"
+            src={first.large.src}
+            srcset={first.large.srcset}
+            width={first.large.width}
+            height={first.large.height}
+            alt={first.caption}
+            data-image
+          />
+          <div class="mt-6 font-bold text-ink-strong" data-caption>
+            {first.caption}
+          </div>
+          <div class="type-small text-ink-soft">
+            <span data-date>{first.date}</span> の記事「<a href={first.href} data-post>{first.postTitle}</a>」より
+          </div>
+          <div class="mt-6 flex items-center justify-center gap-10" data-controls hidden>
+            <Button class="px-10 disabled:cursor-default disabled:text-ink-soft" variant="plain" data-step="-1">
+              &laquo; 前の写真
+            </Button>
+            <span class="type-small text-ink-soft" aria-live="polite">
+              <span data-position>1</span> / {shown.length}
+            </span>
+            <Button class="px-10 disabled:cursor-default disabled:text-ink-soft" variant="plain" data-step="1">
+              次の写真 &raquo;
+            </Button>
+          </div>
+        </div>
+
+        <ul class="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-10">
+          {shown.map((photo, index) => (
+            <li class="min-w-0">
+              <a
+                class="flex flex-col gap-3 border border-line bg-paper p-4 text-left text-ink no-underline aria-[current=true]:border-2 aria-[current=true]:border-accent aria-[current=true]:p-3"
+                href={photo.href}
+                aria-current={index === 0 ? "true" : undefined}
+                data-src={photo.large.src}
+                data-srcset={photo.large.srcset}
+                data-width={photo.large.width}
+                data-height={photo.large.height}
+                data-caption={photo.caption}
+                data-date={photo.date}
+                data-title={photo.postTitle}
+              >
+                <Image class="block aspect-[4/3] w-full bg-blank object-cover" src={photo.src} alt="" width={160} height={120} fit="cover" densities={[1, 2]} format="webp" loading="lazy" />
+                <span class="type-small text-ink-strong">{photo.caption}</span>
+                <span class="type-small text-ink-soft">{photo.date}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </gallery-viewer>
+    ) : (
+      <p class="mb-14 border border-line bg-wash p-10 text-center">まだ写真はありません。</p>
+    )
+  }
+
+  <div class="mt-14">
+    <PageNumbers base="/gallery/" page={page} last={pageCount(all.length, galleryPageSize)} />
+  </div>
+</Base>
+
+<script>
+  import "../../scripts/gallery";
+</script>

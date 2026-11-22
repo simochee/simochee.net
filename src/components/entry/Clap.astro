@@ -1,9 +1,57 @@
 ---
 import Button from "../ui/Button.astro";
 import Icon from "../ui/Icon.astro";
-import { sampleClaps } from "../../sample";
+
+interface Props {
+  slug: string;
+}
 ---
 
-<p class="type-small border-t border-line-soft pt-5 text-right text-ink-soft">
-  <Button variant="soft" class="px-8"><Icon name="clap" /> 拍手する</Button> ({sampleClaps})
-</p>
+<clap-button hidden data-slug={Astro.props.slug}>
+  <p class="type-small border-t border-line-soft pt-5 text-right text-ink-soft">
+    <Button variant="soft" class="px-8"><Icon name="clap" /> 拍手する</Button> (<span data-slot="count">0</span>)
+    <span class="sr-only" role="status"></span>
+  </p>
+</clap-button>
+
+<script>
+  import { ApiError, call } from "../../scripts/api";
+  import { countsOf } from "../../scripts/shared-data";
+
+  customElements.define(
+    "clap-button",
+    class extends HTMLElement {
+      get #slug() {
+        return this.dataset.slug!;
+      }
+      #show(count: number) {
+        this.querySelector("[data-slot=count]")!.textContent = String(count);
+      }
+      connectedCallback() {
+        this.querySelector("button")!.addEventListener("click", this);
+        countsOf(this.#slug).then(
+          ({ claps }) => {
+            this.#show(claps);
+            this.hidden = false;
+          },
+          () => {},
+        );
+      }
+      disconnectedCallback() {
+        this.querySelector("button")!.removeEventListener("click", this);
+      }
+      async handleEvent() {
+        const status = this.querySelector("[role=status]")!;
+        try {
+          const { count } = await call<{ count: number }>("/api/claps/", { body: { slug: this.#slug } });
+          // 一覧とページ下のように、同じ記事の拍手ボタンが 1 ページに 2 つあることがある。
+          for (const other of document.querySelectorAll<HTMLElement>(`clap-button[data-slug="${this.#slug}"]`))
+            other.querySelector("[data-slot=count]")!.textContent = String(count);
+          status.textContent = `拍手しました。${count} 回目です。`;
+        } catch (error) {
+          status.textContent = error instanceof ApiError ? error.message : "";
+        }
+      }
+    },
+  );
+</script>

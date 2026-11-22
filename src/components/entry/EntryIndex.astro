@@ -4,7 +4,8 @@ import { formatDay } from "../../lib/dates";
 
 interface Props {
   posts: Post[];
-  note: (post: Post) => string;
+  /** 記事の右に添える小さな注記。文字列でもマークアップでもよい。 */
+  note: (post: Post) => unknown;
 }
 const { posts, note } = Astro.props;
 ---

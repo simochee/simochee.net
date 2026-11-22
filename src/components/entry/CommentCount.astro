@@ -1,0 +1,12 @@
+---
+/** 記事のコメント数。数はページを開いたときに読むので、スクリプトが動かないあいだは「-」のまま。 */
+interface Props {
+  slug: string;
+}
+---
+
+<comment-count data-slug={Astro.props.slug}>-</comment-count>
+
+<script>
+  import "../../scripts/comment-count";
+</script>

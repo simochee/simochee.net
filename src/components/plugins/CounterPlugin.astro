@@ -1,26 +1,42 @@
 ---
 import Plugin from "../layout/Plugin.astro";
-
-// デザインに書かれていた見本のデータ。実データにつなぐときに置き換える。
-const counter = [
-  "0",
-  "0",
-  "1",
-  "2",
-  "3",
-  "4",
-  "1",
-];
 ---
 
-<Plugin title="アクセスカウンター">
-<div class="py-8 px-4 text-center">
-<div class="inline-flex gap-2">
-{counter.map((d) => (
-<span class="inline-block w-14 py-1 bg-lcd text-lcd-ink font-bold">{d}</span>
-))}
-</div>
-<div class="type-small mt-4">あなたは 0012341 人目のお客様です</div>
-<div class="type-small text-ink-soft">次のキリ番は 0012345 です。<br />踏んだ方は掲示板でご報告ください♪</div>
-</div>
-</Plugin>
+<access-counter hidden>
+  <Plugin title="アクセスカウンター">
+    <div class="px-4 py-8 text-center">
+      <div class="inline-flex gap-2" role="img" data-slot="digits"></div>
+      <div class="type-small mt-4">これまでに来てくれたお客様の数です</div>
+    </div>
+  </Plugin>
+</access-counter>
+
+<script>
+  import { counterDigits } from "../../lib/counter";
+  import { onSidebar } from "../../scripts/shared-data";
+
+  customElements.define(
+    "access-counter",
+    class extends HTMLElement {
+      #stop: (() => void) | undefined;
+      connectedCallback() {
+        this.#stop = onSidebar(({ total }) => {
+          const digits = this.querySelector<HTMLElement>("[data-slot=digits]")!;
+          digits.setAttribute("aria-label", `これまでのお客様 ${total} 人`);
+          digits.replaceChildren(
+            ...[...counterDigits(total)].map((digit) =>
+              Object.assign(document.createElement("span"), {
+                className: "inline-block w-14 bg-lcd py-1 font-bold text-lcd-ink",
+                textContent: digit,
+              }),
+            ),
+          );
+          this.hidden = false;
+        });
+      }
+      disconnectedCallback() {
+        this.#stop?.();
+      }
+    },
+  );
+</script>

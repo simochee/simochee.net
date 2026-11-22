@@ -1,28 +1,48 @@
 ---
 import Plugin from "../layout/Plugin.astro";
 import PluginList from "../layout/PluginList.astro";
-import Icon from "../ui/Icon.astro";
-import { services } from "../../content/comment-schema";
-import { threads } from "../../lib/comment-store";
-import { commentAnchor, recentComments } from "../../lib/comments";
-import { formatMonthDay } from "../../lib/dates";
-import { posts } from "../../lib/posts";
-
-const titles = new Map((await posts()).map((post) => [post.id, post.data.title]));
-const recent = recentComments(await threads(), 5);
 ---
 
-{
-  recent.length > 0 && (
-    <Plugin title="最新コメント">
-      <PluginList>
-        {recent.map(({ slug, number, comment }) => (
-          <li>
-            ・{comment.via && <Icon name={comment.via} label={`${services[comment.via]}から`} class="mr-2" />}
-            {comment.name}：<a href={`/posts/${slug}/#${commentAnchor(number)}`}>{titles.get(slug)}</a> ({formatMonthDay(comment.at)})
-          </li>
-        ))}
-      </PluginList>
-    </Plugin>
-  )
-}
+<recent-comments hidden>
+  <Plugin title="最新コメント">
+    <PluginList />
+    <template>
+      <li>
+        ・<span data-slot="name"></span>：<a data-slot="post"></a> (<span data-slot="date"></span>)
+      </li>
+    </template>
+  </Plugin>
+</recent-comments>
+
+<script>
+  import { commentAnchor } from "../../lib/comments";
+  import { formatMonthDay } from "../../lib/dates";
+  import { onSidebar } from "../../scripts/shared-data";
+  import { stamp } from "../../scripts/template";
+
+  customElements.define(
+    "recent-comments",
+    class extends HTMLElement {
+      #stop: (() => void) | undefined;
+      connectedCallback() {
+        this.#stop = onSidebar(({ comments }) => {
+          const template = this.querySelector("template")!;
+          this.querySelector("ul")!.replaceChildren(
+            ...comments.map((comment) => {
+              const { fragment, slot } = stamp(template);
+              slot("name").textContent = comment.name;
+              slot<HTMLAnchorElement>("post").href = `/posts/${comment.slug}/#${commentAnchor(comment.number)}`;
+              slot("post").textContent = comment.postTitle;
+              slot("date").textContent = formatMonthDay(new Date(comment.at));
+              return fragment;
+            }),
+          );
+          this.hidden = comments.length === 0;
+        });
+      }
+      disconnectedCallback() {
+        this.#stop?.();
+      }
+    },
+  );
+</script>

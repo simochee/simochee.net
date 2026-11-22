@@ -3,18 +3,88 @@ import Plugin from "../layout/Plugin.astro";
 import Button from "../ui/Button.astro";
 import TextArea from "../ui/TextArea.astro";
 import TextField from "../ui/TextField.astro";
+import Turnstile from "../ui/Turnstile.astro";
+import { limits } from "../../lib/limits";
+
+interface Props {
+  slug: string;
+}
 ---
 
 <Plugin title="コメントの投稿" class="mt-22">
-  <form class="mt-6 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-8 gap-y-4">
-    <label for="comment-name">名前</label><TextField class="max-w-220" id="comment-name" autocomplete="name" />
-    <label for="comment-title">タイトル</label><TextField class="max-w-320" id="comment-title" />
-    <label for="comment-mail">メールアドレス</label><TextField class="max-w-320" id="comment-mail" type="email" autocomplete="email" />
-    <label for="comment-url">URL</label><TextField class="max-w-320" id="comment-url" type="url" autocomplete="url" />
-    <label class="self-start" for="comment-body">本文</label><TextArea id="comment-body" rows="5" />
-    <label for="comment-pass">パスワード</label><TextField class="max-w-160" id="comment-pass" type="password" autocomplete="off" />
-    <span>非公開コメント</span><label class="type-small"><input type="checkbox" /> 管理者にだけ表示を許可する</label>
-    <span></span>
-    <div><Button class="px-16 py-2">送信</Button></div>
-  </form>
+  <comment-form hidden data-slug={Astro.props.slug}>
+    <form class="mt-6 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-8 gap-y-4">
+      <label for="comment-name">名前</label><TextField class="max-w-220" id="comment-name" name="name" autocomplete="name" maxlength={limits.name} required />
+      <label for="comment-title">タイトル</label><TextField class="max-w-320" id="comment-title" name="title" maxlength={limits.title} />
+      <label for="comment-url">URL</label><TextField class="max-w-320" id="comment-url" name="url" type="url" autocomplete="url" maxlength={limits.url} placeholder="https://" />
+      <label class="self-start" for="comment-body">本文</label><TextArea id="comment-body" name="body" rows="5" maxlength={limits.body} required />
+      <label for="comment-pass">削除パスワード</label>
+      <div class="flex flex-wrap items-center gap-x-8 gap-y-2">
+        <TextField class="min-w-0 flex-[0_1_160px]" id="comment-pass" name="password" type="password" autocomplete="off" maxlength={limits.password} /><span class="type-small text-ink-soft">（入れておくと、あとで自分で削除できます）</span>
+      </div>
+      <span>非公開コメント</span><label class="type-small"><input type="checkbox" name="private" /> 管理者にだけ表示を許可する</label>
+      <span></span><Turnstile />
+      <span></span>
+      <div><Button class="px-16 py-2" type="submit">送信</Button></div>
+      <span></span>
+      <p role="status" hidden></p>
+    </form>
+  </comment-form>
+  <noscript><p class="mt-6">コメントを書くには、JavaScript を有効にしてください。</p></noscript>
 </Plugin>
+
+<script>
+  import type { PostedComment } from "../../lib/api";
+  import { ApiError, call } from "../../scripts/api";
+  import { commentsChanged } from "../../scripts/events";
+  import { refreshSidebar } from "../../scripts/shared-data";
+  import { report, textFields } from "../../scripts/template";
+  import type { TurnstileField } from "../../scripts/turnstile";
+
+  customElements.define(
+    "comment-form",
+    class extends HTMLElement {
+      get #form() {
+        return this.querySelector("form")!;
+      }
+      connectedCallback() {
+        this.#form.addEventListener("submit", this);
+        this.hidden = false;
+      }
+      disconnectedCallback() {
+        this.#form.removeEventListener("submit", this);
+      }
+      async handleEvent(event: Event) {
+        event.preventDefault();
+        const form = this.#form;
+        const status = form.querySelector<HTMLElement>("[role=status]")!;
+        const submit = form.querySelector<HTMLButtonElement>("[type=submit]")!;
+        const isPrivate = form.querySelector<HTMLInputElement>("[name=private]")!.checked;
+        submit.disabled = true;
+        try {
+          const posted = await call<PostedComment>("/api/comments/", {
+            body: { ...textFields(form), slug: this.dataset.slug, private: isPrivate },
+          });
+          for (const name of ["title", "body", "password"])
+            (form.elements.namedItem(name) as HTMLInputElement).value = "";
+          form.querySelector<HTMLInputElement>("[name=private]")!.checked = false;
+          report(
+            status,
+            posted.private
+              ? "管理人だけが読めるコメントとして受け付けました。ありがとうございます。"
+              : "コメントを送信しました。ありがとうございます。",
+          );
+          if (!posted.private) {
+            document.dispatchEvent(new CustomEvent(commentsChanged, { detail: posted.id }));
+            refreshSidebar();
+          }
+        } catch (error) {
+          report(status, error instanceof ApiError ? error.message : "送信できませんでした。", "error");
+        } finally {
+          submit.disabled = false;
+          form.querySelector<TurnstileField>("turnstile-field")?.reset();
+        }
+      }
+    },
+  );
+</script>

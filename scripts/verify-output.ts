@@ -17,6 +17,9 @@ for (const path of [
   "tags/sample/index.html",
   "tags/日本語/index.html",
   "tags/CI~2fCD/index.html",
+  "search/index.html",
+  "search.json",
+  "gallery/index.html",
   "404.html",
   "feed.xml",
   "sitemap-index.xml",
@@ -48,14 +51,24 @@ async function checkMarkers(
 for (const dir of [".cloudflare/output", "dist", ".astro", "node_modules/.astro"]) {
   if (await stat(dir).catch(() => undefined)) await checkMarkers(dir);
 }
-// コメントは記事と違って data store には全件入る。公開されるページに出ていないことだけを確かめる。
+// 手元の dev で入る見本のコメント（db/dev-seed.sql）は、本番の Worker にも静的ファイルにも入れない。
 await checkMarkers(".cloudflare/output", /COMMENT-ON-DRAFT-DO-NOT-SHIP/);
+// コメントと拍手は書かれたらすぐ出したいので、ページには器だけを書き出し、中身はサーバーから読む。
 const morning = await readFile(`${assets}/posts/morning-at-kissaten/index.html`, "utf8");
-assert.equal(morning.match(/id="comment-\d+"/g)?.length, 5);
-assert.match(morning, /コメント\(5\)/);
-assert.match(await readFile(`${assets}/comments.xml`, "utf8"), /厚切りトースト/);
+assert.match(morning, /<post-comments data-slug="morning-at-kissaten"/);
+assert.match(morning, /<clap-button [^>]*data-slug="morning-at-kissaten"/);
+// サーバーが記事を知るための一覧には、公開中の記事だけを載せる。
+const listed = JSON.parse(await readFile(`${assets}/posts.json`, "utf8")) as { id: string }[];
+assert.deepEqual(listed.map((post) => post.id).sort(), expected);
 // サーバーで動かすルートは、静的ファイルとして書き出されていてはいけない。
-assert.equal(await stat(`${assets}/api`).catch(() => undefined), undefined);
+for (const path of ["api", "comments.xml"])
+  assert.equal(await stat(`${assets}/${path}`).catch(() => undefined), undefined);
+// 管理画面は検索にもサイトマップにも載せない。
+assert.match(
+  await readFile(`${assets}/admin/index.html`, "utf8"),
+  /<meta name="robots" content="noindex, nofollow"/,
+);
+assert.doesNotMatch(await readFile(`${assets}/sitemap-0.xml`, "utf8"), /\/admin\//);
 const markdown = await readFile(`${assets}/posts/markdown-lab/index.html`, "utf8");
 for (const pattern of [
   /<a class="heading-anchor"/,
@@ -77,3 +90,11 @@ assert.match(
 console.log(
   "No draft/material markers in the build output, .astro, node_modules/.astro; Markdown/MDX decoration verified.",
 );
+const search: { id: string; text: string }[] = JSON.parse(
+  await readFile(`${assets}/search.json`, "utf8"),
+);
+assert.deepEqual(search.map((entry) => entry.id).sort(), expected);
+const gallery = await readFile(`${assets}/gallery/index.html`, "utf8");
+assert.match(gallery, /<gallery-viewer/);
+assert.match(gallery, /\/_astro\/napolitan\.[^" ]+\.webp/);
+console.log(`search.json: ${search.length} posts; gallery page rendered.`);

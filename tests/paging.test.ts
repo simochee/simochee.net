@@ -52,3 +52,9 @@ test("一覧の 1 ページ目は URL に番号を持たない", () => {
     { page: 2, param: "page/2" },
   ]);
 });
+test("1 ページの件数を指定した一覧でも、区切りと範囲と URL が同じ決まりになる", () => {
+  expect(pageCount(25, 12)).toBe(3);
+  expect(pageOf(items, 2, 4)).toEqual(items.slice(4, 8));
+  expect(pageRange(25, 3, 12)).toEqual({ from: 25, to: 25 });
+  expect(pageParams(13, 12).map(({ param }) => param)).toEqual([undefined, "page/2"]);
+});

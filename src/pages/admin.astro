@@ -1,0 +1,185 @@
+---
+import Base from "../layouts/Base.astro";
+import Button from "../components/ui/Button.astro";
+import TextArea from "../components/ui/TextArea.astro";
+import TextField from "../components/ui/TextField.astro";
+import { limits } from "../lib/limits";
+
+const heading = "mb-6 mt-14 border-b border-line bg-wash px-6 py-2 font-bold text-ink-strong before:content-['▼_']";
+const item = "border-b border-dotted border-line px-6 py-6";
+---
+
+<Base title="管理画面" noindex>
+  <h1 class="title-box mb-10">管理画面</h1>
+  <noscript><p>管理画面を使うには、JavaScript を有効にしてください。</p></noscript>
+
+  <admin-panel hidden>
+    <form class="flex flex-wrap items-center gap-8" data-slot="login" hidden>
+      <label for="admin-password">管理人のパスワード</label>
+      <TextField class="min-w-0 flex-[0_1_220px]" id="admin-password" name="password" type="password" autocomplete="current-password" required />
+      <Button class="px-16 py-2" type="submit">ログイン</Button>
+    </form>
+
+    <div data-slot="inbox" hidden>
+      <div class="flex flex-wrap items-center gap-8">
+        <Button class="px-10 py-1" variant="plain" data-action="logout">ログアウト</Button>
+      </div>
+
+      <h2 class={heading}>コメント（新しい順）</h2>
+      <p class="type-small mb-4 text-ink-soft">非公開のコメントもここに出ます。</p>
+      <ul data-slot="comments"></ul>
+
+      <h2 class={heading}>掲示板（新しい順）</h2>
+      <ul data-slot="bbs"></ul>
+    </div>
+
+    <p class="mt-8" role="status" data-slot="status" hidden></p>
+
+    <template data-slot="comment">
+      <li class={item}>
+        <p class="font-bold text-ink-strong"><span class="text-danger" data-slot="private">［非公開］</span><span data-slot="title"></span></p>
+        <p class="type-small text-ink-soft"><span data-slot="name"></span> ／ <span data-slot="meta"></span> ／ <a data-slot="post"></a></p>
+        <p class="mt-2 whitespace-pre-line" data-slot="body"></p>
+        <p class="mt-2 text-right"><Button class="px-10 py-1" variant="plain" data-action="delete-comment">削除する</Button></p>
+      </li>
+    </template>
+
+    <template data-slot="bbs-post">
+      <li class={item}>
+        <p class="font-bold text-ink-strong" data-slot="title"></p>
+        <p class="type-small text-ink-soft"><span data-slot="name"></span> ／ <span data-slot="meta"></span></p>
+        <p class="mt-2 whitespace-pre-line" data-slot="body"></p>
+        <form class="mt-4 flex flex-col gap-4" data-slot="reply-form">
+          <label class="type-small" data-slot="reply-label">管理人の返信</label>
+          <TextArea name="reply" rows="3" maxlength={limits.body} />
+          <div class="flex flex-wrap justify-end gap-6">
+            <Button class="px-10 py-1" type="submit">返信を保存する</Button>
+            <Button class="px-10 py-1" variant="plain" data-action="delete-bbs">削除する</Button>
+          </div>
+        </form>
+      </li>
+    </template>
+  </admin-panel>
+</Base>
+
+<script>
+  import type { AdminInbox } from "../lib/api";
+  import { formatTimestamp } from "../lib/dates";
+  import { ApiError, call } from "../scripts/api";
+  import { report, stamp, textFields } from "../scripts/template";
+
+  customElements.define(
+    "admin-panel",
+    class extends HTMLElement {
+      #slot<T extends HTMLElement = HTMLElement>(name: string) {
+        return this.querySelector<T>(`[data-slot="${name}"]`)!;
+      }
+
+      connectedCallback() {
+        this.addEventListener("submit", this);
+        this.addEventListener("click", this);
+        this.hidden = false;
+        void this.#load();
+      }
+
+      #status(message: string, tone: "ok" | "error" = "ok") {
+        report(this.#slot("status"), message, tone);
+      }
+
+      async #run(task: () => Promise<unknown>) {
+        try {
+          await task();
+        } catch (error) {
+          this.#status(error instanceof ApiError ? error.message : "うまくいきませんでした。", "error");
+        }
+      }
+
+      async #load() {
+        const { admin } = await call<{ admin: boolean }>("/api/admin/session/").catch(() => ({ admin: false }));
+        this.#slot("login").hidden = admin;
+        this.#slot("inbox").hidden = !admin;
+        if (admin) await this.#run(async () => this.#render(await call<AdminInbox>("/api/admin/inbox/")));
+      }
+
+      #render({ comments, bbs }: AdminInbox) {
+        const comment = this.#slot<HTMLTemplateElement>("comment");
+        this.#slot("comments").replaceChildren(
+          ...comments.map((entry) => {
+            const { fragment, slot } = stamp(comment);
+            fragment.querySelector("li")!.dataset.id = String(entry.id);
+            if (!entry.private) slot("private").remove();
+            slot("title").textContent = entry.title;
+            slot("name").textContent = entry.name;
+            slot("meta").textContent = [
+              formatTimestamp(new Date(entry.at)),
+              entry.url,
+            ]
+              .filter(Boolean)
+              .join(" ／ ");
+            slot<HTMLAnchorElement>("post").href = `/posts/${entry.slug}/#comments`;
+            slot("post").textContent = entry.postTitle ?? `${entry.slug}（公開されていない記事）`;
+            slot("body").textContent = entry.body;
+            return fragment;
+          }),
+        );
+        const post = this.#slot<HTMLTemplateElement>("bbs-post");
+        this.#slot("bbs").replaceChildren(
+          ...bbs.map((entry) => {
+            const { fragment, slot } = stamp(post);
+            fragment.querySelector("li")!.dataset.id = String(entry.id);
+            slot("title").textContent = `[${entry.id}] ${entry.title}`;
+            slot("name").textContent = entry.name;
+            slot("meta").textContent = [formatTimestamp(new Date(entry.at)), entry.url]
+              .filter(Boolean)
+              .join(" ／ ");
+            slot("body").textContent = entry.body;
+            slot("body").style.color = entry.color;
+            const reply = slot<HTMLFormElement>("reply-form").querySelector("textarea")!;
+            reply.id = `reply-${entry.id}`;
+            reply.defaultValue = entry.reply ?? "";
+            slot("reply-label").setAttribute("for", reply.id);
+            return fragment;
+          }),
+        );
+      }
+
+      handleEvent(event: Event) {
+        const target = event.target as Element;
+        const id = target.closest<HTMLElement>("li[data-id]")?.dataset.id;
+        if (event.type === "submit") {
+          event.preventDefault();
+          const form = target as HTMLFormElement;
+          if (form.dataset.slot === "login")
+            void this.#run(async () => {
+              await call("/api/admin/session/", { body: textFields(form) });
+              form.reset();
+              this.#status("");
+              await this.#load();
+            });
+          else
+            void this.#run(async () => {
+              await call(`/api/bbs/${id}/reply/`, { method: "PUT", body: textFields(form) });
+              this.#status(`[${id}] の返信を保存しました。`);
+            });
+          return;
+        }
+        const action = target.closest<HTMLElement>("[data-action]")?.dataset.action;
+        if (action === "logout")
+          void this.#run(async () => {
+            await call("/api/admin/session/", { method: "DELETE" });
+            await this.#load();
+          });
+        else if (action === "delete-comment" && confirm("このコメントを削除しますか？"))
+          void this.#run(async () => {
+            await call(`/api/comments/${id}/`, { method: "DELETE", body: {} });
+            await this.#load();
+          });
+        else if (action === "delete-bbs" && confirm("この書き込みを削除しますか？"))
+          void this.#run(async () => {
+            await call(`/api/bbs/${id}/`, { method: "DELETE", body: {} });
+            await this.#load();
+          });
+      }
+    },
+  );
+</script>

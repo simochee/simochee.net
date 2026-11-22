@@ -1,43 +1,163 @@
 ---
 import Plugin from "../layout/Plugin.astro";
+import Button from "../ui/Button.astro";
 import Icon from "../ui/Icon.astro";
-import { services } from "../../content/comment-schema";
-import { threads } from "../../lib/comment-store";
-import { commentAnchor } from "../../lib/comments";
-import { formatTimestamp } from "../../lib/dates";
+import TextField from "../ui/TextField.astro";
 
 interface Props {
   slug: string;
 }
-const comments = (await threads()).get(Astro.props.slug) ?? [];
 ---
 
 <Plugin title="コメント" class="mt-22" id="comments">
-  {
-    comments.map((comment, index) => (
-      <article id={commentAnchor(index + 1)} class="border-b border-dotted border-line px-6 py-8">
-        <h3 class="font-bold text-ink-strong before:content-['■_']">{comment.title}</h3>
-        <p class="mt-2 mb-4 whitespace-pre-line">{comment.body}</p>
+  <post-comments data-slug={Astro.props.slug}>
+    <div data-slot="list"></div>
+    <p class="px-6 py-8" data-slot="message">コメントを読み込んでいます…</p>
+    <template>
+      <article class="border-b border-dotted border-line px-6 py-8">
+        <h3 class="font-bold text-ink-strong before:content-['■_']" data-slot="title"></h3>
+        <p class="mt-2 mb-4 whitespace-pre-line" data-slot="body"></p>
         <p class="type-small text-right text-ink-soft">
-          <time datetime={comment.at.toISOString()}>{formatTimestamp(comment.at)}</time>
-          {comment.via && (
-            <>
-              {" | "}
-              <Icon name={comment.via} /> {services[comment.via]}の投稿
-            </>
-          )}
-          {comment.url && (
-            <>
-              {" | "}
-              <a href={comment.url} rel="nofollow ugc noopener">URL</a>
-            </>
-          )}
+          <time data-slot="time"></time>
+          <span data-slot="link">
+            {" | "}
+            <a rel="nofollow ugc noopener">URL</a>
+          </span>
           {" | "}
-          {comment.name}
+          <span data-slot="name"></span>
+          <span data-slot="delete">
+            {" | "}
+            <Icon name="edit" /> <Button variant="link" aria-expanded="false">削除</Button>
+          </span>
         </p>
+        <form class="type-small mt-6 flex flex-wrap items-center gap-x-8 gap-y-4 border border-line bg-wash px-8 py-6" data-slot="remover" hidden>
+          <label class="flex items-center gap-8">削除パスワード<TextField class="w-160" type="password" name="password" autocomplete="off" required /></label>
+          <div class="flex flex-wrap gap-6">
+            <Button class="px-12 py-1" type="submit">削除する</Button>
+            <Button class="px-12 py-1" variant="plain" data-action="close">やめる</Button>
+          </div>
+          <p class="basis-full" role="alert" data-slot="error" hidden></p>
+        </form>
       </article>
-    ))
-  }
-  {comments.length === 0 && <p class="px-6 py-8">コメントはまだありません。</p>}
-  <p class="type-small mt-6 text-ink-soft">※ Bluesky・Mastodon でこの記事に返信した内容も、ここに表示されます。</p>
+    </template>
+  </post-comments>
+  <noscript><p class="px-6 py-8">コメントを読むには、JavaScript を有効にしてください。</p></noscript>
 </Plugin>
+
+<script>
+  import type { CommentThread, PublicComment } from "../../lib/api";
+  import { commentAnchor } from "../../lib/comments";
+  import { formatTimestamp } from "../../lib/dates";
+  import { ApiError, call } from "../../scripts/api";
+  import { commentsChanged } from "../../scripts/events";
+  import { refreshSidebar } from "../../scripts/shared-data";
+  import { report, stamp, textFields } from "../../scripts/template";
+
+  customElements.define(
+    "post-comments",
+    class extends HTMLElement {
+      get #slug() {
+        return this.dataset.slug!;
+      }
+      #slot(name: string) {
+        return this.querySelector<HTMLElement>(`:scope > [data-slot="${name}"]`)!;
+      }
+
+      connectedCallback() {
+        document.addEventListener(commentsChanged, this);
+        this.addEventListener("click", this);
+        this.addEventListener("submit", this);
+        void this.load();
+      }
+      disconnectedCallback() {
+        document.removeEventListener(commentsChanged, this);
+      }
+
+      async load(focus?: number) {
+        try {
+          const { comments } = await call<CommentThread>(
+            `/api/comments/?slug=${encodeURIComponent(this.#slug)}`,
+          );
+          this.#render(comments);
+          const target = focus
+            ? this.querySelector(`[data-id="${focus}"]`)
+            : location.hash.startsWith("#comment-")
+              ? document.getElementById(location.hash.slice(1))
+              : null;
+          target?.scrollIntoView({ block: "start" });
+        } catch (error) {
+          this.#slot("message").textContent =
+            error instanceof ApiError ? error.message : "コメントを読み込めませんでした。";
+        }
+      }
+
+      #render(comments: PublicComment[]) {
+        const template = this.querySelector("template")!;
+        this.#slot("list").replaceChildren(
+          ...comments.map((comment) => {
+            const { fragment, slot } = stamp(template);
+            const article = fragment.querySelector("article")!;
+            article.id = commentAnchor(comment.number);
+            article.dataset.id = String(comment.id);
+            slot("title").textContent = comment.title;
+            slot("body").textContent = comment.body;
+            slot("time").textContent = formatTimestamp(new Date(comment.at));
+            slot("time").setAttribute("datetime", comment.at);
+            if (comment.url) slot("link").querySelector("a")!.href = comment.url;
+            else slot("link").remove();
+            slot("name").textContent = comment.name;
+            if (!comment.deletable) {
+              slot("delete").remove();
+              slot("remover").remove();
+            }
+            return fragment;
+          }),
+        );
+        const message = this.#slot("message");
+        message.textContent = "コメントはまだありません。";
+        message.hidden = comments.length > 0;
+      }
+
+      handleEvent(event: Event) {
+        if (event.type === commentsChanged) {
+          void this.load((event as CustomEvent<number>).detail);
+          return;
+        }
+        const article = (event.target as Element).closest<HTMLElement>("article[data-id]");
+        if (!article) return;
+        const remover = article.querySelector<HTMLFormElement>("[data-slot=remover]")!;
+        const toggle = article.querySelector<HTMLButtonElement>("[data-slot=delete] button")!;
+        const open = (shown: boolean) => {
+          remover.hidden = !shown;
+          toggle.setAttribute("aria-expanded", String(shown));
+          if (shown) remover.querySelector("input")!.focus();
+        };
+        if (event.type === "submit") {
+          event.preventDefault();
+          void this.#remove(article, remover);
+          return;
+        }
+        const button = (event.target as Element).closest("button");
+        if (button === toggle) open(Boolean(remover.hidden));
+        else if (button?.dataset.action === "close") open(false);
+      }
+
+      async #remove(article: HTMLElement, remover: HTMLFormElement) {
+        try {
+          await call(`/api/comments/${article.dataset.id}/`, {
+            method: "DELETE",
+            body: { password: textFields(remover).password },
+          });
+          document.dispatchEvent(new CustomEvent(commentsChanged));
+          refreshSidebar();
+        } catch (error) {
+          report(
+            remover.querySelector<HTMLElement>("[data-slot=error]")!,
+            error instanceof ApiError ? error.message : "削除できませんでした。",
+            "error",
+          );
+        }
+      }
+    },
+  );
+</script>

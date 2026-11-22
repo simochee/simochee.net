@@ -33,9 +33,20 @@ export default defineConfig({
   env: {
     schema: {
       SIMOCHEE_NOINDEX: envField.boolean({ context: "server", access: "public", default: false }),
+      // Cloudflare Web Analytics の計測スクリプトに入れるサイトのトークン。未登録のあいだは計測しない。
+      WEB_ANALYTICS_TOKEN: envField.string({ context: "server", access: "public", optional: true }),
+      // 未登録のあいだは Cloudflare の試験用の鍵（必ず通る）になる。本番の秘密鍵とは組にならないので、投稿は受け付けられない。
+      TURNSTILE_SITE_KEY: envField.string({
+        context: "client",
+        access: "public",
+        default: "1x00000000000000000000AA",
+      }),
     },
   },
-  integrations: [mdx(), sitemap({ filter: (page) => !page.endsWith("/404/") })],
+  integrations: [
+    mdx(),
+    sitemap({ filter: (page) => !page.endsWith("/404/") && !page.endsWith("/admin/") }),
+  ],
   markdown: {
     processor: unified({
       remarkPlugins: [remarkAlerts],

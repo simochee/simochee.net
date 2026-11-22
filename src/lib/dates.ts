@@ -22,6 +22,12 @@ export function formatTimestamp(date: Date) {
   const { year, month, day, weekday } = parts(date);
   return `${year}/${month}/${day}(${weekday}) ${clock.format(date)}`;
 }
+const minutes = tokyo({ hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+/** 掲示板の書き込み日時。昔の掲示板にならって分まで出す。 */
+export function formatMinutes(date: Date) {
+  const { year, month, day, weekday } = parts(date);
+  return `${year}/${month}/${day}(${weekday}) ${minutes.format(date)}`;
+}
 export function formatMonthDay(date: Date) {
   const { month, day } = parts(date);
   return `${month}/${day}`;

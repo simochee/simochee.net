@@ -4,9 +4,43 @@ import PluginList from "../layout/PluginList.astro";
 ---
 
 <Plugin title="ひとこと掲示板">
-<PluginList>
-<li><b>ことり</b> (11/17)<br />銀杏並木の写真、すてきでした！</li>
-<li><b>通りすがり</b> (11/15)<br />テンプレート変わりましたね。</li>
-</PluginList>
-<div class="px-4 text-right"><a href="/bbs/">書き込む »</a></div>
+  <latest-board hidden>
+    <PluginList />
+    <template>
+      <li><b data-slot="name"></b> (<span data-slot="date"></span>)<br /><span data-slot="body"></span></li>
+    </template>
+  </latest-board>
+  <div class="px-4 py-6 text-right"><a href="/bbs/">書き込む »</a></div>
 </Plugin>
+
+<script>
+  import { formatMonthDay } from "../../lib/dates";
+  import { onSidebar } from "../../scripts/shared-data";
+  import { truncate } from "../../lib/text";
+  import { stamp } from "../../scripts/template";
+
+  customElements.define(
+    "latest-board",
+    class extends HTMLElement {
+      #stop: (() => void) | undefined;
+      connectedCallback() {
+        this.#stop = onSidebar(({ board }) => {
+          const template = this.querySelector("template")!;
+          this.querySelector("ul")!.replaceChildren(
+            ...board.map((post) => {
+              const { fragment, slot } = stamp(template);
+              slot("name").textContent = post.name;
+              slot("date").textContent = formatMonthDay(new Date(post.at));
+              slot("body").textContent = truncate(post.body.replace(/\s+/g, " "), 40);
+              return fragment;
+            }),
+          );
+          this.hidden = board.length === 0;
+        });
+      }
+      disconnectedCallback() {
+        this.#stop?.();
+      }
+    },
+  );
+</script>
