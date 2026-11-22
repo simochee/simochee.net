@@ -15,7 +15,7 @@ export const PATCH = handler(async (context) => {
   const id = parseId(context.params.id);
   const change = await readJson(
     context.request,
-    z.object({ key, title: fields.title, body: fields.body, color: fields.inkColor }),
+    z.object({ key, title: fields.title, body: fields.body, colorId: fields.inkColor }),
   );
   await throttle(env.ACTION_LIMIT, `bbs-edit:${clientAddress(context)}`);
   await editBbsPost(await database(), id, { ...change, admin: await isAdmin(context.cookies) });

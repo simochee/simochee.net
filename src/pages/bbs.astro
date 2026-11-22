@@ -34,7 +34,7 @@ import { site } from "../site";
       {
         inkColors.map((ink, index) => (
           <label style={`color: ${ink.value}`}>
-            <input type="radio" name="color" value={ink.value} checked={index === 0} /> ■{ink.label}
+            <input type="radio" name="colorId" value={ink.id} checked={index === 0} /> ■{ink.label}
           </label>
         ))
       }
@@ -83,7 +83,7 @@ import { site } from "../site";
       {
         inkColors.map((ink, index) => (
           <label style={`color: ${ink.value}`}>
-            <input type="radio" name="color" value={ink.value} checked={index === 0} /> ■{ink.label}
+            <input type="radio" name="colorId" value={ink.id} checked={index === 0} /> ■{ink.label}
           </label>
         ))
       }
@@ -104,6 +104,7 @@ import { site } from "../site";
 
 <script>
   import type { BbsPage, BbsPost } from "../lib/api";
+  import { inkColorValue } from "../lib/bbs";
   import { formatMinutes } from "../lib/dates";
   import { pageNumbers } from "../lib/paging";
   import { ApiError, call } from "../scripts/api";
@@ -203,15 +204,15 @@ import { site } from "../site";
         if (post.url) slot("home").querySelector("a")!.href = post.url;
         else slot("home").remove();
         slot("body").textContent = post.body;
-        slot("body").style.color = post.color;
+        slot("body").style.color = inkColorValue(post.colorId);
         if (post.reply) slot("reply-text").textContent = post.reply;
         else slot("reply").remove();
         if (post.editable) {
           const editor = slot<HTMLFormElement>("editor");
           (editor.elements.namedItem("title") as HTMLInputElement).defaultValue = post.title;
           (editor.elements.namedItem("body") as HTMLTextAreaElement).defaultValue = post.body;
-          for (const radio of editor.querySelectorAll<HTMLInputElement>("[name=color]"))
-            radio.defaultChecked = radio.value === post.color;
+          for (const radio of editor.querySelectorAll<HTMLInputElement>("[name=colorId]"))
+            radio.defaultChecked = Number(radio.value) === post.colorId;
         } else {
           slot("edit").remove();
           slot("editor").remove();
@@ -278,11 +279,11 @@ import { site } from "../site";
 
       async #change(editor: HTMLFormElement, method: "PATCH" | "DELETE") {
         const article = editor.closest<HTMLElement>("article")!;
-        const { key, title, body, color } = textFields(editor);
+        const { key, title, body, colorId } = textFields(editor);
         try {
           await call(`/api/bbs/${article.dataset.id}/`, {
             method,
-            body: method === "PATCH" ? { key, title, body, color } : { key },
+            body: method === "PATCH" ? { key, title, body, colorId } : { key },
           });
           refreshSidebar();
           await this.#load();

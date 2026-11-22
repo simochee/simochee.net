@@ -64,6 +64,7 @@ const item = "border-b border-dotted border-line px-6 py-6";
 
 <script>
   import type { AdminInbox } from "../lib/api";
+  import { inkColorValue } from "../lib/bbs";
   import { formatTimestamp } from "../lib/dates";
   import { ApiError, call } from "../scripts/api";
   import { report, stamp, textFields } from "../scripts/template";
@@ -133,7 +134,7 @@ const item = "border-b border-dotted border-line px-6 py-6";
               .filter(Boolean)
               .join(" ／ ");
             slot("body").textContent = entry.body;
-            slot("body").style.color = entry.color;
+            slot("body").style.color = inkColorValue(entry.colorId);
             const reply = slot<HTMLFormElement>("reply-form").querySelector("textarea")!;
             reply.id = `reply-${entry.id}`;
             reply.defaultValue = entry.reply ?? "";
