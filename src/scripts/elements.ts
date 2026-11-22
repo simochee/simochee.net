@@ -22,7 +22,7 @@ abstract class FeedbackButton extends HTMLElement {
 
   connectedCallback() {
     this.#status.setAttribute("role", "status");
-    this.#status.className = "visually-hidden";
+    this.#status.className = "sr-only";
     this.append(this.#status);
     this.#label = this.button.textContent ?? "";
     this.button.addEventListener("click", this);
