@@ -26,7 +26,7 @@ const schema = z.object({
   url: fields.url,
   title: fields.title,
   body: fields.body,
-  color: fields.inkColor,
+  colorId: fields.inkColor,
   key: fields.deleteKey,
   turnstile: fields.turnstile,
 });

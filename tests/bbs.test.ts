@@ -8,13 +8,15 @@ import {
   replyToBbsPost,
   type NewBbsPost,
 } from "../src/server/bbs";
+import { inkColorValue } from "../src/lib/bbs";
+import { fields } from "../src/server/fields";
 import { migratedD1 } from "./support/d1";
 
 const post = (title: string, extra: Partial<NewBbsPost> = {}): NewBbsPost => ({
   title,
   name: "ことり",
   body: "本文",
-  color: "#333333",
+  colorId: 1,
   ...extra,
 });
 
@@ -49,12 +51,12 @@ test("書き込み番号は消しても詰めず、次の書き込みは続き�
 test("削除キーを入れた書き込みは、同じキーでだけ編集・削除できる", async () => {
   const db = await migratedD1();
   const id = await addBbsPost(db, post("元", { key: "abc123" }));
-  const change = { title: "直した", body: "直した本文", color: "#1f3f8f" as const, admin: false };
+  const change = { title: "直した", body: "直した本文", colorId: 2 as const, admin: false };
   await expect(editBbsPost(db, id, { ...change, key: "zzz" })).rejects.toThrow(
     "削除キーが違います",
   );
   await editBbsPost(db, id, { ...change, key: "abc123" });
-  expect((await bbsPage(db, 1, 10)).posts[0]).toMatchObject({ title: "直した", color: "#1f3f8f" });
+  expect((await bbsPage(db, 1, 10)).posts[0]).toMatchObject({ title: "直した", colorId: 2 });
   await removeBbsPost(db, id, { key: "abc123", admin: false });
   expect((await bbsPage(db, 1, 10)).total).toBe(0);
 });
@@ -83,4 +85,15 @@ test("サイドバーには新しい書き込みから指定した件数だけ�
   const db = await migratedD1();
   for (const title of ["1", "2", "3"]) await addBbsPost(db, post(title, { body: `本文${title}` }));
   expect((await latestBbsPosts(db, 2)).map((item) => item.body)).toEqual(["本文3", "本文2"]);
+});
+
+test("文字色はフォームから番号で届き、表にない番号は受け付けない", () => {
+  expect(fields.inkColor.parse("2")).toBe(2);
+  expect(fields.inkColor.safeParse("7").success).toBe(false);
+  expect(fields.inkColor.safeParse("#333333").success).toBe(false);
+});
+
+test("文字色の番号は色に引けて、やめた色の書き込みは黒で出る", () => {
+  expect(inkColorValue(2)).toBe("#1f5fb8");
+  expect(inkColorValue(99)).toBe("#333333");
 });

@@ -1,5 +1,5 @@
 import type { D1Database } from "@cloudflare/workers-types/index.ts";
-import type { InkColor } from "../lib/bbs";
+import type { InkColorId } from "../lib/bbs";
 import { HttpError } from "./http";
 import { hashSecret, matchesSecret } from "./secrets";
 
@@ -10,7 +10,7 @@ export interface BbsPost {
   name: string;
   url: string | null;
   body: string;
-  color: InkColor;
+  colorId: InkColorId;
   reply: string | null;
   at: string;
   editable: boolean;
@@ -30,7 +30,7 @@ export interface NewBbsPost {
   name: string;
   url?: string;
   body: string;
-  color: InkColor;
+  colorId: InkColorId;
   key?: string;
 }
 
@@ -40,7 +40,7 @@ interface Row {
   name: string;
   url: string | null;
   body: string;
-  color: InkColor;
+  color_id: InkColorId;
   key_hash: string | null;
   reply: string | null;
   created_at: string;
@@ -52,7 +52,7 @@ const publicPost = (row: Row): BbsPost => ({
   name: row.name,
   url: row.url,
   body: row.body,
-  color: row.color,
+  colorId: row.color_id,
   reply: row.reply,
   at: row.created_at,
   editable: row.key_hash !== null,
@@ -97,7 +97,7 @@ export async function addBbsPost(db: D1Database, post: NewBbsPost, now = new Dat
   const [inserted] = await db.batch([
     db
       .prepare(
-        `INSERT INTO bbs_posts (title, name, url, body, color, key_hash, created_at)
+        `INSERT INTO bbs_posts (title, name, url, body, color_id, key_hash, created_at)
          VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id`,
       )
       .bind(
@@ -105,7 +105,7 @@ export async function addBbsPost(db: D1Database, post: NewBbsPost, now = new Dat
         post.name,
         post.url ?? null,
         post.body,
-        post.color,
+        post.colorId,
         post.key ? await hashSecret(post.key) : null,
         now.toISOString(),
       ),
@@ -134,13 +134,13 @@ async function authorize(db: D1Database, id: number, key: string | undefined, ad
 export async function editBbsPost(
   db: D1Database,
   id: number,
-  change: { key?: string; title: string; body: string; color: InkColor; admin: boolean },
+  change: { key?: string; title: string; body: string; colorId: InkColorId; admin: boolean },
   now = new Date(),
 ) {
   await authorize(db, id, change.key, change.admin);
   await db
-    .prepare("UPDATE bbs_posts SET title = ?, body = ?, color = ?, updated_at = ? WHERE id = ?")
-    .bind(change.title, change.body, change.color, now.toISOString(), id)
+    .prepare("UPDATE bbs_posts SET title = ?, body = ?, color_id = ?, updated_at = ? WHERE id = ?")
+    .bind(change.title, change.body, change.colorId, now.toISOString(), id)
     .run();
 }
 

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { inkColors, type InkColor } from "../lib/bbs";
+import { inkColors } from "../lib/bbs";
 import { deleteKeyPattern, limits } from "../lib/limits";
 
 const blank = (value: unknown) =>
@@ -31,9 +31,9 @@ export const fields = {
     .min(1, "本文を入れてください。")
     .max(limits.body, tooLong("本文", limits.body)),
   turnstile: z.string().optional(),
-  inkColor: z.enum(inkColors.map((ink) => ink.value) as [InkColor, ...InkColor[]], {
-    error: "文字色を選んでください。",
-  }),
+  inkColor: z.coerce
+    .number({ error: "文字色を選んでください。" })
+    .pipe(z.literal(inkColors.map((ink) => ink.id), { error: "文字色を選んでください。" })),
   deleteKey: optional(
     z
       .string()
