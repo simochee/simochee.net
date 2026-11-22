@@ -4,7 +4,7 @@ import EntryIndex from "../../components/entry/EntryIndex.astro";
 import { groupByMonth } from "../../lib/archive";
 import CommentCount from "../../components/entry/CommentCount.astro";
 import { posts } from "../../lib/posts";
-import { categories } from "../../site";
+import { categories } from "../../categories";
 
 const all = await posts();
 const months = groupByMonth(all);

@@ -1,7 +1,7 @@
 import { formatDay } from "../lib/dates";
 import { pageNumbers } from "../lib/paging";
 import { resultPage, search, snippet, terms, type SearchEntry } from "../lib/search";
-import { categories, type Category } from "../site";
+import { categories, type Category } from "../categories";
 
 let entries: Promise<SearchEntry[]> | undefined;
 function load() {

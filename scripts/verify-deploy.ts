@@ -35,6 +35,7 @@ const git = (...args: string[]) =>
 try {
   if (!resume) {
     mkdirSync(join(content, "posts/deploy-example"), { recursive: true });
+    cpSync(join(source, "content/posts/_site.yaml"), join(content, "posts/_site.yaml"));
     git("init", "-b", "main");
     git("config", "user.name", "Deploy Test");
     git("config", "user.email", "deploy@example.invalid");
