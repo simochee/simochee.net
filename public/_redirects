@@ -1,0 +1,4 @@
+/blog /archive/ 301
+/blog/ /archive/ 301
+/blog/:id /posts/:id/ 301
+/blog/:id/ /posts/:id/ 301
