@@ -9,7 +9,7 @@ export default defineConfig({
       htmlHandling: "auto-trailing-slash",
       notFoundHandling: "404-page",
     },
-    // 閲覧者数と人気記事のために数えた古い記録を捨てる。
+    // Web Analytics の集計が間引かれる前に、記事ごとの閲覧数と訪問数を D1 へ取り込む。
     triggers: [triggers.scheduled({ schedule: "0 * * * *" })],
     env: {
       DB: bindings.d1({ name: "simochee-net" }),
@@ -18,6 +18,9 @@ export default defineConfig({
       ACTION_LIMIT: bindings.rateLimit({ namespace: "1002", simple: { limit: 30, period: 60 } }),
       TURNSTILE_SECRET_KEY: bindings.secret(),
       ADMIN_PASSWORD: bindings.secret(),
+      ANALYTICS_ACCOUNT_ID: bindings.secret(),
+      ANALYTICS_SITE_TAG: bindings.secret(),
+      ANALYTICS_API_TOKEN: bindings.secret(),
     },
   },
 });

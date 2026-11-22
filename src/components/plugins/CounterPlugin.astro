@@ -6,23 +6,24 @@ import Plugin from "../layout/Plugin.astro";
   <Plugin title="アクセスカウンター">
     <div class="px-4 py-8 text-center">
       <div class="inline-flex gap-2" role="img" data-slot="digits"></div>
-      <div class="type-small mt-4">あなたは <span data-slot="number"></span> 人目のお客様です</div>
+      <div class="type-small mt-4">これまでに来てくれたお客様の数です</div>
     </div>
   </Plugin>
 </access-counter>
 
 <script>
   import { counterDigits } from "../../lib/counter";
-  import { onVisit } from "../../scripts/visit";
+  import { onSidebar } from "../../scripts/shared-data";
 
   customElements.define(
     "access-counter",
     class extends HTMLElement {
+      #stop: (() => void) | undefined;
       connectedCallback() {
-        const slot = (name: string) => this.querySelector<HTMLElement>(`[data-slot="${name}"]`)!;
-        onVisit(({ number, total }) => {
-          slot("digits").setAttribute("aria-label", `これまでのお客様 ${total} 人`);
-          slot("digits").replaceChildren(
+        this.#stop = onSidebar(({ total }) => {
+          const digits = this.querySelector<HTMLElement>("[data-slot=digits]")!;
+          digits.setAttribute("aria-label", `これまでのお客様 ${total} 人`);
+          digits.replaceChildren(
             ...[...counterDigits(total)].map((digit) =>
               Object.assign(document.createElement("span"), {
                 className: "inline-block w-14 bg-lcd py-1 font-bold text-lcd-ink",
@@ -30,9 +31,11 @@ import Plugin from "../layout/Plugin.astro";
               }),
             ),
           );
-          slot("number").textContent = counterDigits(number ?? total);
           this.hidden = false;
         });
+      }
+      disconnectedCallback() {
+        this.#stop?.();
       }
     },
   );

@@ -137,6 +137,7 @@ Workers Builds は `CI=true` と `WORKERS_CI=1` を設定します（[公式資�
 | `SIMOCHEE_SITE_URL`         | `https://simochee.net`                                                      | canonical、OG、RSS、`robots.txt` に使うサイトの URL。空文字は未設定と同じ               |
 | `SIMOCHEE_NOINDEX`          | `false`                                                                     | `true` のとき全ページに `noindex, nofollow` を付け、`robots.txt` からサイトマップを外す |
 | `TURNSTILE_SITE_KEY`        | Cloudflare の試験用の鍵                                                     | コメントと掲示板の迷惑書き込みよけ（Turnstile）のサイトキー                             |
+| `WEB_ANALYTICS_TOKEN`       | 未設定                                                                      | Cloudflare Web Analytics の計測スクリプトに入れるサイトのトークン。未設定なら計測しない |
 | `CI` / `WORKERS_CI`         | 未設定                                                                      | いずれかが設定されていれば履歴検証を厳格にする                                          |
 
 `SIMOCHEE_CONTENT_DIR` を指定すると、日時はそのディレクトリを含む git リポジトリの履歴から取得します。
@@ -198,7 +199,7 @@ export const GET: APIRoute = () => Response.json({ ok: true });
 - 本番と同じ形（ビルド済みのファイルと Worker）で確かめるときは `vp run preview` を使います。
 - dev ではデータベースに見本のデータ（`db/dev-seed.sql`）が入ります。本番には入りません。
 - 秘密の値は `.dev.vars` に書きます。`.dev.vars.example` をコピーして使ってください。Turnstile の鍵がないときは、手元では確認を飛ばして投稿できます。
-- 定期実行（1 時間おきに古い閲覧の記録を捨てる）は dev では動きません。
+- 定期実行（1 時間おきに Web Analytics の集計を取り込む）は dev では動きません。人気記事とカウンターは見本のデータで出し、閲覧者数は出しません。
 
 ## サーバーで動く部品
 
@@ -208,9 +209,9 @@ export const GET: APIRoute = () => Response.json({ ok: true });
 | 拍手                   | D1。記事ごとの回数                                                         |
 | ひとこと掲示板         | D1。`/bbs/` とサイドバー。削除キーで本人が編集・削除、管理人が返信         |
 | アンケート             | D1。質問と選択肢は `src/site.ts` の `poll`。1 人 1 票（cookie で見分ける） |
-| アクセスカウンター     | D1。ブラウザのセッションごとに 1 回数える                                  |
-| 現在の閲覧者数         | D1。この 5 分のあいだにページを開いていた人。数えなおすのは 1 分ごと       |
-| 人気記事               | D1。この 30 日の記事ごとの閲覧数。数えなおすのは 1 時間ごと                |
+| アクセスカウンター     | Web Analytics の訪問数を 1 時間ごとに D1 へ足した累計                      |
+| 現在の閲覧者数         | Web Analytics の直近 10 分の訪問数。問い合わせるのは 5 分ごと              |
+| 人気記事               | Web Analytics から D1 へ取り込んだ、この 30 日の記事ごとの閲覧数           |
 | 最新コメントの RSS     | `/comments.xml` をリクエストのたびに作る                                   |
 
 ページは静的なままで、これらの部品はスクリプトが `/api/` のルートを呼んで中身を入れます。
@@ -219,9 +220,21 @@ export const GET: APIRoute = () => Response.json({ ok: true });
 - 送信回数の制限は Workers の Rate Limiting です。書き込み（コメント・掲示板・ログイン）は 1 分 5 回、拍手や投票などは 1 分 30 回まで（IP ごと）。
 - 記事の一覧は、ビルドで書き出した `/posts.json` を Worker が読みます。記事の本文を Worker に抱えさせないためです。
 - D1 の無料枠は読んだ行の数で決まるので、記事やコメントが増えても 1 ページで読む行が増えないようにしています。
-  - 人気記事と閲覧者数は数えた結果を `snapshots` 表に置き、上の間隔で数えなおします。
+  - 人気記事と閲覧者数は数えた結果を `snapshots` 表に置き、人気記事は 1 時間ごと、閲覧者数は 5 分ごとに数えなおします。
   - アンケートの票の合計（`poll_totals`）と掲示板の書き込みの数（`counters`）は、書き込みのたびに足し引きします。
   - 拍手とコメントの数は、ページに出ている記事の分だけを頼みます（`/api/counts/?slugs=...`）。
+
+### 閲覧の数（Web Analytics）
+
+閲覧数は自分では数えず、Cloudflare Web Analytics に任せます。計測スクリプトは cookie もブラウザへの保存も使いません。
+
+- 1 時間おきの定期実行で、Web Analytics の GraphQL Analytics API から直前 1 時間の「ページごとの閲覧数」と「訪問数」を読み、D1 に足します（`src/server/analytics.ts`）。
+  - 記事ごとの閲覧数は `page_views` 表に日本時間の日付ごとに、訪問数の累計は `counters` 表の `visitors` に足します。
+  - Web Analytics は古い集計を間引いて消していくので、これらは D1 で持ちつづけ、消しません。
+  - どこまで取り込んだかは `counters` 表の `analytics_until` に残します。止まっていたあとは続きから取り込みます（1 回 24 時間ぶんまで）。
+  - 集計が落ち着くのを待つため、取り込むのは 15 分より前の時間だけです。
+- 計測スクリプトはページ遷移も数えます。ダッシュボードの「自動で計測スクリプトを入れる」設定は使わないでください（二重に数えます）。
+- API で使っている項目名（`rumPageloadEventsAdaptiveGroups` の `requestPath` や `sum.visits`）は、資料で確かめきれていません。取り込みが失敗するときは Worker のログを見てください。
 
 ### 管理画面
 
@@ -244,12 +257,16 @@ pnpm exec cf deploy --dry-run   # アップロードせずにビルドと検証�
 ### 初めてデプロイする前に
 
 1. Turnstile のウィジェットを Cloudflare のダッシュボードで作り、サイトキーをビルドの環境変数 `TURNSTILE_SITE_KEY` に入れます。
+   Web Analytics のサイトを作り、計測スクリプトのトークンをビルドの環境変数 `WEB_ANALYTICS_TOKEN` に入れます。
 2. Worker の秘密の値を登録します。ダッシュボードの Worker の「設定 → 変数とシークレット」か、`pnpm exec cf workers secrets update <名前> --worker simochee-net --text <値>` で入れます。
 
-| 秘密の値               | 用途                         | ないとき                                 |
-| ---------------------- | ---------------------------- | ---------------------------------------- |
-| `TURNSTILE_SECRET_KEY` | Turnstile のシークレットキー | コメントと掲示板の書き込みを受け付けない |
-| `ADMIN_PASSWORD`       | 管理画面のパスワード         | 管理画面に入れない                       |
+| 秘密の値               | 用途                                                             | ないとき                                                       |
+| ---------------------- | ---------------------------------------------------------------- | -------------------------------------------------------------- |
+| `TURNSTILE_SECRET_KEY` | Turnstile のシークレットキー                                     | コメントと掲示板の書き込みを受け付けない                       |
+| `ADMIN_PASSWORD`       | 管理画面のパスワード                                             | 管理画面に入れない                                             |
+| `ANALYTICS_ACCOUNT_ID` | Cloudflare のアカウント ID                                       | 閲覧数を取り込まない（人気記事・カウンター・閲覧者数が止まる） |
+| `ANALYTICS_SITE_TAG`   | Web Analytics のサイトタグ（計測スクリプトのトークンとは別の値） | 同上                                                           |
+| `ANALYTICS_API_TOKEN`  | 「アカウントの分析の読み取り」権限だけを付けた API トークン      | 同上                                                           |
 
 3. D1 のデータベース（`simochee-net`）と送信回数の制限は、`cloudflare.config.ts` の binding からデプロイ時に用意されます。テーブルは Worker が最初のリクエストで作ります。
 

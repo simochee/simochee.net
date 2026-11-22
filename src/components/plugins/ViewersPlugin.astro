@@ -9,16 +9,20 @@ import Plugin from "../layout/Plugin.astro";
 </current-viewers>
 
 <script>
-  import { onVisit } from "../../scripts/visit";
+  import { onSidebar } from "../../scripts/shared-data";
 
   customElements.define(
     "current-viewers",
     class extends HTMLElement {
+      #stop: (() => void) | undefined;
       connectedCallback() {
-        onVisit(({ viewers }) => {
-          this.querySelector("[data-slot=viewers]")!.textContent = String(viewers);
-          this.hidden = false;
+        this.#stop = onSidebar(({ viewers }) => {
+          this.querySelector("[data-slot=viewers]")!.textContent = String(viewers ?? "");
+          this.hidden = viewers === null;
         });
+      }
+      disconnectedCallback() {
+        this.#stop?.();
       }
     },
   );
