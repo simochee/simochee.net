@@ -39,6 +39,7 @@ const cell = "border border-line px-8 py-3";
         ))
       }
     </p>
+    {profile.favorites.length > 0 && (<>
     <h2>すきなもの いろいろ</h2>
     <dl class="grid grid-cols-[auto_minmax(0,1fr)] gap-x-12 gap-y-2">
       {
@@ -50,15 +51,19 @@ const cell = "border border-line px-8 py-3";
         ))
       }
     </dl>
+    </>)}
+    {profile.notes.length > 0 && (<>
     <h2>このブログについて</h2>
     <ul>
       {profile.notes.map((note) => <li>{note}</li>)}
     </ul>
+    </>)}
     <h2>ほかの場所でも</h2>
     <p>新しい記事は RSS でも受け取れます。</p>
     <div class="flex flex-col gap-4 border border-line bg-wash px-10 py-6">
       <p><Icon name="rss" /> RSS：<a href="/feed.xml">{new URL("/feed.xml", Astro.site)}</a></p>
     </div>
+    {profile.history.length > 0 && (<>
     <h2>このブログのあゆみ</h2>
     <table class="type-small border-collapse!">
       <tbody>
@@ -72,6 +77,7 @@ const cell = "border border-line px-8 py-3";
         }
       </tbody>
     </table>
+    </>)}
     <visit-stat hidden>
       <p class="type-small text-ink-soft">このブログに来てくれた人：<b data-slot="value"></b> 人</p>
     </visit-stat>

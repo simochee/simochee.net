@@ -2,7 +2,7 @@
 import EntryListPage from "../../components/entry/EntryListPage.astro";
 import { pageParams } from "../../lib/paging";
 import { posts } from "../../lib/posts";
-import { categories, type Category } from "../../site";
+import { categories, type Category } from "../../categories";
 
 export async function getStaticPaths() {
   const all = await posts();
