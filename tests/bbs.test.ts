@@ -1,7 +1,6 @@
 import { expect, test } from "vitest";
 import {
   addBbsPost,
-  bbsInbox,
   bbsPage,
   editBbsPost,
   latestBbsPosts,
@@ -36,13 +35,6 @@ test("書き込み番号は消しても詰めず、次の書き込みは続き�
   const second = await addBbsPost(db, post("2"));
   await removeBbsPost(db, second, { admin: true });
   expect(await addBbsPost(db, post("3"))).toBe(second + 1);
-});
-
-test("メールアドレスは掲示板には出さず、管理画面でだけ見える", async () => {
-  const db = await migratedD1();
-  await addBbsPost(db, post("1", { email: "kotori@example.com" }));
-  expect((await bbsPage(db, 1, 10)).posts[0]).not.toHaveProperty("email");
-  expect((await bbsInbox(db, 10))[0]!.email).toBe("kotori@example.com");
 });
 
 test("削除キーを入れた書き込みは、同じキーでだけ編集・削除できる", async () => {

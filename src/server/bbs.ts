@@ -16,9 +16,7 @@ export interface BbsPost {
   editable: boolean;
 }
 
-export interface BbsInboxPost extends Omit<BbsPost, "editable"> {
-  email: string | null;
-}
+export type BbsInboxPost = Omit<BbsPost, "editable">;
 
 export interface BbsPage {
   posts: BbsPost[];
@@ -30,7 +28,6 @@ export interface BbsPage {
 export interface NewBbsPost {
   title: string;
   name: string;
-  email?: string;
   url?: string;
   body: string;
   color: InkColor;
@@ -41,7 +38,6 @@ interface Row {
   id: number;
   title: string;
   name: string;
-  email: string | null;
   url: string | null;
   body: string;
   color: InkColor;
@@ -90,20 +86,19 @@ export async function bbsInbox(db: D1Database, limit: number): Promise<BbsInboxP
     .all<Row>();
   return results.map((row) => {
     const { editable: _, ...post } = publicPost(row);
-    return { ...post, email: row.email };
+    return post;
   });
 }
 
 export async function addBbsPost(db: D1Database, post: NewBbsPost, now = new Date()) {
   const row = await db
     .prepare(
-      `INSERT INTO bbs_posts (title, name, email, url, body, color, key_hash, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
+      `INSERT INTO bbs_posts (title, name, url, body, color, key_hash, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id`,
     )
     .bind(
       post.title,
       post.name,
-      post.email ?? null,
       post.url ?? null,
       post.body,
       post.color,

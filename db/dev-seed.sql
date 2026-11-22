@@ -1,19 +1,15 @@
 -- 手元の dev でだけ入る見本のデータ。デザインに書かれていた内容をもとにしている。
 -- 消して最初からやりなおすときは .cloudflare/state/ を削除する。
 
-INSERT INTO comments (slug, title, name, body, url, via, source, created_at) VALUES
-  ('ginkgo-avenue', '銀杏並木', '通りすがり', '銀杏並木の写真、すてきでした！ 今度の休みに行ってみます。', NULL, NULL, NULL, '2026-11-08T01:15:00.000Z'),
-  ('morning-at-kissaten', '厚切りトースト', 'みかん', '厚切りトースト、いいなあ。どこのお店か今度こっそり教えてください！', 'https://example.com/mikan/', NULL, NULL, '2026-11-18T01:12:34.000Z'),
-  ('morning-at-kissaten', 'Blueskyからの返信', 'pochi', 'ゆで卵つきのモーニング、うれしくなりますよね。', NULL, 'bsky', 'seed:morning-at-kissaten:2', '2026-11-18T01:40:02.000Z'),
-  ('morning-at-kissaten', 'Mastodonからの返信', 'ゆず', '午前休の喫茶店、最高の使い方ですね。', NULL, 'mastodon', 'seed:morning-at-kissaten:3', '2026-11-18T03:05:47.000Z'),
-  ('morning-at-kissaten', 'Re: 厚切りトースト', 'しもちぃ', 'みかんさん > 駅前の角のお店です。ナポリタンもおすすめらしいです！', NULL, NULL, NULL, '2026-11-18T12:30:15.000Z'),
-  ('morning-at-kissaten', 'Blueskyからの返信', 'kotori', '窓ぎわの席、写真だけで落ち着きます。', NULL, 'bsky', 'seed:morning-at-kissaten:5', '2026-11-18T13:02:31.000Z'),
-  ('new-template', 'なつかしい', 'ゆず', 'サイドバーのカレンダー、なつかしくていいですね。', NULL, 'mastodon', 'seed:new-template:6', '2026-11-15T22:45:10.000Z'),
-  ('new-template', 'Re: なつかしい', 'しもちぃ', 'ありがとうございます！ あのころのブログっぽさを目指してみました。', NULL, NULL, NULL, '2026-11-16T11:11:00.000Z'),
-  ('pudding-tour', '固め派です', 'くろねこ', '駅前のお店のプリン、わたしも好きです。カラメルがにがめなのがいいんですよね。', NULL, NULL, NULL, '2026-10-22T10:03:44.000Z'),
-  ('unfinished', '下書きへのコメント', 'テスト', 'COMMENT-ON-DRAFT-DO-NOT-SHIP 下書きの記事に付いたコメントは、公開されるページのどこにも出てはいけません。', NULL, NULL, NULL, '2026-10-31T15:00:00.000Z'),
-  ('writing-guide', '表、便利ですね', 'みかん', '喫茶店の表、そのまま行きたいお店リストにしました。古本屋の2階、気になります！', 'https://example.com/mikan/', NULL, NULL, '2026-11-10T23:31:20.000Z'),
-  ('writing-guide', 'Mastodonからの返信', 'kotori', 'キリ番の判定、ゾロ目も入っているのがいいですね。', NULL, 'mastodon', 'seed:writing-guide:11', '2026-11-11T03:47:05.000Z');
+INSERT INTO comments (slug, title, name, body, url, created_at) VALUES
+  ('ginkgo-avenue', '銀杏並木', '通りすがり', '銀杏並木の写真、すてきでした！ 今度の休みに行ってみます。', NULL, '2026-11-08T01:15:00.000Z'),
+  ('morning-at-kissaten', '厚切りトースト', 'みかん', '厚切りトースト、いいなあ。どこのお店か今度こっそり教えてください！', 'https://example.com/mikan/', '2026-11-18T01:12:34.000Z'),
+  ('morning-at-kissaten', 'Re: 厚切りトースト', 'しもちぃ', 'みかんさん > 駅前の角のお店です。ナポリタンもおすすめらしいです！', NULL, '2026-11-18T12:30:15.000Z'),
+  ('new-template', 'なつかしい', 'ゆず', 'サイドバーのカレンダー、なつかしくていいですね。', NULL, '2026-11-15T22:45:10.000Z'),
+  ('new-template', 'Re: なつかしい', 'しもちぃ', 'ありがとうございます！ あのころのブログっぽさを目指してみました。', NULL, '2026-11-16T11:11:00.000Z'),
+  ('pudding-tour', '固め派です', 'くろねこ', '駅前のお店のプリン、わたしも好きです。カラメルがにがめなのがいいんですよね。', NULL, '2026-10-22T10:03:44.000Z'),
+  ('unfinished', '下書きへのコメント', 'テスト', 'COMMENT-ON-DRAFT-DO-NOT-SHIP 下書きの記事に付いたコメントは、公開されるページのどこにも出てはいけません。', NULL, '2026-10-31T15:00:00.000Z'),
+  ('writing-guide', '表、便利ですね', 'みかん', '喫茶店の表、そのまま行きたいお店リストにしました。古本屋の2階、気になります！', 'https://example.com/mikan/', '2026-11-10T23:31:20.000Z');
 
 INSERT INTO bbs_posts (id, title, name, url, body, color, reply, created_at) VALUES
   (125, '銀杏並木', 'みかん', NULL, '銀杏並木の写真、すてきでした！ 今度の休みに行ってみます。', '#7a4a1e', NULL, '2026-11-08T01:15:00.000Z'),

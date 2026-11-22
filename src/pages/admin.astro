@@ -22,12 +22,11 @@ const item = "border-b border-dotted border-line px-6 py-6";
 
     <div data-slot="inbox" hidden>
       <div class="flex flex-wrap items-center gap-8">
-        <Button class="px-10 py-1" variant="plain" data-action="sync">Bluesky・Mastodon と今すぐ同期する</Button>
         <Button class="px-10 py-1" variant="plain" data-action="logout">ログアウト</Button>
       </div>
 
       <h2 class={heading}>コメント（新しい順）</h2>
-      <p class="type-small mb-4 text-ink-soft">非公開のコメントもここに出ます。Bluesky・Mastodon から取り込んだ返信は、削除すると非公開になります。</p>
+      <p class="type-small mb-4 text-ink-soft">非公開のコメントもここに出ます。</p>
       <ul data-slot="comments"></ul>
 
       <h2 class={heading}>掲示板（新しい順）</h2>
@@ -65,7 +64,6 @@ const item = "border-b border-dotted border-line px-6 py-6";
 
 <script>
   import type { AdminInbox } from "../lib/api";
-  import { services } from "../lib/comments";
   import { formatTimestamp } from "../lib/dates";
   import { ApiError, call } from "../scripts/api";
   import { report, stamp, textFields } from "../scripts/template";
@@ -114,8 +112,6 @@ const item = "border-b border-dotted border-line px-6 py-6";
             slot("name").textContent = entry.name;
             slot("meta").textContent = [
               formatTimestamp(new Date(entry.at)),
-              entry.via && `${services[entry.via]}から`,
-              entry.email,
               entry.url,
             ]
               .filter(Boolean)
@@ -133,7 +129,7 @@ const item = "border-b border-dotted border-line px-6 py-6";
             fragment.querySelector("li")!.dataset.id = String(entry.id);
             slot("title").textContent = `[${entry.id}] ${entry.title}`;
             slot("name").textContent = entry.name;
-            slot("meta").textContent = [formatTimestamp(new Date(entry.at)), entry.email, entry.url]
+            slot("meta").textContent = [formatTimestamp(new Date(entry.at)), entry.url]
               .filter(Boolean)
               .join(" ／ ");
             slot("body").textContent = entry.body;
@@ -171,23 +167,6 @@ const item = "border-b border-dotted border-line px-6 py-6";
         if (action === "logout")
           void this.#run(async () => {
             await call("/api/admin/session/", { method: "DELETE" });
-            await this.#load();
-          });
-        else if (action === "sync")
-          void this.#run(async () => {
-            this.#status("同期しています…");
-            const result = await call<{ announced: string[]; watched: number; errors: string[] }>(
-              "/api/admin/sync/",
-              { method: "POST" },
-            );
-            this.#status(
-              [
-                `知らせた記事：${result.announced.length ? result.announced.join("、") : "なし"}`,
-                `返信を確かめた投稿：${result.watched} 件`,
-                ...result.errors,
-              ].join(" ／ "),
-              result.errors.length ? "error" : "ok",
-            );
             await this.#load();
           });
         else if (action === "delete-comment" && confirm("このコメントを削除しますか？"))

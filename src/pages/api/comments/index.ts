@@ -2,7 +2,6 @@ import { env } from "cloudflare:workers";
 import { z } from "zod";
 import type { CommentThread, PostedComment } from "../../../lib/api";
 import { limits } from "../../../lib/limits";
-import { guardAuthorName } from "../../../server/admin";
 import { addComment, threadOf } from "../../../server/comments";
 import { database } from "../../../server/db";
 import { fields, optional } from "../../../server/fields";
@@ -22,11 +21,10 @@ const schema = z.object({
   slug: z.string(),
   name: fields.name,
   title: fields.title,
-  email: fields.email,
   url: fields.url,
   body: fields.body,
   password: optional(
-    z.string().max(limits.password, `パスワードは ${limits.password} 文字までにしてください。`),
+    z.string().max(limits.password, `削除パスワードは ${limits.password} 文字までにしてください。`),
   ),
   private: z.boolean().default(false),
   turnstile: fields.turnstile,
@@ -35,10 +33,8 @@ const schema = z.object({
 export const POST = handler(async (context) => {
   const input = await readJson(context.request, schema);
   await publishedPost(input.slug, context.url.origin);
-  const address = clientAddress(context);
-  await throttle(env.POST_LIMIT, `comment:${address}`);
-  await guardAuthorName(context.cookies, input.name);
-  await verifyHuman(input.turnstile, address);
+  await throttle(env.POST_LIMIT, `comment:${clientAddress(context)}`);
+  await verifyHuman(input.turnstile);
   const id = await addComment(await database(), input);
   return json({ id, private: input.private } satisfies PostedComment, 201);
 });

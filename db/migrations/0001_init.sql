@@ -9,14 +9,10 @@ CREATE TABLE comments (
   title TEXT NOT NULL,
   name TEXT NOT NULL,
   body TEXT NOT NULL,
-  email TEXT,
   url TEXT,
   password_hash TEXT,
   private INTEGER NOT NULL DEFAULT 0,
-  via TEXT,
-  source TEXT UNIQUE,
-  created_at TEXT NOT NULL,
-  updated_at TEXT
+  created_at TEXT NOT NULL
 );
 CREATE INDEX comments_by_post ON comments (slug, created_at);
 CREATE INDEX comments_by_time ON comments (created_at);
@@ -25,7 +21,6 @@ CREATE TABLE bbs_posts (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   title TEXT NOT NULL,
   name TEXT NOT NULL,
-  email TEXT,
   url TEXT,
   body TEXT NOT NULL,
   color TEXT NOT NULL,
@@ -60,16 +55,6 @@ CREATE TABLE presence (
   seen_at INTEGER NOT NULL
 );
 CREATE INDEX presence_by_time ON presence (seen_at);
-
-CREATE TABLE syndications (
-  slug TEXT NOT NULL,
-  service TEXT NOT NULL,
-  remote_id TEXT NOT NULL,
-  url TEXT NOT NULL,
-  created_at TEXT NOT NULL,
-  checked_at TEXT,
-  PRIMARY KEY (slug, service)
-);
 
 CREATE TABLE admin_sessions (
   token_hash TEXT PRIMARY KEY,

@@ -2,7 +2,6 @@ import { env } from "cloudflare:workers";
 import { z } from "zod";
 import type { BbsPage } from "../../../lib/api";
 import { bbsPageSize } from "../../../lib/bbs";
-import { guardAuthorName } from "../../../server/admin";
 import { addBbsPost, bbsPage } from "../../../server/bbs";
 import { database } from "../../../server/db";
 import { fields } from "../../../server/fields";
@@ -24,7 +23,6 @@ export const GET = handler(async ({ url }) => {
 
 const schema = z.object({
   name: fields.name,
-  email: fields.email,
   url: fields.url,
   title: fields.title,
   body: fields.body,
@@ -35,9 +33,7 @@ const schema = z.object({
 
 export const POST = handler(async (context) => {
   const input = await readJson(context.request, schema);
-  const address = clientAddress(context);
-  await throttle(env.POST_LIMIT, `bbs:${address}`);
-  await guardAuthorName(context.cookies, input.name);
-  await verifyHuman(input.turnstile, address);
+  await throttle(env.POST_LIMIT, `bbs:${clientAddress(context)}`);
+  await verifyHuman(input.turnstile);
   return json({ id: await addBbsPost(await database(), input) }, 201);
 });

@@ -7,14 +7,12 @@ import Plugin from "../layout/Plugin.astro";
     <div class="px-4 py-8 text-center">
       <div class="inline-flex gap-2" role="img" data-slot="digits"></div>
       <div class="type-small mt-4">あなたは <span data-slot="number"></span> 人目のお客様です</div>
-      <div class="type-small font-bold text-ink-strong" data-slot="kiriban" hidden>キリ番おめでとうございます！</div>
-      <div class="type-small text-ink-soft">次のキリ番は <span data-slot="next"></span> です。<br />踏んだ方は<a href="/bbs/">掲示板</a>でご報告ください♪</div>
     </div>
   </Plugin>
 </access-counter>
 
 <script>
-  import { counterDigits, isKiriban, nextKiriban } from "../../lib/kiriban";
+  import { counterDigits } from "../../lib/counter";
   import { onVisit } from "../../scripts/visit";
 
   customElements.define(
@@ -23,20 +21,16 @@ import Plugin from "../layout/Plugin.astro";
       connectedCallback() {
         const slot = (name: string) => this.querySelector<HTMLElement>(`[data-slot="${name}"]`)!;
         onVisit(({ number, total }) => {
-          const digits = counterDigits(total);
           slot("digits").setAttribute("aria-label", `これまでのお客様 ${total} 人`);
           slot("digits").replaceChildren(
-            ...[...digits].map((digit) =>
+            ...[...counterDigits(total)].map((digit) =>
               Object.assign(document.createElement("span"), {
                 className: "inline-block w-14 bg-lcd py-1 font-bold text-lcd-ink",
                 textContent: digit,
               }),
             ),
           );
-          const mine = number ?? total;
-          slot("number").textContent = counterDigits(mine);
-          slot("kiriban").hidden = !isKiriban(mine);
-          slot("next").textContent = counterDigits(nextKiriban(total));
+          slot("number").textContent = counterDigits(number ?? total);
           this.hidden = false;
         });
       }

@@ -2,7 +2,6 @@
 export const limits = {
   name: 40,
   title: 80,
-  email: 200,
   url: 200,
   body: 2000,
   password: 64,

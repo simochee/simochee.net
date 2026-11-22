@@ -8,8 +8,6 @@ interface Env {
   // 秘密の値は Cloudflare に登録するまで空なので、無いときの振る舞いを呼ぶ側で決める。
   TURNSTILE_SECRET_KEY?: string;
   ADMIN_PASSWORD?: string;
-  BLUESKY_APP_PASSWORD?: string;
-  MASTODON_ACCESS_TOKEN?: string;
 }
 
 declare module "cloudflare:workers" {

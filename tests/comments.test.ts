@@ -2,14 +2,11 @@ import { expect, test } from "vitest";
 import {
   addComment,
   commentCounts,
-  editComment,
   inboxComments,
   recentComments,
   removeComment,
-  syncReplies,
   threadOf,
   type NewComment,
-  type Reply,
 } from "../src/server/comments";
 import { migratedD1 } from "./support/d1";
 
@@ -51,11 +48,8 @@ test("非公開コメントは、記事のコメント欄にも件数にも最�
   );
 });
 
-test("非公開コメントも、管理画面ではメールアドレスとともに読める", async () => {
-  const db = await sample();
-  await addComment(db, comment("morning", "メール", { email: "a@example.com" }), at("23:30"));
-  const inbox = await inboxComments(db, 10);
-  expect(inbox[0]).toMatchObject({ name: "メール", email: "a@example.com" });
+test("非公開コメントも、管理画面では読める", async () => {
+  const inbox = await inboxComments(await sample(), 10);
   expect(inbox.find((item) => item.name === "ないしょ")?.private).toBe(true);
 });
 
@@ -73,78 +67,24 @@ test("最新コメントは記事をまたいで新しい順に並び、その�
   ]);
 });
 
-test("パスワードを付けて書いたコメントは、同じパスワードでだけ編集・削除できる", async () => {
+test("削除パスワードを付けて書いたコメントは、同じパスワードでだけ削除できる", async () => {
   const db = await migratedD1();
   const id = await addComment(db, comment("morning", "書いた人", { password: "himitsu" }));
-  expect((await threadOf(db, "morning"))[0]!.editable).toBe(true);
-  await expect(
-    editComment(db, id, { password: "chigau", title: "直した", body: "直した", admin: false }),
-  ).rejects.toThrow("パスワードが違います");
-  await editComment(db, id, {
-    password: "himitsu",
-    title: "直した",
-    body: "直した本文",
-    admin: false,
-  });
-  expect((await threadOf(db, "morning"))[0]).toMatchObject({ title: "直した", body: "直した本文" });
+  expect((await threadOf(db, "morning"))[0]!.deletable).toBe(true);
+  await expect(removeComment(db, id, { password: "chigau", admin: false })).rejects.toThrow(
+    "削除パスワードが違います",
+  );
   await removeComment(db, id, { password: "himitsu", admin: false });
   expect(await threadOf(db, "morning")).toEqual([]);
 });
 
-test("パスワードなしで書いたコメントは、書いた人には直せず、管理人は消せる", async () => {
+test("削除パスワードなしで書いたコメントは、書いた人には消せず、管理人は消せる", async () => {
   const db = await migratedD1();
   const id = await addComment(db, comment("morning", "書いた人"));
-  expect((await threadOf(db, "morning"))[0]!.editable).toBe(false);
+  expect((await threadOf(db, "morning"))[0]!.deletable).toBe(false);
   await expect(removeComment(db, id, { password: "", admin: false })).rejects.toThrow(
-    "編集・削除できません",
+    "削除できません",
   );
   await removeComment(db, id, { admin: true });
   expect(await threadOf(db, "morning")).toEqual([]);
-});
-
-const reply = (source: string, body = "返信"): Reply => ({
-  source,
-  name: "pochi",
-  body,
-  url: `https://bsky.app/${source}`,
-  at: "2026-11-18T01:00:00.000Z",
-});
-
-test("Bluesky・Mastodon の返信は、取ってきた一覧に合わせて足し、書き直しを映し、消えたものを消す", async () => {
-  const db = await migratedD1();
-  await syncReplies(db, "morning", "bsky", [reply("a"), reply("b")], "Blueskyからの返信");
-  await syncReplies(
-    db,
-    "morning",
-    "bsky",
-    [reply("a", "書き直した"), reply("c")],
-    "Blueskyからの返信",
-  );
-  const thread = await threadOf(db, "morning");
-  expect(thread.map((item) => [item.body, item.via, item.title])).toEqual([
-    ["書き直した", "bsky", "Blueskyからの返信"],
-    ["返信", "bsky", "Blueskyからの返信"],
-  ]);
-  expect(thread.every((item) => !item.editable)).toBe(true);
-});
-
-test("取り込んだ返信を管理人が消すと非公開になり、次の同期でも表に戻らない", async () => {
-  const db = await migratedD1();
-  await syncReplies(db, "morning", "mastodon", [reply("a")], "Mastodonからの返信");
-  const [imported] = await threadOf(db, "morning");
-  await removeComment(db, imported!.id, { admin: true });
-  await syncReplies(db, "morning", "mastodon", [reply("a")], "Mastodonからの返信");
-  expect(await threadOf(db, "morning")).toEqual([]);
-  expect((await inboxComments(db, 10))[0]?.private).toBe(true);
-});
-
-test("管理人が非公開にした返信は、取ってきた一覧から一時的に消えても残り、戻ってきても非公開のまま", async () => {
-  const db = await migratedD1();
-  await syncReplies(db, "morning", "bsky", [reply("a")], "Blueskyからの返信");
-  const [imported] = await threadOf(db, "morning");
-  await removeComment(db, imported!.id, { admin: true });
-  await syncReplies(db, "morning", "bsky", [], "Blueskyからの返信");
-  await syncReplies(db, "morning", "bsky", [reply("a")], "Blueskyからの返信");
-  expect(await threadOf(db, "morning")).toEqual([]);
-  expect(await inboxComments(db, 10)).toHaveLength(1);
 });

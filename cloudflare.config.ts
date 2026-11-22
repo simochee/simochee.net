@@ -9,8 +9,8 @@ export default defineConfig({
       htmlHandling: "auto-trailing-slash",
       notFoundHandling: "404-page",
     },
-    // 新しい記事を Bluesky・Mastodon へ流し、そこへ付いた返信をコメント欄へ取り込む。
-    triggers: [triggers.scheduled({ schedule: "*/10 * * * *" })],
+    // 閲覧者数と人気記事のために数えた古い記録を捨てる。
+    triggers: [triggers.scheduled({ schedule: "0 * * * *" })],
     env: {
       DB: bindings.d1({ name: "simochee-net" }),
       // namespace はアカウントの中で重ならない整数なら何でもよい。
@@ -18,8 +18,6 @@ export default defineConfig({
       ACTION_LIMIT: bindings.rateLimit({ namespace: "1002", simple: { limit: 30, period: 60 } }),
       TURNSTILE_SECRET_KEY: bindings.secret(),
       ADMIN_PASSWORD: bindings.secret(),
-      BLUESKY_APP_PASSWORD: bindings.secret(),
-      MASTODON_ACCESS_TOKEN: bindings.secret(),
     },
   },
 });

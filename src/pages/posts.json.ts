@@ -6,13 +6,6 @@ export async function GET() {
   return Response.json(
     (await posts())
       .filter((post) => post.data.status === "published")
-      .map((post): PublishedPost => ({
-        id: post.id,
-        title: post.data.title,
-        type: post.data.type,
-        description: post.data.description ?? "",
-        tags: post.data.tags,
-        publishedAt: post.data.publishedAt.toISOString(),
-      })),
+      .map((post): PublishedPost => ({ id: post.id, title: post.data.title })),
   );
 }

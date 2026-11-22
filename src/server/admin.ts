@@ -1,8 +1,6 @@
 import type { AstroCookies } from "astro";
 import { env } from "cloudflare:workers";
 import { database } from "./db";
-import { isAuthorName } from "../lib/names";
-import { site } from "../site";
 import { HttpError } from "./http";
 import { sameText } from "./secrets";
 import { closeSession, hasSession, openSession } from "./sessions";
@@ -37,10 +35,4 @@ export async function isAdmin(cookies: AstroCookies) {
 
 export async function requireAdmin(cookies: AstroCookies) {
   if (!(await isAdmin(cookies))) throw new HttpError(401, "管理人としてログインしてください。");
-}
-
-/** 管理人の名前で書けるのは、ログインしている管理人だけ。なりすましの返信を防ぐ。 */
-export async function guardAuthorName(cookies: AstroCookies, name: string) {
-  if (isAuthorName(name) && !(await isAdmin(cookies)))
-    throw new HttpError(403, `「${site.author.name}」は管理人の名前なので使えません。`);
 }

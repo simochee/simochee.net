@@ -16,15 +16,11 @@ interface Props {
     <form class="mt-6 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-8 gap-y-4">
       <label for="comment-name">名前</label><TextField class="max-w-220" id="comment-name" name="name" autocomplete="name" maxlength={limits.name} required />
       <label for="comment-title">タイトル</label><TextField class="max-w-320" id="comment-title" name="title" maxlength={limits.title} />
-      <label for="comment-mail">メールアドレス</label>
-      <div class="flex flex-wrap items-center gap-x-8 gap-y-2">
-        <TextField class="min-w-0 flex-[0_1_320px]" id="comment-mail" name="email" type="email" autocomplete="email" maxlength={limits.email} /><span class="type-small text-ink-soft">（表示されません）</span>
-      </div>
       <label for="comment-url">URL</label><TextField class="max-w-320" id="comment-url" name="url" type="url" autocomplete="url" maxlength={limits.url} placeholder="https://" />
       <label class="self-start" for="comment-body">本文</label><TextArea id="comment-body" name="body" rows="5" maxlength={limits.body} required />
-      <label for="comment-pass">パスワード</label>
+      <label for="comment-pass">削除パスワード</label>
       <div class="flex flex-wrap items-center gap-x-8 gap-y-2">
-        <TextField class="min-w-0 flex-[0_1_160px]" id="comment-pass" name="password" type="password" autocomplete="off" maxlength={limits.password} /><span class="type-small text-ink-soft">（あとで編集・削除するときに使います）</span>
+        <TextField class="min-w-0 flex-[0_1_160px]" id="comment-pass" name="password" type="password" autocomplete="off" maxlength={limits.password} /><span class="type-small text-ink-soft">（入れておくと、あとで自分で削除できます）</span>
       </div>
       <span>非公開コメント</span><label class="type-small"><input type="checkbox" name="private" /> 管理者にだけ表示を許可する</label>
       <span></span><Turnstile />

@@ -1,24 +1,11 @@
 ---
 import Plugin from "../layout/Plugin.astro";
 import Icon from "../ui/Icon.astro";
-import { accounts } from "../../lib/accounts";
-
-const { bluesky, mastodon } = accounts;
 ---
 
-<Plugin title="RSS・フォロー">
+<Plugin title="RSS">
   <ul class="px-4 py-6 *:py-2">
     <li><Icon name="rss" /> <a href="/feed.xml">最近記事のRSS</a></li>
     <li><Icon name="rss" /> <a href="/comments.xml">最新コメントのRSS</a></li>
-    <li><Icon name="bsky" /> <a href={bluesky.profile} rel="me noopener">Blueskyでフォロー</a></li>
-    {
-      mastodon && (
-        <li>
-          <Icon name="mastodon" /> <a href={mastodon.profile} rel="me noopener">Mastodonでフォロー</a>
-          <br />
-          <span class="type-small pl-[1em] break-all text-ink-soft">{mastodon.handle}</span>
-        </li>
-      )
-    }
   </ul>
 </Plugin>

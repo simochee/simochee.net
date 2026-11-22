@@ -20,11 +20,6 @@ export const fields = {
     .trim()
     .max(limits.title, tooLong("タイトル", limits.title))
     .transform((title) => title || "無題"),
-  email: optional(
-    z
-      .email("メールアドレスの書き方を確かめてください。")
-      .max(limits.email, tooLong("メールアドレス", limits.email)),
-  ),
   url: optional(
     z
       .url({ protocol: /^https?$/, error: "URL は http:// か https:// から書いてください。" })
