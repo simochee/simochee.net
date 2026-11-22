@@ -54,6 +54,18 @@ const { poll } = site;
   import { ApiError, call } from "../../scripts/api";
   import { report } from "../../scripts/template";
 
+  let first: Promise<PollResponse> | undefined;
+  /**
+   * ページを開いたときの投票の状態。読むのは最初の 1 回だけにする。
+   * ページを移るとき、ClientRouter は新しいページ側のサイドバーをいったん文書に入れてから、残しておいたサイドバーと差し替える。
+   * 要素ごとに読むと、その一瞬つながった複製の分まで毎回読んでしまう。
+   */
+  const initial = () =>
+    (first ??= call<PollResponse>("/api/poll/").catch((error: unknown) => {
+      first = undefined;
+      throw error;
+    }));
+
   customElements.define(
     "sidebar-poll",
     class extends HTMLElement {
@@ -68,7 +80,7 @@ const { poll } = site;
         this.addEventListener("click", this);
         this.addEventListener("submit", this);
         this.hidden = false;
-        call<PollResponse>("/api/poll/").then(
+        initial().then(
           (result) => {
             if (result.choice !== null) this.#show(result);
           },

@@ -22,8 +22,9 @@ import PluginList from "../layout/PluginList.astro";
   customElements.define(
     "latest-board",
     class extends HTMLElement {
+      #stop: (() => void) | undefined;
       connectedCallback() {
-        onSidebar(({ board }) => {
+        this.#stop = onSidebar(({ board }) => {
           const template = this.querySelector("template")!;
           this.querySelector("ul")!.replaceChildren(
             ...board.map((post) => {
@@ -36,6 +37,9 @@ import PluginList from "../layout/PluginList.astro";
           );
           this.hidden = board.length === 0;
         });
+      }
+      disconnectedCallback() {
+        this.#stop?.();
       }
     },
   );

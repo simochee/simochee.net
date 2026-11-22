@@ -23,8 +23,9 @@ import PluginList from "../layout/PluginList.astro";
   customElements.define(
     "recent-comments",
     class extends HTMLElement {
+      #stop: (() => void) | undefined;
       connectedCallback() {
-        onSidebar(({ comments }) => {
+        this.#stop = onSidebar(({ comments }) => {
           const template = this.querySelector("template")!;
           this.querySelector("ul")!.replaceChildren(
             ...comments.map((comment) => {
@@ -38,6 +39,9 @@ import PluginList from "../layout/PluginList.astro";
           );
           this.hidden = comments.length === 0;
         });
+      }
+      disconnectedCallback() {
+        this.#stop?.();
       }
     },
   );

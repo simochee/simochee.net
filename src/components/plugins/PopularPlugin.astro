@@ -14,8 +14,9 @@ import Plugin from "../layout/Plugin.astro";
   customElements.define(
     "popular-posts",
     class extends HTMLElement {
+      #stop: (() => void) | undefined;
       connectedCallback() {
-        onSidebar(({ popular }) => {
+        this.#stop = onSidebar(({ popular }) => {
           this.querySelector("ol")!.replaceChildren(
             ...popular.map(({ slug, title }) => {
               const item = document.createElement("li");
@@ -25,6 +26,9 @@ import Plugin from "../layout/Plugin.astro";
           );
           this.hidden = popular.length === 0;
         });
+      }
+      disconnectedCallback() {
+        this.#stop?.();
       }
     },
   );
