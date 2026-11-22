@@ -39,6 +39,7 @@ export class TurnstileField extends HTMLElement {
         this.#widget = turnstile.render(this, {
           sitekey: TURNSTILE_SITE_KEY,
           language: "ja",
+          appearance: "interaction-only",
           "response-field-name": "turnstile",
         });
       })
