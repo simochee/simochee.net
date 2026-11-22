@@ -1,5 +1,5 @@
 import { commentsChanged } from "./events";
-import { counts } from "./shared-data";
+import { countsOf } from "./shared-data";
 
 /** `data-slug` の記事に付いた公開コメントの数を、自分の文字として出す。コメントが変わったら出しなおす。 */
 customElements.define(
@@ -13,8 +13,8 @@ customElements.define(
       document.removeEventListener(commentsChanged, this);
     }
     handleEvent() {
-      counts.get().then(
-        (loaded) => (this.textContent = String(loaded.comments[this.dataset.slug ?? ""] ?? 0)),
+      countsOf(this.dataset.slug ?? "").then(
+        ({ comments }) => (this.textContent = String(comments)),
         () => {},
       );
     }

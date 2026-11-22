@@ -29,6 +29,15 @@ test("書き込みは新しい順にページへ分かれ、範囲の外のペ�
   expect(beyond.posts.map((item) => item.title)).toEqual(["1"]);
 });
 
+test("書き込みの件数は、書き込みと削除のたびに数えなおさずに合う", async () => {
+  const db = await migratedD1();
+  const first = await addBbsPost(db, post("1"));
+  await addBbsPost(db, post("2"));
+  await removeBbsPost(db, first, { admin: true });
+  await expect(removeBbsPost(db, first, { admin: true })).rejects.toThrow("見つかりませんでした");
+  expect((await bbsPage(db, 1, 10)).total).toBe(1);
+});
+
 test("書き込み番号は消しても詰めず、次の書き込みは続きの番号になる", async () => {
   const db = await migratedD1();
   await addBbsPost(db, post("1"));

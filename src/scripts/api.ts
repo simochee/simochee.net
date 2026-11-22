@@ -21,17 +21,3 @@ export async function call<T>(
   if (!response.ok) throw new ApiError(data?.error ?? unreachable);
   return data as T;
 }
-
-/** 同じページの中では一度だけ読み、ページを移ったら読みなおす。 */
-export function perPage<T>(load: () => Promise<T>) {
-  let cached: Promise<T> | undefined;
-  document.addEventListener("astro:before-swap", () => (cached = undefined));
-  return {
-    get: () =>
-      (cached ??= load().catch((error: unknown) => {
-        cached = undefined;
-        throw error;
-      })),
-    refresh: () => (cached = undefined),
-  };
-}

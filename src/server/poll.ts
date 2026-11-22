@@ -14,14 +14,12 @@ export async function pollResult(
   options: number,
   visitor: string,
 ): Promise<PollResult> {
-  const [counts, mine] = await db.batch([
-    db
-      .prepare("SELECT choice, COUNT(*) AS votes FROM poll_votes WHERE poll = ? GROUP BY choice")
-      .bind(poll),
+  const [totals, mine] = await db.batch([
+    db.prepare("SELECT choice, votes FROM poll_totals WHERE poll = ?").bind(poll),
     db.prepare("SELECT choice FROM poll_votes WHERE poll = ? AND visitor = ?").bind(poll, visitor),
   ]);
   const votes = Array.from({ length: options }, () => 0);
-  for (const row of counts!.results as { choice: number; votes: number }[])
+  for (const row of totals!.results as { choice: number; votes: number }[])
     if (row.choice < options) votes[row.choice] = row.votes;
   return {
     votes,
@@ -30,7 +28,7 @@ export async function pollResult(
   };
 }
 
-/** 1 人 1 票。投票しなおしても最初の票のまま。 */
+/** 1 人 1 票。投票しなおしても最初の票のまま。票が入ったときだけ、同じ取引の中で合計を 1 つ進める。 */
 export async function vote(
   db: D1Database,
   poll: string,
@@ -38,10 +36,17 @@ export async function vote(
   choice: number,
   now = new Date(),
 ) {
-  await db
-    .prepare(
-      "INSERT INTO poll_votes (poll, visitor, choice, created_at) VALUES (?, ?, ?, ?) ON CONFLICT DO NOTHING",
-    )
-    .bind(poll, visitor, choice, now.toISOString())
-    .run();
+  await db.batch([
+    db
+      .prepare(
+        "INSERT INTO poll_votes (poll, visitor, choice, created_at) VALUES (?, ?, ?, ?) ON CONFLICT DO NOTHING",
+      )
+      .bind(poll, visitor, choice, now.toISOString()),
+    db
+      .prepare(
+        `INSERT INTO poll_totals (poll, choice, votes) SELECT ?, ?, 1 WHERE changes() = 1
+         ON CONFLICT (poll, choice) DO UPDATE SET votes = votes + 1`,
+      )
+      .bind(poll, choice),
+  ]);
 }

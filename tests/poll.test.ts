@@ -16,6 +16,17 @@ test("アンケートは 1 人 1 票で、投票しなおしても最初の票�
   expect((await pollResult(db, "winter", 4, "c")).choice).toBeNull();
 });
 
+test("票の合計は投票のたびに足され、投票しなおしても増えない", async () => {
+  const db = await migratedD1();
+  await vote(db, "winter", "a", 1);
+  await vote(db, "winter", "a", 1);
+  await vote(db, "winter", "a", 3);
+  const { results } = await db
+    .prepare("SELECT choice, votes FROM poll_totals WHERE poll = 'winter'")
+    .all<{ choice: number; votes: number }>();
+  expect(results).toEqual([{ choice: 1, votes: 1 }]);
+});
+
 test("質問を変えると、前の質問の票とは混ざらない", async () => {
   const db = await migratedD1();
   await vote(db, "autumn", "a", 1);

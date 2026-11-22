@@ -16,7 +16,7 @@ interface Props {
 
 <script>
   import { ApiError, call } from "../../scripts/api";
-  import { counts } from "../../scripts/shared-data";
+  import { countsOf } from "../../scripts/shared-data";
 
   customElements.define(
     "clap-button",
@@ -29,9 +29,9 @@ interface Props {
       }
       connectedCallback() {
         this.querySelector("button")!.addEventListener("click", this);
-        counts.get().then(
-          (loaded) => {
-            this.#show(loaded.claps[this.#slug] ?? 0);
+        countsOf(this.#slug).then(
+          ({ claps }) => {
+            this.#show(claps);
             this.hidden = false;
           },
           () => {},

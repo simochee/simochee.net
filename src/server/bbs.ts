@@ -60,8 +60,11 @@ const publicPost = (row: Row): BbsPost => ({
 
 /** 新しい順の page ページ目。範囲の外を頼まれたら、いちばん近いページを返す。 */
 export async function bbsPage(db: D1Database, page: number, size: number): Promise<BbsPage> {
+  // 書き込みの数は書き込みと削除のたびに数えてある。COUNT(*) は書き込みの総数だけ行を読む。
   const total =
-    (await db.prepare("SELECT COUNT(*) AS total FROM bbs_posts").first<number>("total")) ?? 0;
+    (await db
+      .prepare("SELECT value FROM counters WHERE name = 'bbs_posts'")
+      .first<number>("value")) ?? 0;
   const pages = Math.max(1, Math.ceil(total / size));
   const shown = Math.min(Math.max(1, page), pages);
   const { results } = await db
@@ -91,22 +94,27 @@ export async function bbsInbox(db: D1Database, limit: number): Promise<BbsInboxP
 }
 
 export async function addBbsPost(db: D1Database, post: NewBbsPost, now = new Date()) {
-  const row = await db
-    .prepare(
-      `INSERT INTO bbs_posts (title, name, url, body, color, key_hash, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id`,
-    )
-    .bind(
-      post.title,
-      post.name,
-      post.url ?? null,
-      post.body,
-      post.color,
-      post.key ? await hashSecret(post.key) : null,
-      now.toISOString(),
-    )
-    .first<{ id: number }>();
-  return row!.id;
+  const [inserted] = await db.batch([
+    db
+      .prepare(
+        `INSERT INTO bbs_posts (title, name, url, body, color, key_hash, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id`,
+      )
+      .bind(
+        post.title,
+        post.name,
+        post.url ?? null,
+        post.body,
+        post.color,
+        post.key ? await hashSecret(post.key) : null,
+        now.toISOString(),
+      ),
+    db.prepare(
+      `INSERT INTO counters (name, value) VALUES ('bbs_posts', 1)
+       ON CONFLICT (name) DO UPDATE SET value = value + 1`,
+    ),
+  ]);
+  return (inserted!.results[0] as { id: number }).id;
 }
 
 /** 書いた人の削除キーか、管理人なら通す。 */
@@ -142,7 +150,10 @@ export async function removeBbsPost(
   { key, admin }: { key?: string; admin: boolean },
 ) {
   await authorize(db, id, key, admin);
-  await db.prepare("DELETE FROM bbs_posts WHERE id = ?").bind(id).run();
+  await db.batch([
+    db.prepare("DELETE FROM bbs_posts WHERE id = ?").bind(id),
+    db.prepare("UPDATE counters SET value = value - 1 WHERE name = 'bbs_posts' AND changes() = 1"),
+  ]);
 }
 
 /** 管理人の返信。空にすると返信を取り下げる。 */

@@ -92,6 +92,10 @@ export async function commentCounts(db: D1Database, published: Iterable<string>)
   return Object.fromEntries(results.map((row) => [row.slug, row.count]));
 }
 
+/**
+ * 全記事をまたいだ新しいコメント。新しい順の索引から少し多めに読み、公開中の記事のものだけを残す。
+ * 番号はそのコメントより前に同じ記事へ付いた数で出す。全コメントに番号を振ってから選ぶと、コメントの総数だけ行を読む。
+ */
 export async function recentComments(
   db: D1Database,
   published: Iterable<string>,
@@ -99,18 +103,27 @@ export async function recentComments(
 ): Promise<PlacedComment[]> {
   const { results } = await db
     .prepare(
-      `SELECT * FROM (${numbered}) WHERE ${publishedOnly} ORDER BY created_at DESC, slug LIMIT ?`,
+      `SELECT c.*, (
+         SELECT COUNT(*) FROM comments p
+         WHERE p.slug = c.slug AND p.private = 0
+           AND (p.created_at < c.created_at OR (p.created_at = c.created_at AND p.id <= c.id))
+       ) AS number
+       FROM comments c WHERE c.private = 0 ORDER BY c.created_at DESC, c.id DESC LIMIT ?`,
     )
-    .bind(JSON.stringify([...published]), limit)
+    .bind(limit * 4)
     .all<Row>();
-  return results.map((row) => ({
-    slug: row.slug,
-    number: row.number,
-    title: row.title,
-    name: row.name,
-    body: row.body,
-    at: row.created_at,
-  }));
+  const shown = new Set(published);
+  return results
+    .filter((row) => shown.has(row.slug))
+    .slice(0, limit)
+    .map((row) => ({
+      slug: row.slug,
+      number: row.number,
+      title: row.title,
+      name: row.name,
+      body: row.body,
+      at: row.created_at,
+    }));
 }
 
 export async function inboxComments(db: D1Database, limit: number): Promise<InboxComment[]> {

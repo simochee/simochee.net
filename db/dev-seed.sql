@@ -37,3 +37,9 @@ INSERT INTO poll_votes (poll, visitor, choice, created_at) VALUES
   ('2026-winter-kissaten', 'seed-3', 2, '2026-11-18T00:00:00.000Z'),
   ('2026-winter-kissaten', 'seed-4', 1, '2026-11-18T00:00:00.000Z'),
   ('2026-winter-kissaten', 'seed-5', 3, '2026-11-18T00:00:00.000Z');
+
+-- 見本の票と書き込みに合わせて、数えてある合計をそろえる。
+INSERT INTO poll_totals (poll, choice, votes)
+SELECT poll, choice, COUNT(*) FROM poll_votes GROUP BY poll, choice;
+
+UPDATE counters SET value = (SELECT COUNT(*) FROM bbs_posts) WHERE name = 'bbs_posts';

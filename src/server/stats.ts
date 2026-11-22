@@ -1,10 +1,17 @@
 import type { D1Database } from "@cloudflare/workers-types/index.ts";
 import { dayKey } from "../lib/dates";
+import { snapshot } from "./snapshots";
 
 /** この秒数のあいだに便りがあった訪問者を「いま見ている人」と数える。 */
 export const presenceSeconds = 5 * 60;
+/** 閲覧者数は、この秒数のあいだ同じ値を見せる。 */
+export const viewersCacheSeconds = 60;
 /** 人気記事は、この日数の閲覧数で決める。 */
 export const popularDays = 30;
+/** 人気記事は、この秒数のあいだ同じ並びを見せる。 */
+export const popularCacheSeconds = 60 * 60;
+/** 人気記事として数えておく件数。公開をやめた記事を除いても足りるよう、出す件数より多めに持つ。 */
+const popularKept = 20;
 const day = 24 * 60 * 60 * 1000;
 
 export interface Visit {
@@ -34,9 +41,6 @@ export async function recordVisit(
         "INSERT INTO presence (visitor, seen_at) VALUES (?, ?) ON CONFLICT (visitor) DO UPDATE SET seen_at = excluded.seen_at",
       )
       .bind(visitor, seconds),
-    db
-      .prepare("SELECT COUNT(*) AS viewers FROM presence WHERE seen_at > ?")
-      .bind(seconds - presenceSeconds),
     first
       ? db.prepare(
           `INSERT INTO counters (name, value) VALUES ('visitors', 1)
@@ -53,13 +57,21 @@ export async function recordVisit(
         )
         .bind(slug, dayKey(now)),
     );
-  const [, viewers, counter] = await db.batch(statements);
+  const [, counter] = await db.batch(statements);
   const total = (counter!.results[0] as { value: number } | undefined)?.value ?? 0;
-  return {
-    number: first ? total : null,
-    total,
-    viewers: (viewers!.results[0] as { viewers: number }).viewers,
-  };
+  // 訪問のたびに数えると、同時に見ている人が増えるほど読む行が掛け算で増える。
+  const viewers = await snapshot(
+    db,
+    "viewers",
+    viewersCacheSeconds,
+    async () =>
+      (await db
+        .prepare("SELECT COUNT(*) AS viewers FROM presence WHERE seen_at > ?")
+        .bind(seconds - presenceSeconds)
+        .first<number>("viewers")) ?? 0,
+    now.getTime(),
+  );
+  return { number: first ? total : null, total, viewers };
 }
 
 export async function popularPosts(
@@ -68,19 +80,24 @@ export async function popularPosts(
   limit: number,
   now = new Date(),
 ) {
-  const { results } = await db
-    .prepare(
-      `SELECT slug, SUM(count) AS views FROM page_views
-       WHERE day >= ? AND slug IN (SELECT value FROM json_each(?))
-       GROUP BY slug ORDER BY views DESC, slug LIMIT ?`,
-    )
-    .bind(
-      dayKey(new Date(now.getTime() - (popularDays - 1) * day)),
-      JSON.stringify([...published]),
-      limit,
-    )
-    .all<{ slug: string; views: number }>();
-  return results;
+  const ranked = await snapshot(
+    db,
+    "popular",
+    popularCacheSeconds,
+    async () =>
+      (
+        await db
+          .prepare(
+            `SELECT slug, SUM(count) AS views FROM page_views WHERE day >= ?
+             GROUP BY slug ORDER BY views DESC, slug LIMIT ?`,
+          )
+          .bind(dayKey(new Date(now.getTime() - (popularDays - 1) * day)), popularKept)
+          .all<{ slug: string; views: number }>()
+      ).results,
+    now.getTime(),
+  );
+  const shown = new Set(published);
+  return ranked.filter((post) => shown.has(post.slug)).slice(0, limit);
 }
 
 /** 数え終えた古い記録を捨て、表が際限なく育たないようにする。 */
