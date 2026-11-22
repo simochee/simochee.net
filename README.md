@@ -278,6 +278,7 @@ pnpm exec cf deploy --dry-run   # アップロードせずにビルドと検証�
 
 ビルドの出力は `.cloudflare/output/` です。静的ファイルは `.cloudflare/output/v1/workers/default/assets/` に、Worker はその隣に出ます。
 404 は `404-page`、HTML の URL は `auto-trailing-slash` です。
+前のブログの URL（`/blog/` と `/blog/<id>/`）は、`public/_redirects` で全記事一覧と同じ slug の記事へ転送します。
 
 `cf` と Cloudflare アダプター（`@astrojs/cloudflare`）は、どちらも正式版の前の版（リリース候補とベータ）を固定して使っています。正式版が出たら上げてください。
 
