@@ -49,12 +49,12 @@ test("書き込み番号は消しても詰めず、次の書き込みは続き�
 test("削除キーを入れた書き込みは、同じキーでだけ編集・削除できる", async () => {
   const db = await migratedD1();
   const id = await addBbsPost(db, post("元", { key: "abc123" }));
-  const change = { title: "直した", body: "直した本文", color: "#1f3f8f" as const, admin: false };
+  const change = { title: "直した", body: "直した本文", color: "#1f5fb8" as const, admin: false };
   await expect(editBbsPost(db, id, { ...change, key: "zzz" })).rejects.toThrow(
     "削除キーが違います",
   );
   await editBbsPost(db, id, { ...change, key: "abc123" });
-  expect((await bbsPage(db, 1, 10)).posts[0]).toMatchObject({ title: "直した", color: "#1f3f8f" });
+  expect((await bbsPage(db, 1, 10)).posts[0]).toMatchObject({ title: "直した", color: "#1f5fb8" });
   await removeBbsPost(db, id, { key: "abc123", admin: false });
   expect((await bbsPage(db, 1, 10)).total).toBe(0);
 });
