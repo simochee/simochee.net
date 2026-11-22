@@ -16,14 +16,17 @@ export interface AnalyticsCredentials {
   accountId: string;
   siteTag: string;
   apiToken: string;
+  host: string;
 }
 
-const query = `query ($account: string!, $site: string!, $start: Time!, $end: Time!) {
+// ゾーンで計測スクリプトを自動で入れているサイトタグは、同じドメインのサブドメイン（ステージングなど）もまとめて数える。
+// サイトタグだけで絞ると、ほかのホストの /posts/ の閲覧が人気記事とカウンターに混ざるので、ホスト名でも絞る。
+const query = `query ($account: string!, $site: string!, $host: string!, $start: Time!, $end: Time!) {
   viewer {
     accounts(filter: { accountTag: $account }) {
       rumPageloadEventsAdaptiveGroups(
         limit: 1000
-        filter: { siteTag: $site, datetime_geq: $start, datetime_lt: $end }
+        filter: { siteTag: $site, requestHost: $host, datetime_geq: $start, datetime_lt: $end }
       ) {
         count
         sum { visits }
@@ -53,6 +56,7 @@ export function webAnalytics({
   accountId,
   siteTag,
   apiToken,
+  host,
 }: AnalyticsCredentials): PageviewSource {
   return async (start, end) => {
     const response = await fetch("https://api.cloudflare.com/client/v4/graphql", {
@@ -63,6 +67,7 @@ export function webAnalytics({
         variables: {
           account: accountId,
           site: siteTag,
+          host,
           start: start.toISOString(),
           end: end.toISOString(),
         },

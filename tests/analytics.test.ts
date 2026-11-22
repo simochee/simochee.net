@@ -1,4 +1,4 @@
-import { expect, test } from "vitest";
+import { afterEach, expect, test, vi } from "vitest";
 import {
   importAnalytics,
   maxHoursPerRun,
@@ -7,11 +7,51 @@ import {
   windowsToImport,
   type PageviewSource,
   type PathViews,
+  webAnalytics,
 } from "../src/server/analytics";
 import { migratedD1 } from "./support/d1";
 
 const hour = 60 * 60 * 1000;
 const at = (iso: string) => Date.parse(iso);
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
+test("Web Analytics からは、サイトのホスト名の閲覧だけを、ページごとの閲覧数と訪問数として読む", async () => {
+  const requests: { query: string; variables: Record<string, string> }[] = [];
+  vi.stubGlobal("fetch", async (_url: string, init: RequestInit) => {
+    requests.push(JSON.parse(init.body as string));
+    return Response.json({
+      data: {
+        viewer: {
+          accounts: [
+            {
+              rumPageloadEventsAdaptiveGroups: [
+                { count: 4, sum: { visits: 0 }, dimensions: { requestPath: "/posts/pudding/" } },
+                { count: 10, sum: { visits: 5 }, dimensions: { requestPath: "/" } },
+              ],
+            },
+          ],
+        },
+      },
+      errors: null,
+    });
+  });
+  const source = webAnalytics({
+    accountId: "account",
+    siteTag: "site",
+    apiToken: "token",
+    host: "simochee.net",
+  });
+  const rows = await source(new Date("2026-11-19T02:00:00Z"), new Date("2026-11-19T03:00:00Z"));
+  expect(rows).toEqual([
+    { path: "/posts/pudding/", views: 4, visits: 0 },
+    { path: "/", views: 10, visits: 5 },
+  ]);
+  expect(requests[0]!.query).toMatch(/requestHost: \$host/);
+  expect(requests[0]!.variables).toMatchObject({ site: "site", host: "simochee.net" });
+});
 
 test("記事のページの URL からだけ slug を取り出す", () => {
   expect(slugOfPath("/posts/morning-at-kissaten/")).toBe("morning-at-kissaten");

@@ -9,6 +9,6 @@ export function analyticsSource(): PageviewSource | undefined {
     ANALYTICS_API_TOKEN: apiToken,
   } = env;
   return accountId && siteTag && apiToken
-    ? webAnalytics({ accountId, siteTag, apiToken })
+    ? webAnalytics({ accountId, siteTag, apiToken, host: new URL(import.meta.env.SITE).host })
     : undefined;
 }
