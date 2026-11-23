@@ -116,6 +116,10 @@ MDX では裸の URL を使ってください（`<https://...>` は Astro の MD
 https://example.com/
 ```
 
+文中に書いた素の URL（`https://example.com/` や Markdown の `<https://example.com/>`）は、カードにはならず、リンクのテキストが「タイトル (ホスト名)」になります。
+リンク先は書いた URL のままで、取得に失敗した URL はそのまま表示します。
+`[見出し](https://example.com/)` のように書き手がテキストを付けたリンクは変わりません。
+
 記事を書いたら、ビルドの前にリンク先の情報を取得します。
 このコマンドも `SIMOCHEE_CONTENT_DIR` の記事ディレクトリを使います。
 
@@ -125,7 +129,7 @@ vp run unfurl --refresh                       # 全件を取り直す
 vp run unfurl --refresh https://example.com/   # この URL だけ取り直す
 ```
 
-下書きを含む全記事を走査し、まだ保存されていない URL だけを取得します。
+下書きを含む全記事を走査し、カードにする URL と文中の素の URL のうち、まだ保存されていないものだけを取得します。
 記事ごとの `links.json` に結果を保存するので、記事と一緒にコミットしてください。
 `links.json` は形式の `version` と、URL をキーにした `entries` を持ちます。
 成功した結果は `status: "ok"`、取得できなかった結果は `status: "error"` になり、失敗の理由と取得日時も残ります。

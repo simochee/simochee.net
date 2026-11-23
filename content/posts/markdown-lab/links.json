@@ -8,6 +8,16 @@
       "siteName": "Astro",
       "fetchedAt": "2026-11-23T16:18:58.666Z"
     },
+    "https://example.com/": {
+      "status": "ok",
+      "title": "Example Domain",
+      "fetchedAt": "2026-11-23T16:40:03.514Z"
+    },
+    "https://example.com/not-found-inline-link": {
+      "status": "error",
+      "reason": "Error: HTTP 404",
+      "fetchedAt": "2026-11-23T16:40:03.722Z"
+    },
     "https://example.com/not-found-link-card": {
       "status": "error",
       "reason": "Error: HTTP 404",

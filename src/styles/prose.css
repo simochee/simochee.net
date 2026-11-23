@@ -133,6 +133,11 @@
       content: "≫ このページへ行く" / "";
     }
   }
+  & .link-mention-host {
+    color: var(--color-ink-soft);
+    font-family: var(--font-small);
+    font-size: var(--text-small);
+  }
   & :is(ul, ol) {
     padding-inline-start: 1.6em;
     & :is(ul, ol) {

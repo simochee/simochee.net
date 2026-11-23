@@ -121,6 +121,45 @@ test("ラベル付きリンクにはキャッシュを求めず、文中でも�
   expect(code).toContain(`>${url}</a>`);
   expect(code).not.toContain("link-card");
 });
+test("文中やリスト項目の素の URL は href をそのままにタイトルへ置き換え、ホスト名を小さく添える", async () => {
+  const path = await article({
+    [url]: { status: "ok", title: "<b>題名</b>", description: "説明", fetchedAt },
+  });
+  const { code } = await render(path, `文中 ${url} と <${url}> です\n\n- 参考 ${url}`);
+  expect(
+    code.match(
+      new RegExp(
+        `<a href="${url}"[^>]*>&#x3C;b>題名&#x3C;/b></a> <span class="link-mention-host">\\(example.com\\)</span>`,
+        "g",
+      ),
+    ),
+  ).toHaveLength(3);
+  expect(code).not.toContain("link-card");
+  expect(code).not.toContain("説明");
+  expect(code).not.toContain("<img");
+});
+test("取得失敗した文中の URL にはホスト名を添えない", async () => {
+  const path = await article({ [url]: { status: "error", reason: "HTTP 404", fetchedAt } });
+  const { code } = await render(path, `文中 ${url} です`);
+  expect(code).not.toContain("link-mention-host");
+});
+test("取得失敗した文中の URL は URL のまま表示する", async () => {
+  const path = await article({ [url]: { status: "error", reason: "HTTP 404", fetchedAt } });
+  const { code } = await render(path, `文中 ${url} です`);
+  expect(code).toContain(`<a href="${url}"`);
+  expect(code).toContain(`>${url}</a>`);
+});
+test("未保存の文中 URL は CI で停止し、dev では警告して URL のまま表示する", async () => {
+  const path = await article();
+  vi.spyOn(console, "error").mockImplementation(() => {});
+  await expect(render(path, `文中 ${url} です`)).rejects.toThrow(
+    new RegExp(`${path}/index.md[\\s\\S]*${url}[\\s\\S]*vp run unfurl`),
+  );
+  const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+  const { code } = await render(path, `文中 ${url} です`, false);
+  expect(warn).toHaveBeenCalledWith(expect.stringContaining(url));
+  expect(code).toContain(`>${url}</a>`);
+});
 test("スマート引用符やダッシュの変換が先に走っても取得時と同じ URL をカード化する", async () => {
   const literal = "https://example.com/it's--a-test";
   const path = await article({ [literal]: { status: "ok", title: "引用符の URL", fetchedAt } });

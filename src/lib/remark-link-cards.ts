@@ -1,8 +1,8 @@
 import { dirname } from "node:path";
-import type { Paragraph, PhrasingContent, Root } from "mdast";
+import type { Link, Paragraph, Parents, PhrasingContent, Root } from "mdast";
 import type { Plugin } from "unified";
 import { visit } from "unist-util-visit";
-import { cardURL } from "./link-urls";
+import { bareLinkURL, cardURL } from "./link-urls";
 import { readLinks } from "./link-cache";
 import { isCI } from "./git-dates";
 
@@ -45,13 +45,33 @@ export const remarkLinkCards: Plugin<[{ ci?: boolean }?], Root> = (options = {})
       const url = cardURL(node, String(file));
       if (url) targets.push({ node, url });
     });
-    if (!targets.length) return;
+    const cardLinks = new Set(targets.map(({ node }) => node.children[0]));
+    const mentions: { node: Link; parent: Parents; url: string }[] = [];
+    visit(tree, "link", (node, _index, parent) => {
+      const url = bareLinkURL(node, String(file));
+      if (url && parent && !cardLinks.has(node)) mentions.push({ node, parent, url });
+    });
+    if (!targets.length && !mentions.length) return;
     if (!file.path) throw new Error("リンクカードの記事パスがありません");
     const entries = await linkCardEntries(
       file.path,
-      targets.map(({ url }) => url),
+      [...new Set([...targets, ...mentions].map(({ url }) => url))],
       options.ci,
     );
+    // 同じ親に複数あっても挿入で添字がずれないよう、後ろの出現から処理する。
+    for (const { node, parent, url } of mentions.reverse()) {
+      const entry = entries[url];
+      if (entry?.status !== "ok") continue;
+      node.children = [text(entry.title)];
+      const host = new URL(url).hostname.replace(/^www\./, "");
+      const index = (parent.children as PhrasingContent[]).indexOf(node);
+      (parent.children as PhrasingContent[]).splice(
+        index + 1,
+        0,
+        text(" "),
+        span("link-mention-host", [text(`(${host})`)]),
+      );
+    }
     for (const { node, url } of targets) {
       const entry = entries[url];
       if (!entry) continue;

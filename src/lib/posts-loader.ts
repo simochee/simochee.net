@@ -13,7 +13,7 @@ import { frontmatterSchema } from "../content/schema";
 import { resolveContentSource } from "./content-source";
 import { isCI, readHistory, resolveDates, type History } from "./git-dates";
 import { isPreview } from "./preview";
-import { cardURLs } from "./link-urls";
+import { bareURLs } from "./link-urls";
 import { linkCardEntries } from "./remark-link-cards";
 
 function parseBody(body: string, mdx: boolean) {
@@ -81,7 +81,7 @@ export function postsLoader(): Loader {
           selected.push(file);
           // glob は dev の変換結果を再利用できるため、CI の未取得チェックを remark の再実行だけに任せない。
           if (isCI())
-            await linkCardEntries(resolve(base, file), cardURLs(content, file.endsWith(".mdx")));
+            await linkCardEntries(resolve(base, file), bareURLs(content, file.endsWith(".mdx")));
           const thumbnail = thumbnails[0] ? `./${thumbnails[0]}` : undefined;
           const images = bodyImages(content, file.endsWith(".mdx"));
           if (thumbnail && !images.some((image) => image.src === thumbnail))

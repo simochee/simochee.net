@@ -90,7 +90,18 @@ for (const [slug, count] of [
     assert.doesNotMatch(card, /<span class="link-card-label">[^<]/);
   }
   assert.doesNotMatch(html, /<img\b[^>]*src="https?:/);
+  assert.match(
+    html,
+    /<a href="https:\/\/example.com\/"[^>]*>Example Domain<\/a> <span class="link-mention-host">\(example.com\)<\/span>/,
+    slug,
+  );
+  assert.match(
+    html,
+    /<a href="https:\/\/example.com\/not-found-inline-link"[^>]*>https:\/\/example.com\/not-found-inline-link<\/a>/,
+    slug,
+  );
 }
+assert.match(markdown, /<a href="https:\/\/example.com\/"[^>]*>テキスト付きのリンク<\/a>/);
 assert.match(markdown, /class="link-card-title">\/not-found-link-card<\/span>/);
 assert.doesNotMatch(await readFile(`${assets}/feed.xml`, "utf8"), /link-card/);
 for (const pattern of [

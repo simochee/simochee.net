@@ -94,4 +94,8 @@ https://simochee.net/
 
 https://example.com/not-found-link-card
 
+#### 文中の URL
+
+文中に書いた URL は、保存済みのタイトルに置き換わります。たとえば https://example.com/ や <https://astro.build/> のようにです。取得できなかった https://example.com/not-found-inline-link は URL のまま、[テキスト付きのリンク](https://example.com/) は書いたテキストのままです。
+
 [^1]: これは脚注のダミーです。
