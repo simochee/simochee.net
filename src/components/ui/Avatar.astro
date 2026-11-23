@@ -1,11 +1,20 @@
 ---
+import { Image } from "astro:assets";
+import avatar from "virtual:avatar";
+
 interface Props {
   size: number;
 }
 const { size } = Astro.props;
 ---
 
-<svg class="flex-none border border-line bg-wash text-control" width={size} height={size} viewBox="0 0 80 80" role="img" aria-label="管理人のアイコン" fill="none" stroke="currentColor" stroke-width="2">
-  <circle cx="40" cy="30" r="14"></circle>
-  <path d="M14 74c3-16 14-24 26-24s23 8 26 24"></path>
-</svg>
+{
+  avatar ? (
+    <Image class="flex-none border border-line bg-wash object-cover" src={avatar} width={size} height={size} densities={[1, 2]} alt="管理人のアイコン" />
+  ) : (
+    <svg class="flex-none border border-line bg-wash text-control" width={size} height={size} viewBox="0 0 80 80" role="img" aria-label="管理人のアイコン" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="40" cy="30" r="14"></circle>
+      <path d="M14 74c3-16 14-24 26-24s23 8 26 24"></path>
+    </svg>
+  )
+}

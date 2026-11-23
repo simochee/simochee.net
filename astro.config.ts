@@ -17,8 +17,10 @@ import { rehypeAlerts } from "./src/lib/rehype-alerts";
 import { rehypeCodeFrame } from "./src/lib/rehype-code-frame";
 import { hasNoLink } from "./src/lib/heading-links";
 import { resolveContentSource } from "./src/lib/content-source";
+import { avatarPlugin } from "./src/lib/avatar-plugin";
 import { siteContentPlugin } from "./src/lib/site-content-plugin";
 const contentDir = process.env.SIMOCHEE_CONTENT_DIR;
+const { postsDir } = resolveContentSource(process.cwd());
 export default defineConfig({
   site: process.env.SIMOCHEE_SITE_URL || "https://simochee.net",
   output: "static",
@@ -77,7 +79,7 @@ export default defineConfig({
   // vite.config.ts は Vite+ 用で、Astro の Vite に読み込ませると衝突する。型定義に configFile がないため断言で渡す。
   vite: {
     configFile: false,
-    plugins: [tailwindcss(), siteContentPlugin(resolveContentSource(process.cwd()).postsDir)],
+    plugins: [tailwindcss(), siteContentPlugin(postsDir), avatarPlugin(postsDir)],
     // 既定ではドット絵アイコンのような小さなファイルが data URI として CSS へ埋め込まれ、使わないアイコンまで毎回読み込むことになる。
     build: { assetsInlineLimit: 0 },
     // 既定の許可範囲は site ルートのみで、外部の記事ディレクトリの画像が dev で 403 になる。
