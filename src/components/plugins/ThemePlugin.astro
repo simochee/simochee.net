@@ -43,6 +43,7 @@ import { themes } from "../../lib/themes";
         const choice = (event.target as Element).closest("button")?.dataset.themeChoice;
         if (!choice) return;
         document.documentElement.dataset.theme = choice;
+        document.querySelector('link[rel="icon"][type="image/svg+xml"]')?.setAttribute("href", `/favicon/${choice}.svg`);
         save(choice);
         this.reflect();
       }
