@@ -1,7 +1,6 @@
 import { expect, test } from "vitest";
 import { applyMigrations, statements } from "../src/server/migrations";
 import { hashSecret, matchesSecret } from "../src/server/secrets";
-import { closeSession, hasSession, openSession } from "../src/server/sessions";
 import { memoryD1, migratedD1 } from "./support/d1";
 
 test("SQL ファイルは文ごとに分け、コメント行と空の文を捨てる", () => {
@@ -40,22 +39,21 @@ test("削除キーは元の値と照らし合わせられるが、保存した�
   expect(await hashSecret("abc123")).not.toBe(stored);
 });
 
-test("管理人のログインは、期限内で、ログアウトしていないあいだだけ通る", async () => {
+test("新しいマイグレーションは管理人の印を追加し、旧ログインの表を取り除く", async () => {
   const db = await migratedD1();
-  const token = await openSession(db, 60, 1_000);
-  expect(await hasSession(db, token, 2_000)).toBe(true);
-  expect(await hasSession(db, token, 61_001)).toBe(false);
-  expect(await hasSession(db, "でたらめ", 2_000)).toBe(false);
-  expect(await hasSession(db, undefined, 2_000)).toBe(false);
-  await closeSession(db, token);
-  expect(await hasSession(db, token, 2_000)).toBe(false);
-});
-
-test("ログインの cookie の値そのものは、データベースに残さない", async () => {
-  const db = await migratedD1();
-  const token = await openSession(db, 60);
+  for (const table of ["comments", "bbs_posts"]) {
+    const { results } = await db
+      .prepare(`PRAGMA table_info(${table})`)
+      .all<{ name: string; type: string; notnull: number; dflt_value: string }>();
+    expect(results.find((column) => column.name === "admin")).toMatchObject({
+      type: "INTEGER",
+      notnull: 1,
+      dflt_value: "0",
+    });
+  }
   const { results } = await db
-    .prepare("SELECT token_hash FROM admin_sessions")
-    .all<{ token_hash: string }>();
-  expect(results.map((row) => row.token_hash)).not.toContain(token);
+    .prepare("SELECT name FROM sqlite_master WHERE type = ? AND name LIKE ?")
+    .bind("table", "admin_%")
+    .all();
+  expect(results).toEqual([]);
 });

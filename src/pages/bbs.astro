@@ -66,7 +66,7 @@ import { site } from "../site";
           <span class="type-small text-ink-soft" data-slot="date"></span>
         </div>
         <div class="px-10 py-6">
-          <div class="type-small text-ink-soft">名前：<b data-slot="name"></b><span data-slot="home"> <Icon name="home" /> <a rel="nofollow ugc noopener">HOME</a></span></div>
+          <div class="type-small text-ink-soft">名前：<b data-slot="name"></b><span class="ml-2 type-small text-memo-ink" data-slot="admin">［管理人］</span><span data-slot="home"> <Icon name="home" /> <a rel="nofollow ugc noopener">HOME</a></span></div>
           <div class="mt-4 leading-prose whitespace-pre-line" data-slot="body"></div>
           <div class="mt-6 ml-[1em] border border-dotted border-memo-line bg-memo px-8 py-4 leading-prose whitespace-pre-line" data-slot="reply">└ <b class="text-memo-ink">{site.author.name}</b>：<span data-slot="reply-text"></span></div>
           <div class="type-small mt-4 text-right">
@@ -201,6 +201,7 @@ import { site } from "../site";
         slot("heading").textContent = `[${post.id}] ${post.title}`;
         slot("date").textContent = formatMinutes(new Date(post.at));
         slot("name").textContent = post.name;
+        if (!post.admin) slot("admin").remove();
         if (post.url) slot("home").querySelector("a")!.href = post.url;
         else slot("home").remove();
         slot("body").textContent = post.body;

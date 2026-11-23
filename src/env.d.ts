@@ -7,7 +7,8 @@ interface Env {
   ACTION_LIMIT: import("@cloudflare/workers-types/index.ts").RateLimit;
   // 秘密の値は Cloudflare に登録するまで空なので、無いときの振る舞いを呼ぶ側で決める。
   TURNSTILE_SECRET_KEY?: string;
-  ADMIN_PASSWORD?: string;
+  ACCESS_TEAM_DOMAIN?: string;
+  ACCESS_AUD?: string;
   ANALYTICS_ACCOUNT_ID?: string;
   ANALYTICS_SITE_TAG?: string;
   ANALYTICS_API_TOKEN?: string;

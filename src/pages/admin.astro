@@ -3,6 +3,7 @@ import Base from "../layouts/Base.astro";
 import Button from "../components/ui/Button.astro";
 import TextArea from "../components/ui/TextArea.astro";
 import TextField from "../components/ui/TextField.astro";
+import { inkColors } from "../lib/bbs";
 import { limits } from "../lib/limits";
 
 const heading = "mb-6 mt-14 border-b border-line bg-wash px-6 py-2 font-bold text-ink-strong before:content-['▼_']";
@@ -13,17 +14,39 @@ const item = "border-b border-dotted border-line px-6 py-6";
   <h1 class="title-box mb-10">管理画面</h1>
   <noscript><p>管理画面を使うには、JavaScript を有効にしてください。</p></noscript>
 
-  <admin-panel hidden>
-    <form class="flex flex-wrap items-center gap-8" data-slot="login" hidden>
-      <label for="admin-password">管理人のパスワード</label>
-      <TextField class="min-w-0 flex-[0_1_220px]" id="admin-password" name="password" type="password" autocomplete="current-password" required />
-      <Button class="px-16 py-2" type="submit">ログイン</Button>
-    </form>
+  <admin-panel class="block" hidden>
+    <p class="sticky top-0 z-10 mb-4 border border-line bg-paper px-6 py-2" role="status" data-slot="status" hidden></p>
 
     <div data-slot="inbox" hidden>
       <div class="flex flex-wrap items-center gap-8">
-        <Button class="px-10 py-1" variant="plain" data-action="logout">ログアウト</Button>
+        <a href="/cdn-cgi/access/logout">ログアウト</a>
       </div>
+
+      <h2 class={heading}>記事にコメントする</h2>
+      <form class="flex flex-col gap-4 px-6" data-slot="new-comment">
+        <label for="comment-post">記事</label>
+        <select class="min-w-0 max-w-full border border-control bg-paper px-4 py-2" id="comment-post" name="slug" data-slot="posts" required></select>
+        <label for="comment-title">タイトル</label>
+        <TextField id="comment-title" name="title" maxlength={limits.title} />
+        <label for="comment-body">本文</label>
+        <TextArea id="comment-body" name="body" rows="5" maxlength={limits.body} required />
+        <div><Button class="px-16 py-2" type="submit">コメントを送る</Button></div>
+      </form>
+
+      <h2 class={heading}>掲示板に書き込む</h2>
+      <form class="flex flex-col gap-4 px-6" data-slot="new-bbs">
+        <label for="post-title">題名</label>
+        <TextField id="post-title" name="title" maxlength={limits.title} />
+        <label for="post-body">本文</label>
+        <TextArea id="post-body" name="body" rows="5" maxlength={limits.body} required />
+        <fieldset class="flex flex-wrap gap-8">
+          <legend>文字色</legend>
+          {inkColors.map((ink, index) => (
+            <label style={{ color: ink.value }}><input type="radio" name="colorId" value={ink.id} checked={index === 0} /> ■{ink.label}</label>
+          ))}
+        </fieldset>
+        <div><Button class="px-16 py-2" type="submit">書き込みを送る</Button></div>
+      </form>
 
       <h2 class={heading}>コメント（新しい順）</h2>
       <p class="type-small mb-4 text-ink-soft">非公開のコメントもここに出ます。</p>
@@ -32,8 +55,6 @@ const item = "border-b border-dotted border-line px-6 py-6";
       <h2 class={heading}>掲示板（新しい順）</h2>
       <ul data-slot="bbs"></ul>
     </div>
-
-    <p class="mt-8" role="status" data-slot="status" hidden></p>
 
     <template data-slot="comment">
       <li class={item}>
@@ -80,11 +101,15 @@ const item = "border-b border-dotted border-line px-6 py-6";
         this.addEventListener("submit", this);
         this.addEventListener("click", this);
         this.hidden = false;
-        void this.#load();
+        void this.#run(() => this.#load());
       }
 
       #status(message: string, tone: "ok" | "error" = "ok") {
         report(this.#slot("status"), message, tone);
+      }
+
+      #call<T>(path: string, init: { method?: string; body?: unknown } = {}) {
+        return call<T>(path, { ...init, sessionExpired: "ログインが切れました。ページを再読み込みしてください。" });
       }
 
       async #run(task: () => Promise<unknown>) {
@@ -96,13 +121,16 @@ const item = "border-b border-dotted border-line px-6 py-6";
       }
 
       async #load() {
-        const { admin } = await call<{ admin: boolean }>("/api/admin/session/").catch(() => ({ admin: false }));
-        this.#slot("login").hidden = admin;
-        this.#slot("inbox").hidden = !admin;
-        if (admin) await this.#run(async () => this.#render(await call<AdminInbox>("/api/admin/inbox/")));
+        const data = await this.#call<AdminInbox>("/api/admin/inbox/");
+        this.#render(data);
+        this.#slot("inbox").hidden = false;
       }
 
-      #render({ comments, bbs }: AdminInbox) {
+      #render({ comments, bbs, posts }: AdminInbox) {
+        const select = this.#slot<HTMLSelectElement>("posts");
+        const selected = select.value;
+        select.replaceChildren(...posts.map((post) => new Option(post.title, post.slug)));
+        if (posts.some((post) => post.slug === selected)) select.value = selected;
         const comment = this.#slot<HTMLTemplateElement>("comment");
         this.#slot("comments").replaceChildren(
           ...comments.map((entry) => {
@@ -110,7 +138,7 @@ const item = "border-b border-dotted border-line px-6 py-6";
             fragment.querySelector("li")!.dataset.id = String(entry.id);
             if (!entry.private) slot("private").remove();
             slot("title").textContent = entry.title;
-            slot("name").textContent = entry.name;
+            slot("name").textContent = entry.name + (entry.admin ? " ［管理人］" : "");
             slot("meta").textContent = [
               formatTimestamp(new Date(entry.at)),
               entry.url,
@@ -129,7 +157,7 @@ const item = "border-b border-dotted border-line px-6 py-6";
             const { fragment, slot } = stamp(post);
             fragment.querySelector("li")!.dataset.id = String(entry.id);
             slot("title").textContent = `[${entry.id}] ${entry.title}`;
-            slot("name").textContent = entry.name;
+            slot("name").textContent = entry.name + (entry.admin ? " ［管理人］" : "");
             slot("meta").textContent = [formatTimestamp(new Date(entry.at)), entry.url]
               .filter(Boolean)
               .join(" ／ ");
@@ -150,34 +178,38 @@ const item = "border-b border-dotted border-line px-6 py-6";
         if (event.type === "submit") {
           event.preventDefault();
           const form = target as HTMLFormElement;
-          if (form.dataset.slot === "login")
-            void this.#run(async () => {
-              await call("/api/admin/session/", { body: textFields(form) });
-              form.reset();
-              this.#status("");
-              await this.#load();
-            });
-          else
-            void this.#run(async () => {
-              await call(`/api/bbs/${id}/reply/`, { method: "PUT", body: textFields(form) });
-              this.#status(`[${id}] の返信を保存しました。`);
-            });
+          void this.#run(async () => {
+            const button = form.querySelector<HTMLButtonElement>("button[type=submit]")!;
+            button.disabled = true;
+            try {
+              const kind = form.dataset.slot;
+              if (kind === "new-comment" || kind === "new-bbs") {
+                await this.#call(kind === "new-comment" ? "/api/admin/comments/" : "/api/admin/bbs/", { body: textFields(form) });
+                form.reset();
+                this.#status(kind === "new-comment" ? "コメントを送りました。" : "掲示板に書き込みました。");
+                await this.#load();
+              } else {
+                await this.#call(`/api/admin/bbs/${id}/reply/`, { method: "PUT", body: textFields(form) });
+                this.#status(`[${id}] の返信を保存しました。`);
+                await this.#load();
+              }
+            } finally {
+              button.disabled = false;
+            }
+          });
           return;
         }
         const action = target.closest<HTMLElement>("[data-action]")?.dataset.action;
-        if (action === "logout")
+        if (action === "delete-comment" && confirm("このコメントを削除しますか？"))
           void this.#run(async () => {
-            await call("/api/admin/session/", { method: "DELETE" });
-            await this.#load();
-          });
-        else if (action === "delete-comment" && confirm("このコメントを削除しますか？"))
-          void this.#run(async () => {
-            await call(`/api/comments/${id}/`, { method: "DELETE", body: {} });
+            await this.#call(`/api/admin/comments/${id}/`, { method: "DELETE", body: {} });
+            this.#status("コメントを削除しました。");
             await this.#load();
           });
         else if (action === "delete-bbs" && confirm("この書き込みを削除しますか？"))
           void this.#run(async () => {
-            await call(`/api/bbs/${id}/`, { method: "DELETE", body: {} });
+            await this.#call(`/api/admin/bbs/${id}/`, { method: "DELETE", body: {} });
+            this.#status("書き込みを削除しました。");
             await this.#load();
           });
       }

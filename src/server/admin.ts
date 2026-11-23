@@ -1,38 +1,11 @@
-import type { AstroCookies } from "astro";
+import type { APIContext } from "astro";
 import { env } from "cloudflare:workers";
-import { database } from "./db";
-import { HttpError } from "./http";
-import { sameText } from "./secrets";
-import { closeSession, hasSession, openSession } from "./sessions";
+import { verifyAccess } from "./access";
 
-const name = "admin";
-const lifetime = 60 * 60 * 24 * 30;
-
-export async function logIn(cookies: AstroCookies, password: string) {
-  const expected = env.ADMIN_PASSWORD;
-  if (!expected) throw new HttpError(503, "管理人のパスワードが登録されていません。");
-  if (!sameText(password, expected)) throw new HttpError(401, "パスワードが違います。");
-  cookies.set(name, await openSession(await database(), lifetime), {
-    path: "/api/",
-    httpOnly: true,
-    secure: !import.meta.env.DEV,
-    sameSite: "strict",
-    maxAge: lifetime,
-  });
-}
-
-export async function logOut(cookies: AstroCookies) {
-  await closeSession(await database(), cookies.get(name)?.value);
-  cookies.delete(name, { path: "/api/" });
-}
-
-/** パスワードの登録を消すと、ログイン中の人も含めて管理人として扱わなくなる。 */
-export async function isAdmin(cookies: AstroCookies) {
-  const token = cookies.get(name)?.value;
-  if (!env.ADMIN_PASSWORD || !token) return false;
-  return hasSession(await database(), token);
-}
-
-export async function requireAdmin(cookies: AstroCookies) {
-  if (!(await isAdmin(cookies))) throw new HttpError(401, "管理人としてログインしてください。");
+export async function requireAdmin({ request, cookies }: Pick<APIContext, "request" | "cookies">) {
+  if (import.meta.env.DEV && (!env.ACCESS_TEAM_DOMAIN?.trim() || !env.ACCESS_AUD?.trim())) {
+    // 手元には Access の入口がないため、設定していない dev でだけ認証を省く。
+    return;
+  }
+  await verifyAccess(request, cookies.get("CF_Authorization")?.value, env);
 }

@@ -8,6 +8,7 @@ export interface PublicComment {
   number: number;
   title: string;
   name: string;
+  admin: boolean;
   body: string;
   at: string;
   url: string | null;
@@ -20,6 +21,7 @@ export interface PlacedComment {
   number: number;
   title: string;
   name: string;
+  admin: boolean;
   body: string;
   at: string;
 }
@@ -30,6 +32,7 @@ export interface InboxComment {
   slug: string;
   title: string;
   name: string;
+  admin: boolean;
   body: string;
   url: string | null;
   private: boolean;
@@ -40,6 +43,7 @@ export interface NewComment {
   slug: string;
   title: string;
   name: string;
+  admin?: boolean;
   body: string;
   url?: string;
   password?: string;
@@ -57,6 +61,7 @@ interface Row {
   slug: string;
   title: string;
   name: string;
+  admin: number;
   body: string;
   url: string | null;
   password_hash: string | null;
@@ -75,6 +80,7 @@ export async function threadOf(db: D1Database, slug: string): Promise<PublicComm
     number: row.number,
     title: row.title,
     name: row.name,
+    admin: row.admin === 1,
     body: row.body,
     at: row.created_at,
     url: row.url,
@@ -121,6 +127,7 @@ export async function recentComments(
       number: row.number,
       title: row.title,
       name: row.name,
+      admin: row.admin === 1,
       body: row.body,
       at: row.created_at,
     }));
@@ -136,6 +143,7 @@ export async function inboxComments(db: D1Database, limit: number): Promise<Inbo
     slug: row.slug,
     title: row.title,
     name: row.name,
+    admin: row.admin === 1,
     body: row.body,
     url: row.url,
     private: row.private === 1,
@@ -146,8 +154,8 @@ export async function inboxComments(db: D1Database, limit: number): Promise<Inbo
 export async function addComment(db: D1Database, comment: NewComment, now = new Date()) {
   const row = await db
     .prepare(
-      `INSERT INTO comments (slug, title, name, body, url, password_hash, private, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
+      `INSERT INTO comments (slug, title, name, body, url, password_hash, private, created_at, admin)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
     )
     .bind(
       comment.slug,
@@ -158,6 +166,7 @@ export async function addComment(db: D1Database, comment: NewComment, now = new 
       comment.password ? await hashSecret(comment.password) : null,
       comment.private ? 1 : 0,
       now.toISOString(),
+      comment.admin ? 1 : 0,
     )
     .first<{ id: number }>();
   return row!.id;
