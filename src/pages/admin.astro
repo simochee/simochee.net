@@ -14,7 +14,9 @@ const item = "border-b border-dotted border-line px-6 py-6";
   <h1 class="title-box mb-10">管理画面</h1>
   <noscript><p>管理画面を使うには、JavaScript を有効にしてください。</p></noscript>
 
-  <admin-panel hidden>
+  <admin-panel class="block" hidden>
+    <p class="sticky top-0 z-10 mb-4 border border-line bg-paper px-6 py-2" role="status" data-slot="status" hidden></p>
+
     <div data-slot="inbox" hidden>
       <div class="flex flex-wrap items-center gap-8">
         <a href="/cdn-cgi/access/logout">ログアウト</a>
@@ -53,8 +55,6 @@ const item = "border-b border-dotted border-line px-6 py-6";
       <h2 class={heading}>掲示板（新しい順）</h2>
       <ul data-slot="bbs"></ul>
     </div>
-
-    <p class="mt-8" role="status" data-slot="status" hidden></p>
 
     <template data-slot="comment">
       <li class={item}>
@@ -108,6 +108,10 @@ const item = "border-b border-dotted border-line px-6 py-6";
         report(this.#slot("status"), message, tone);
       }
 
+      #call<T>(path: string, init: { method?: string; body?: unknown } = {}) {
+        return call<T>(path, { ...init, sessionExpired: "ログインが切れました。ページを再読み込みしてください。" });
+      }
+
       async #run(task: () => Promise<unknown>) {
         try {
           await task();
@@ -117,8 +121,7 @@ const item = "border-b border-dotted border-line px-6 py-6";
       }
 
       async #load() {
-        this.#slot("inbox").hidden = true;
-        const data = await call<AdminInbox>("/api/admin/inbox/");
+        const data = await this.#call<AdminInbox>("/api/admin/inbox/");
         this.#render(data);
         this.#slot("inbox").hidden = false;
       }
@@ -181,14 +184,14 @@ const item = "border-b border-dotted border-line px-6 py-6";
             try {
               const kind = form.dataset.slot;
               if (kind === "new-comment" || kind === "new-bbs") {
-                await call(kind === "new-comment" ? "/api/admin/comments/" : "/api/admin/bbs/", { body: textFields(form) });
+                await this.#call(kind === "new-comment" ? "/api/admin/comments/" : "/api/admin/bbs/", { body: textFields(form) });
                 form.reset();
-                await this.#load();
                 this.#status(kind === "new-comment" ? "コメントを送りました。" : "掲示板に書き込みました。");
-              } else {
-                await call(`/api/admin/bbs/${id}/reply/`, { method: "PUT", body: textFields(form) });
                 await this.#load();
+              } else {
+                await this.#call(`/api/admin/bbs/${id}/reply/`, { method: "PUT", body: textFields(form) });
                 this.#status(`[${id}] の返信を保存しました。`);
+                await this.#load();
               }
             } finally {
               button.disabled = false;
@@ -199,12 +202,14 @@ const item = "border-b border-dotted border-line px-6 py-6";
         const action = target.closest<HTMLElement>("[data-action]")?.dataset.action;
         if (action === "delete-comment" && confirm("このコメントを削除しますか？"))
           void this.#run(async () => {
-            await call(`/api/admin/comments/${id}/`, { method: "DELETE", body: {} });
+            await this.#call(`/api/admin/comments/${id}/`, { method: "DELETE", body: {} });
+            this.#status("コメントを削除しました。");
             await this.#load();
           });
         else if (action === "delete-bbs" && confirm("この書き込みを削除しますか？"))
           void this.#run(async () => {
-            await call(`/api/admin/bbs/${id}/`, { method: "DELETE", body: {} });
+            await this.#call(`/api/admin/bbs/${id}/`, { method: "DELETE", body: {} });
+            this.#status("書き込みを削除しました。");
             await this.#load();
           });
       }

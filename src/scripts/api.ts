@@ -5,7 +5,7 @@ const unreachable = "通信できませんでした。時間をおいてもう�
 
 export async function call<T>(
   path: string,
-  init: { method?: string; body?: unknown } = {},
+  init: { method?: string; body?: unknown; sessionExpired?: string } = {},
 ): Promise<T> {
   let response: Response;
   try {
@@ -13,10 +13,12 @@ export async function call<T>(
       method: init.method ?? (init.body === undefined ? "GET" : "POST"),
       headers: init.body === undefined ? undefined : { "Content-Type": "application/json" },
       body: init.body === undefined ? undefined : JSON.stringify(init.body),
+      redirect: init.sessionExpired === undefined ? "follow" : "manual",
     });
   } catch {
     throw new ApiError(unreachable);
   }
+  if (response.type === "opaqueredirect") throw new ApiError(init.sessionExpired!);
   const data = (await response.json().catch(() => undefined)) as { error?: string } | undefined;
   if (!response.ok) throw new ApiError(data?.error ?? unreachable);
   return data as T;

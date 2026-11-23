@@ -1,4 +1,4 @@
-import { beforeAll, expect, test } from "vitest";
+import { beforeAll, expect, test, vi } from "vitest";
 import { customFetch, exportJWK, generateKeyPair, SignJWT, type JWTPayload } from "jose";
 import { verifyAccess } from "../src/server/access";
 
@@ -76,3 +76,56 @@ test.each([
     verifyAccess(request(await token()), undefined, settings, options),
   ).rejects.toMatchObject({ status: 503 });
 });
+test("鍵の取得に成功したあとは、次の検証で certs を取りに行かない", async () => {
+  let fetched = 0;
+  const counting = {
+    [customFetch]: async () => {
+      fetched += 1;
+      return Response.json({ keys: [{ ...jwk, kid: "access", alg: "RS256" }] });
+    },
+  };
+  const cached = { ...config, ACCESS_TEAM_DOMAIN: "cached.cloudflareaccess.com" };
+  const jwt = await token({ iss: "https://cached.cloudflareaccess.com" });
+  await verifyAccess(request(jwt), undefined, cached, counting);
+  await verifyAccess(request(jwt), undefined, cached, counting);
+  expect(fetched).toBe(1);
+});
+test("鍵の取得に失敗したときは、ログに残して 503 にする", async () => {
+  const error = vi.spyOn(console, "error").mockImplementation(() => {});
+  const broken = {
+    [customFetch]: async () => new Response("unavailable", { status: 500 }),
+  };
+  const down = { ...config, ACCESS_TEAM_DOMAIN: "down.cloudflareaccess.com" };
+  const jwt = await token({ iss: "https://down.cloudflareaccess.com" });
+  await expect(verifyAccess(request(jwt), undefined, down, broken)).rejects.toMatchObject({
+    status: 503,
+  });
+  expect(error).toHaveBeenCalled();
+  error.mockRestore();
+});
+test("許可していないドメインには fetch せず利用不可にする", async () => {
+  let fetched = 0;
+  const counting = {
+    [customFetch]: async () => {
+      fetched += 1;
+      return Response.json({ keys: [] });
+    },
+  };
+  await expect(
+    verifyAccess(
+      request(await token()),
+      undefined,
+      { ...config, ACCESS_TEAM_DOMAIN: "evil.example.com" },
+      counting,
+    ),
+  ).rejects.toMatchObject({ status: 503 });
+  expect(fetched).toBe(0);
+});
+test.each(["https://test.cloudflareaccess.com", "test.cloudflareaccess.com/path", "a b.cloudflareaccess.com"])(
+  "形式が違うドメイン %s は認証失敗ではなく設定の不備として 503 にする",
+  async (domain) => {
+    await expect(
+      verifyAccess(request(await token()), undefined, { ...config, ACCESS_TEAM_DOMAIN: domain }, options),
+    ).rejects.toMatchObject({ status: 503 });
+  },
+);
