@@ -19,10 +19,11 @@ import { hasNoLink } from "./src/lib/heading-links";
 import { resolveContentSource } from "./src/lib/content-source";
 import { avatarPlugin } from "./src/lib/avatar-plugin";
 import { siteContentPlugin } from "./src/lib/site-content-plugin";
+import { isPreview, siteURL } from "./src/lib/preview";
 const contentDir = process.env.SIMOCHEE_CONTENT_DIR;
 const { postsDir } = resolveContentSource(process.cwd());
 export default defineConfig({
-  site: process.env.SIMOCHEE_SITE_URL || "https://simochee.net",
+  site: siteURL(),
   output: "static",
   // アダプターは既定でセッション用の KV を用意する。セッションは使わないので、要らない KV を作らせない。
   session: false,
@@ -36,7 +37,11 @@ export default defineConfig({
   trailingSlash: "always",
   env: {
     schema: {
-      SIMOCHEE_NOINDEX: envField.boolean({ context: "server", access: "public", default: false }),
+      SIMOCHEE_NOINDEX: envField.boolean({
+        context: "server",
+        access: "public",
+        default: isPreview(),
+      }),
       // Cloudflare Web Analytics の計測スクリプトに入れるサイトのトークン。未登録のあいだは計測しない。
       WEB_ANALYTICS_TOKEN: envField.string({ context: "server", access: "public", optional: true }),
       // 未登録のあいだは Cloudflare の試験用の鍵（必ず通る）になる。本番の秘密鍵とは組にならないので、投稿は受け付けられない。

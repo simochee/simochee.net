@@ -11,6 +11,7 @@ import { visit } from "unist-util-visit";
 import { frontmatterSchema } from "../content/schema";
 import { resolveContentSource } from "./content-source";
 import { isCI, readHistory, resolveDates, type History } from "./git-dates";
+import { isPreview } from "./preview";
 
 function parseBody(body: string) {
   return unified().use(remarkParse).use(remarkMdx).parse(body);
@@ -34,6 +35,7 @@ export function bodyImages(body: string): { src: string; alt: string }[] {
   return [...found].map(([src, alt]) => ({ src, alt }));
 }
 export function includeDrafts(command: string, env: NodeJS.ProcessEnv = process.env) {
+  if (isPreview(env)) return true;
   return command === "dev" && !isCI(env) && env.SIMOCHEE_INCLUDE_DRAFTS === "1";
 }
 export function postsLoader(): Loader {
