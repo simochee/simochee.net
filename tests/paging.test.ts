@@ -31,8 +31,8 @@ test("カテゴリなどの一覧も、その一覧の URL の下で同じ形の
   expect(pagePath(3, "/tech/")).toBe("/tech/page/3/");
 });
 test("ページに出ている記事の範囲は 1 件目から数え、最後のページは総数で止まる", () => {
-  expect(pageRange(12, 1)).toEqual({ from: 1, to: pageSize });
-  expect(pageRange(12, 3)).toEqual({ from: pageSize * 2 + 1, to: 12 });
+  expect(pageRange(items.length, 1)).toEqual({ from: 1, to: pageSize });
+  expect(pageRange(items.length, 3)).toEqual({ from: pageSize * 2 + 1, to: items.length });
 });
 test("記事が 1 件もない一覧の範囲は 0 件目になる", () => {
   expect(pageRange(0, 1)).toEqual({ from: 0, to: 0 });

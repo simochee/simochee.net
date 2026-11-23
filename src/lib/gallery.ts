@@ -1,4 +1,4 @@
-export const galleryPageSize = 12;
+export const galleryPageSize = 20;
 
 interface GalleryPost<Src> {
   id: string;

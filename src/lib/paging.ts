@@ -1,4 +1,4 @@
-export const pageSize = 5;
+export const pageSize = 20;
 export const pageCount = (total: number, size = pageSize) => Math.max(1, Math.ceil(total / size));
 export function pageOf<T>(items: T[], page: number, size = pageSize): T[] {
   return items.slice((page - 1) * size, page * size);
