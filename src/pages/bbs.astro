@@ -241,7 +241,7 @@ import { site } from "../site";
         const toggle = article.querySelector<HTMLElement>("[data-action=edit]");
         const open = (shown: boolean) => {
           editor!.hidden = !shown;
-          toggle!.setAttribute("aria-expanded", String(shown));
+          toggle!.ariaExpanded = String(shown);
           if (shown) editor!.querySelector("input")!.focus();
         };
         if (action === "quote") {

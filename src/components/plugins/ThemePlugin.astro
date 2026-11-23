@@ -50,7 +50,7 @@ import { themes } from "../../lib/themes";
       reflect() {
         const theme = themes.find((item) => item.id === document.documentElement.dataset.theme) ?? defaultTheme;
         for (const button of this.querySelectorAll<HTMLElement>("[aria-pressed]"))
-          button.setAttribute("aria-pressed", String(button.dataset.themeChoice === theme.id));
+          button.ariaPressed = String(button.dataset.themeChoice === theme.id);
       }
     },
   );

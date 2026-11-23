@@ -22,7 +22,7 @@ import Plugin from "../layout/Plugin.astro";
       connectedCallback() {
         this.#stop = onSidebar(({ total }) => {
           const digits = this.querySelector<HTMLElement>("[data-slot=digits]")!;
-          digits.setAttribute("aria-label", `これまでのお客様 ${total} 人`);
+          digits.ariaLabel = `これまでのお客様 ${total} 人`;
           digits.replaceChildren(
             ...[...counterDigits(total)].map((digit) =>
               Object.assign(document.createElement("span"), {

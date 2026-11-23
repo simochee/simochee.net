@@ -15,8 +15,8 @@ export interface Photo<Src> {
 
 /** 記事の新しい順に、記事ごとの画像を本文に出てくる順で並べる。説明のない画像は記事のタイトルを題にする。 */
 export function photos<Src>(posts: GalleryPost<Src>[]): Photo<Src>[] {
-  return [...posts]
-    .sort(
+  return posts
+    .toSorted(
       (a, b) =>
         b.data.publishedAt.getTime() - a.data.publishedAt.getTime() || a.id.localeCompare(b.id),
     )

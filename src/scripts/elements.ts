@@ -21,7 +21,7 @@ abstract class FeedbackButton extends HTMLElement {
   protected abstract act(): Promise<string | undefined>;
 
   connectedCallback() {
-    this.#status.setAttribute("role", "status");
+    this.#status.role = "status";
     this.#status.className = "sr-only";
     this.append(this.#status);
     this.#label = this.button.textContent ?? "";

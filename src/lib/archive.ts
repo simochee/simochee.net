@@ -10,24 +10,21 @@ export interface Month<T> {
   path: string;
   posts: T[];
 }
-const yearMonth = (date: Date) => formatDay(date).slice(0, 7).split("/") as [string, string];
+const yearMonth = (date: Date) => formatDay(date).slice(0, 7);
 
 export function groupByMonth<T extends Dated>(posts: T[]): Month<T>[] {
-  const months = new Map<string, Month<T>>();
-  for (const post of posts) {
-    const [year, month] = yearMonth(post.data.publishedAt);
-    const key = `${year}/${month}`;
-    if (!months.has(key))
-      months.set(key, {
+  return [...Map.groupBy(posts, (post) => yearMonth(post.data.publishedAt))]
+    .map(([key, posts]) => {
+      const [year, month] = key.split("/") as [string, string];
+      return {
         year,
         month,
         label: `${year}年${month}月`,
         path: `/archive/${year}/${month}/`,
-        posts: [],
-      });
-    months.get(key)!.posts.push(post);
-  }
-  return [...months.values()].sort((a, b) => b.path.localeCompare(a.path));
+        posts,
+      };
+    })
+    .toSorted((a, b) => b.path.localeCompare(a.path));
 }
 
 export interface CalendarPost {

@@ -101,8 +101,8 @@ interface Props {
             article.dataset.id = String(comment.id);
             slot("title").textContent = comment.title;
             slot("body").textContent = comment.body;
+            slot<HTMLTimeElement>("time").dateTime = comment.at;
             slot("time").textContent = formatTimestamp(new Date(comment.at));
-            slot("time").setAttribute("datetime", comment.at);
             if (comment.url) slot("link").querySelector("a")!.href = comment.url;
             else slot("link").remove();
             slot("name").textContent = comment.name;
@@ -130,7 +130,7 @@ interface Props {
         const toggle = article.querySelector<HTMLButtonElement>("[data-slot=delete] button")!;
         const open = (shown: boolean) => {
           remover.hidden = !shown;
-          toggle.setAttribute("aria-expanded", String(shown));
+          toggle.ariaExpanded = String(shown);
           if (shown) remover.querySelector("input")!.focus();
         };
         if (event.type === "submit") {

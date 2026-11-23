@@ -30,7 +30,7 @@ function pageLink(query: string, page: number, text: string, rel?: string) {
 function pager(query: string, page: number, last: number) {
   const nav = document.createElement("nav");
   nav.className = "border-y border-dotted border-frame p-4 text-center";
-  nav.setAttribute("aria-label", "ページ番号");
+  nav.ariaLabel = "ページ番号";
   const label = (text: string) =>
     Object.assign(document.createElement("span"), { textContent: text });
   nav.append(
@@ -43,7 +43,7 @@ function pager(query: string, page: number, last: number) {
       nav.append(Object.assign(document.createElement("b"), { textContent: String(number) }), " ");
     else {
       const link = pageLink(query, number, String(number));
-      link.setAttribute("aria-label", `${number}ページ目`);
+      link.ariaLabel = `${number}ページ目`;
       nav.append(link, " ");
     }
   }
@@ -126,7 +126,7 @@ customElements.define(
         if (excerpt.hit) text("hit").textContent = excerpt.hit;
         else text("hit").remove();
         text("more").setAttribute("href", post);
-        text("more").setAttribute("aria-label", `「${entry.title}」の続きを読む`);
+        text("more").ariaLabel = `「${entry.title}」の続きを読む`;
         text("category").textContent = categories[entry.type as Category] ?? entry.type;
         text("category").setAttribute("href", `/${entry.type}/`);
         text("comments").setAttribute("href", `${post}#comments`);

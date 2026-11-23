@@ -14,12 +14,14 @@ import TextField from "../components/ui/TextField.astro";
       <p class="type-small text-ink-soft" data-summary aria-live="polite"></p>
       <noscript><p class="type-small mt-4 text-ink-soft">検索には JavaScript が必要です。JavaScript を有効にしてお試しください。</p></noscript>
 
-      <form class="mt-6 flex flex-wrap items-center gap-4" action="/search/" method="get" role="search">
-        <label class="type-small" for="list-q">キーワード</label>
-        <TextField class="min-w-0 flex-[0_1_220px]" id="list-q" type="search" name="q" />
-        <Button class="px-10 py-1" type="submit">検索</Button>
-        <span class="type-small text-ink-soft">※ 記事のタイトルと本文から探します</span>
-      </form>
+      <search class="mt-6">
+        <form class="flex flex-wrap items-center gap-4" action="/search/" method="get">
+          <label class="type-small" for="list-q">キーワード</label>
+          <TextField class="min-w-0 flex-[0_1_220px]" id="list-q" type="search" name="q" />
+          <Button class="px-10 py-1" type="submit">検索</Button>
+          <span class="type-small text-ink-soft">※ 記事のタイトルと本文から探します</span>
+        </form>
+      </search>
     </div>
 
     <div data-results hidden></div>

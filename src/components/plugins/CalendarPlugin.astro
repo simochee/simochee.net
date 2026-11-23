@@ -117,7 +117,7 @@ const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
                 td.className = cellClass;
                 if (!cell) return td;
                 td.dataset.weekday = String(cell.weekday);
-                if (cell.date === this.#today) td.setAttribute("aria-current", "date");
+                if (cell.date === this.#today) td.ariaCurrent = "date";
                 const [post] = cell.posts;
                 if (post) {
                   const link = document.createElement("a");

@@ -37,11 +37,7 @@ customElements.define(
       const thumb = thumbs[index];
       if (!thumb) return;
       this.#index = index;
-      thumbs.forEach((other) =>
-        other === thumb
-          ? other.setAttribute("aria-current", "true")
-          : other.removeAttribute("aria-current"),
-      );
+      for (const other of thumbs) other.ariaCurrent = other === thumb ? "true" : null;
       const image = this.#part<HTMLImageElement>("image");
       image.src = thumb.dataset.src!;
       image.srcset = thumb.dataset.srcset!;

@@ -8,23 +8,19 @@ export interface PostCounts {
 }
 
 let known = new Map<string, Promise<PostCounts>>();
-let waiting: {
-  slug: string;
-  resolve: (counts: PostCounts) => void;
-  reject: (error: unknown) => void;
-}[] = [];
+let waiting = new Map<string, PromiseWithResolvers<PostCounts>>();
 
 function flush() {
   const batch = waiting;
-  waiting = [];
-  const slugs = [...new Set(batch.map((item) => item.slug))].join(",");
+  waiting = new Map();
+  const slugs = [...batch.keys()].join(",");
   call<Counts>(`/api/counts/?slugs=${encodeURIComponent(slugs)}`).then(
     (counts) => {
-      for (const { slug, resolve } of batch)
+      for (const [slug, { resolve }] of batch)
         resolve({ claps: counts.claps[slug] ?? 0, comments: counts.comments[slug] ?? 0 });
     },
     (error: unknown) => {
-      for (const { slug, reject } of batch) {
+      for (const [slug, { reject }] of batch) {
         known.delete(slug);
         reject(error);
       }
@@ -39,11 +35,12 @@ function flush() {
 export function countsOf(slug: string): Promise<PostCounts> {
   let found = known.get(slug);
   if (!found) {
-    found = new Promise<PostCounts>((resolve, reject) => {
-      // 一覧の拍手ボタンやコメント数は、同じ描画の中で次々につながる。出そろってから 1 回だけ頼む。
-      if (waiting.length === 0) setTimeout(flush);
-      waiting.push({ slug, resolve, reject });
-    });
+    // 一覧の拍手ボタンやコメント数は、同じ描画の中で次々につながる。出そろってから 1 回だけ頼む。
+    if (waiting.size === 0) setTimeout(flush);
+    // まだ送っていない問い合わせは、使い回しの記録を消したあとでも最新の数を返すので、そのまま相乗りする。
+    const counts = waiting.get(slug) ?? Promise.withResolvers<PostCounts>();
+    waiting.set(slug, counts);
+    found = counts.promise;
     known.set(slug, found);
   }
   return found;
