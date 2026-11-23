@@ -19,4 +19,4 @@ export type InkColorId = (typeof inkColors)[number]["id"];
 export const inkColorValue = (id: number) =>
   (inkColors.find((ink) => ink.id === id) ?? inkColors[0]).value;
 
-export const bbsPageSize = 10;
+export const bbsPageSize = 20;
