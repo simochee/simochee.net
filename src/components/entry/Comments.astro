@@ -1,7 +1,7 @@
 ---
 import Plugin from "../layout/Plugin.astro";
 import Button from "../ui/Button.astro";
-import Icon from "../ui/Icon.astro";
+import Disclosure from "../ui/Disclosure.astro";
 import TextField from "../ui/TextField.astro";
 
 interface Props {
@@ -25,19 +25,14 @@ interface Props {
           </span>
           {" | "}
           <span data-slot="name"></span><span class="ml-2 type-small text-memo-ink" data-slot="admin">［管理人］</span>
-          <span data-slot="delete">
-            {" | "}
-            <Icon name="edit" /> <Button variant="link" aria-expanded="false">削除</Button>
-          </span>
         </p>
-        <form class="type-small mt-6 flex flex-wrap items-center gap-x-8 gap-y-4 border border-line bg-wash px-8 py-6" data-slot="remover" hidden>
-          <label class="flex items-center gap-8">削除パスワード<TextField class="w-160" type="password" name="password" autocomplete="off" required /></label>
-          <div class="flex flex-wrap gap-6">
+        <Disclosure class="type-small mt-2" label="削除" icon="edit" data-slot="delete">
+          <form class="mt-6 flex flex-wrap items-center gap-x-8 gap-y-4 border border-line bg-wash px-8 py-6">
+            <label class="flex items-center gap-8">削除パスワード<TextField class="w-160" type="password" name="password" autocomplete="off" required /></label>
             <Button class="px-12 py-1" type="submit">削除する</Button>
-            <Button class="px-12 py-1" variant="plain" data-action="close">やめる</Button>
-          </div>
-          <p class="basis-full" role="alert" data-slot="error" hidden></p>
-        </form>
+            <p class="basis-full" role="alert" data-slot="error" hidden></p>
+          </form>
+        </Disclosure>
       </article>
     </template>
   </post-comments>
@@ -65,7 +60,6 @@ interface Props {
 
       connectedCallback() {
         document.addEventListener(commentsChanged, this);
-        this.addEventListener("click", this);
         this.addEventListener("submit", this);
         void this.load();
       }
@@ -107,10 +101,7 @@ interface Props {
             else slot("link").remove();
             slot("name").textContent = comment.name;
             if (!comment.admin) slot("admin").remove();
-            if (!comment.deletable) {
-              slot("delete").remove();
-              slot("remover").remove();
-            }
+            if (!comment.deletable) slot("delete").remove();
             return fragment;
           }),
         );
@@ -124,23 +115,9 @@ interface Props {
           void this.load((event as CustomEvent<number>).detail);
           return;
         }
-        const article = (event.target as Element).closest<HTMLElement>("article[data-id]");
-        if (!article) return;
-        const remover = article.querySelector<HTMLFormElement>("[data-slot=remover]")!;
-        const toggle = article.querySelector<HTMLButtonElement>("[data-slot=delete] button")!;
-        const open = (shown: boolean) => {
-          remover.hidden = !shown;
-          toggle.ariaExpanded = String(shown);
-          if (shown) remover.querySelector("input")!.focus();
-        };
-        if (event.type === "submit") {
-          event.preventDefault();
-          void this.#remove(article, remover);
-          return;
-        }
-        const button = (event.target as Element).closest("button");
-        if (button === toggle) open(Boolean(remover.hidden));
-        else if (button?.dataset.action === "close") open(false);
+        event.preventDefault();
+        const remover = event.target as HTMLFormElement;
+        void this.#remove(remover.closest<HTMLElement>("article")!, remover);
       }
 
       async #remove(article: HTMLElement, remover: HTMLFormElement) {

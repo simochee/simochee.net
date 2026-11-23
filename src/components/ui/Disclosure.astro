@@ -1,0 +1,16 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import Icon from "./Icon.astro";
+
+/** 文中のリンクと同じ見た目の見出しを右端に置き、押すと中身を開く。開閉はブラウザに任せる。 */
+interface Props extends HTMLAttributes<"details"> {
+  label: string;
+  icon?: string;
+}
+const { label, icon, ...rest } = Astro.props;
+---
+
+<details {...rest}>
+  <summary class="ml-auto w-fit cursor-pointer text-link hover:text-link-hover">{icon && <Icon name={icon} />} <span class="underline">{label}</span></summary>
+  <slot />
+</details>

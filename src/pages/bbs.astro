@@ -1,6 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
 import Button from "../components/ui/Button.astro";
+import Disclosure from "../components/ui/Disclosure.astro";
 import Icon from "../components/ui/Icon.astro";
 import TextArea from "../components/ui/TextArea.astro";
 import TextField from "../components/ui/TextField.astro";
@@ -71,31 +72,31 @@ import { site } from "../site";
           <div class="mt-6 ml-[1em] border border-dotted border-memo-line bg-memo px-8 py-4 leading-prose whitespace-pre-line" data-slot="reply">└ <b class="text-memo-ink">{site.author.name}</b>：<span data-slot="reply-text"></span></div>
           <div class="type-small mt-4 text-right">
             <Icon name="comment" /> <a href="#bbs-form" data-action="quote">返信する</a>
-            <span data-slot="edit"> | <Icon name="edit" /> <Button variant="link" data-action="edit" aria-expanded="false">編集・削除</Button></span>
           </div>
-          <form class="type-small mt-6 flex flex-col gap-4 border border-line bg-wash px-8 py-6" data-slot="editor" hidden>
-            <label class="grid grid-cols-[5em_minmax(0,1fr)] items-center gap-x-8">削除キー<TextField class="max-w-120" type="password" name="key" autocomplete="off" required /></label>
-            <label class="grid grid-cols-[5em_minmax(0,1fr)] items-center gap-x-8">題名<TextField class="max-w-320" name="title" maxlength={limits.title} /></label>
-            <label class="grid grid-cols-[5em_minmax(0,1fr)] items-start gap-x-8">本文<TextArea name="body" rows="4" maxlength={limits.body} required /></label>
-            <div class="grid grid-cols-[5em_minmax(0,1fr)] gap-x-8">
-              <span>文字色</span>
-              <div class="flex flex-wrap gap-x-10 gap-y-2" role="radiogroup" aria-label="文字色">
-      {
-        inkColors.map((ink, index) => (
-          <label style={`color: ${ink.value}`}>
-            <input type="radio" name="colorId" value={ink.id} checked={index === 0} /> ■{ink.label}
-          </label>
-        ))
-      }
-      </div>
-            </div>
-            <div class="flex flex-wrap gap-6 pl-[calc(5em+8px)]">
-              <Button class="px-12 py-1" type="submit">更新する</Button>
-              <Button class="px-12 py-1" variant="plain" data-action="delete">削除する</Button>
-              <Button class="px-12 py-1" variant="plain" data-action="close">やめる</Button>
-            </div>
-            <p class="pl-[calc(5em+8px)]" role="alert" data-slot="error" hidden></p>
-          </form>
+          <Disclosure class="type-small mt-2" label="編集・削除" icon="edit" data-slot="edit">
+            <form class="mt-6 flex flex-col gap-4 border border-line bg-wash px-8 py-6" data-slot="editor">
+              <label class="grid grid-cols-[5em_minmax(0,1fr)] items-center gap-x-8">削除キー<TextField class="max-w-120" type="password" name="key" autocomplete="off" required /></label>
+              <label class="grid grid-cols-[5em_minmax(0,1fr)] items-center gap-x-8">題名<TextField class="max-w-320" name="title" maxlength={limits.title} /></label>
+              <label class="grid grid-cols-[5em_minmax(0,1fr)] items-start gap-x-8">本文<TextArea name="body" rows="4" maxlength={limits.body} required /></label>
+              <div class="grid grid-cols-[5em_minmax(0,1fr)] gap-x-8">
+                <span>文字色</span>
+                <div class="flex flex-wrap gap-x-10 gap-y-2" role="radiogroup" aria-label="文字色">
+        {
+          inkColors.map((ink, index) => (
+            <label style={`color: ${ink.value}`}>
+              <input type="radio" name="colorId" value={ink.id} checked={index === 0} /> ■{ink.label}
+            </label>
+          ))
+        }
+        </div>
+              </div>
+              <div class="flex flex-wrap gap-6 pl-[calc(5em+8px)]">
+                <Button class="px-12 py-1" type="submit">更新する</Button>
+                <Button class="px-12 py-1" variant="plain" data-action="delete">削除する</Button>
+              </div>
+              <p class="pl-[calc(5em+8px)]" role="alert" data-slot="error" hidden></p>
+            </form>
+          </Disclosure>
         </div>
       </article>
     </template>
@@ -215,10 +216,7 @@ import { site } from "../site";
           (editor.elements.namedItem("body") as HTMLTextAreaElement).defaultValue = post.body;
           for (const radio of editor.querySelectorAll<HTMLInputElement>("[name=colorId]"))
             radio.defaultChecked = Number(radio.value) === post.colorId;
-        } else {
-          slot("edit").remove();
-          slot("editor").remove();
-        }
+        } else slot("edit").remove();
         return fragment;
       }
 
@@ -238,23 +236,16 @@ import { site } from "../site";
         const action = target.closest<HTMLElement>("[data-action]")?.dataset.action;
         const article = target.closest<HTMLElement>("article[data-id]");
         if (!action || !article) return;
-        const editor = article.querySelector<HTMLFormElement>("[data-slot=editor]");
-        const toggle = article.querySelector<HTMLElement>("[data-action=edit]");
-        const open = (shown: boolean) => {
-          editor!.hidden = !shown;
-          toggle!.ariaExpanded = String(shown);
-          if (shown) editor!.querySelector("input")!.focus();
-        };
         if (action === "quote") {
           event.preventDefault();
           const title = this.#form.elements.namedItem("title") as HTMLInputElement;
           title.value = `Re: ${article.dataset.title}`;
           this.#form.scrollIntoView({ block: "start" });
           (this.#form.elements.namedItem("body") as HTMLTextAreaElement).focus({ preventScroll: true });
-        } else if (action === "edit") open(Boolean(editor!.hidden));
-        else if (action === "close") open(false);
-        else if (action === "delete" && editor!.reportValidity() && confirm("この書き込みを削除しますか？"))
-          void this.#change(editor!, "DELETE");
+        } else if (action === "delete") {
+          const editor = target.closest("form")!;
+          if (editor.reportValidity() && confirm("この書き込みを削除しますか？")) void this.#change(editor, "DELETE");
+        }
       }
 
       async #submit() {
