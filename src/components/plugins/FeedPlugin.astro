@@ -1,11 +1,12 @@
 ---
 import Plugin from "../layout/Plugin.astro";
 import Icon from "../ui/Icon.astro";
+import { hasServer } from "../../lib/features";
 ---
 
 <Plugin title="RSS">
   <ul class="px-4 py-6 *:py-2">
     <li><Icon name="rss" /> <a href="/feed.xml">最近記事のRSS</a></li>
-    <li><Icon name="rss" /> <a href="/comments.xml">最新コメントのRSS</a></li>
+    {hasServer && <li><Icon name="rss" /> <a href="/comments.xml">最新コメントのRSS</a></li>}
   </ul>
 </Plugin>

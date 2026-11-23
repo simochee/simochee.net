@@ -5,6 +5,7 @@ import { groupByMonth } from "../../lib/archive";
 import CommentCount from "../../components/entry/CommentCount.astro";
 import { posts } from "../../lib/posts";
 import { categories } from "../../categories";
+import { hasServer } from "../../lib/features";
 
 const all = await posts();
 const months = groupByMonth(all);
@@ -39,7 +40,7 @@ const groupTitle = "mb-2 border-b border-line bg-wash px-6 py-2 font-bold text-i
             <h2 class={groupTitle}>
               {month.label}（{month.posts.length}件）
             </h2>
-            <EntryIndex posts={month.posts} note={(post) => <>［{categories[post.data.type]}］ コメント(<CommentCount slug={post.id} />)</>} />
+            <EntryIndex posts={month.posts} note={(post) => <>［{categories[post.data.type]}］{hasServer && <> コメント(<CommentCount slug={post.id} />)</>}</>} />
           </section>
         ))
       }
@@ -66,7 +67,7 @@ const groupTitle = "mb-2 border-b border-line bg-wash px-6 py-2 font-bold text-i
             <h2 class={groupTitle}>
               {category.name}（{category.posts.length}件）
             </h2>
-            <EntryIndex posts={category.posts.slice(0, shownPerCategory)} note={(post) => <>コメント(<CommentCount slug={post.id} />)</>} />
+            <EntryIndex posts={category.posts.slice(0, shownPerCategory)} note={(post) => hasServer && <>コメント(<CommentCount slug={post.id} />)</>} />
             {category.posts.length > shownPerCategory && (
               <p class="type-small px-4 pt-2 text-right">
                 <a href={`/${category.type}/`}>

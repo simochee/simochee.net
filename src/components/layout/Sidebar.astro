@@ -17,23 +17,24 @@ import FeedPlugin from "../plugins/FeedPlugin.astro";
 import LinksPlugin from "../plugins/LinksPlugin.astro";
 import ThemePlugin from "../plugins/ThemePlugin.astro";
 import AllEntriesPlugin from "../plugins/AllEntriesPlugin.astro";
+import { hasServer } from "../../lib/features";
 ---
 
 <ProfilePlugin />
 <CalendarPlugin />
 <MoonPlugin />
 <RecentPlugin />
-<RecentCommentsPlugin />
-<PopularPlugin />
+{hasServer && <RecentCommentsPlugin />}
+{hasServer && <PopularPlugin />}
 <ArchivePlugin />
 <CategoryPlugin />
 <SearchPlugin />
 <FeedPlugin />
-<BoardPlugin />
-<PollPlugin />
+{hasServer && <BoardPlugin />}
+{hasServer && <PollPlugin />}
 <LinksPlugin />
 <QrPlugin />
-<ViewersPlugin />
-<CounterPlugin />
+{hasServer && <ViewersPlugin />}
+{hasServer && <CounterPlugin />}
 <ThemePlugin />
 <AllEntriesPlugin />

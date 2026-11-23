@@ -176,18 +176,18 @@ Workers Builds は `CI=true` と `WORKERS_CI=1` を設定します（[公式資�
 
 ## 環境変数
 
-| 環境変数                    | 既定値                                                                      | 用途                                                                                                                                     |
-| --------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `SIMOCHEE_CONTENT_DIR`      | `content/posts`                                                             | 記事ディレクトリ（絶対パス、またはサイトのルートからの相対パス）。空文字は未設定と同じ                                                   |
-| `SIMOCHEE_CONTENT_GIT_ROOT` | `SIMOCHEE_CONTENT_DIR` の git ルート、未設定ならこのサイトのルート          | 日付を読む git リポジトリのルート                                                                                                        |
-| `SIMOCHEE_CONTENT_GIT_PATH` | `SIMOCHEE_CONTENT_DIR` のリポジトリ内の相対パス、未設定なら `content/posts` | そのリポジトリ内の記事ディレクトリ                                                                                                       |
-| `SIMOCHEE_INCLUDE_DRAFTS`   | 無効                                                                        | ローカル dev で `1` のときだけ下書きを含める                                                                                             |
-| `SIMOCHEE_PREVIEW`          | `false`                                                                     | `true` のとき下書きを含め（CI でも）、URL の既定をプレビューに、`SIMOCHEE_NOINDEX` の既定を `true` にする。本番の URL ではビルドを止める |
-| `SIMOCHEE_SITE_URL`         | `https://simochee.net`（プレビューでは `https://preview.simochee.net`）     | canonical、OG、RSS、`robots.txt` に使うサイトの URL。空文字は未設定と同じ                                                                |
-| `SIMOCHEE_NOINDEX`          | `false`（プレビューでは `true`）                                            | `true` のとき全ページに `noindex, nofollow` を付け、`robots.txt` からサイトマップを外す                                                  |
-| `TURNSTILE_SITE_KEY`        | Cloudflare の試験用の鍵                                                     | コメントと掲示板の迷惑書き込みよけ（Turnstile）のサイトキー                                                                              |
-| `WEB_ANALYTICS_TOKEN`       | 未設定                                                                      | Cloudflare Web Analytics の計測スクリプトに入れるサイトのトークン。未設定なら計測しない                                                  |
-| `CI` / `WORKERS_CI`         | 未設定                                                                      | いずれかが設定されていれば履歴検証を厳格にする                                                                                           |
+| 環境変数                    | 既定値                                                                      | 用途                                                                                                                                                                     |
+| --------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `SIMOCHEE_CONTENT_DIR`      | `content/posts`                                                             | 記事ディレクトリ（絶対パス、またはサイトのルートからの相対パス）。空文字は未設定と同じ                                                                                   |
+| `SIMOCHEE_CONTENT_GIT_ROOT` | `SIMOCHEE_CONTENT_DIR` の git ルート、未設定ならこのサイトのルート          | 日付を読む git リポジトリのルート                                                                                                                                        |
+| `SIMOCHEE_CONTENT_GIT_PATH` | `SIMOCHEE_CONTENT_DIR` のリポジトリ内の相対パス、未設定なら `content/posts` | そのリポジトリ内の記事ディレクトリ                                                                                                                                       |
+| `SIMOCHEE_INCLUDE_DRAFTS`   | 無効                                                                        | ローカル dev で `1` のときだけ下書きを含める                                                                                                                             |
+| `SIMOCHEE_PREVIEW`          | `false`                                                                     | `true` のとき下書きを含め（CI でも）、サーバーで動く部品を書き出さず、URL の既定をプレビューに、`SIMOCHEE_NOINDEX` の既定を `true` にする。本番の URL ではビルドを止める |
+| `SIMOCHEE_SITE_URL`         | `https://simochee.net`（プレビューでは `https://preview.simochee.net`）     | canonical、OG、RSS、`robots.txt` に使うサイトの URL。空文字は未設定と同じ                                                                                                |
+| `SIMOCHEE_NOINDEX`          | `false`（プレビューでは `true`）                                            | `true` のとき全ページに `noindex, nofollow` を付け、`robots.txt` からサイトマップを外す                                                                                  |
+| `TURNSTILE_SITE_KEY`        | Cloudflare の試験用の鍵                                                     | コメントと掲示板の迷惑書き込みよけ（Turnstile）のサイトキー                                                                                                              |
+| `WEB_ANALYTICS_TOKEN`       | 未設定                                                                      | Cloudflare Web Analytics の計測スクリプトに入れるサイトのトークン。未設定なら計測しない                                                                                  |
+| `CI` / `WORKERS_CI`         | 未設定                                                                      | いずれかが設定されていれば履歴検証を厳格にする                                                                                                                           |
 
 `SIMOCHEE_CONTENT_DIR` を指定すると、日時はそのディレクトリを含む git リポジトリの履歴から取得します。
 サムネイル、OG 画像、本文の相対画像、MDX は `vp run dev` と `vp run build` のどちらでも指定先から読み込み、dev では編集を監視して再読み込みします。
@@ -355,7 +355,8 @@ SIMOCHEE_PREVIEW=true vp run build
 vp run deploy:preview
 ```
 
-- 本番とは別の Worker（`simochee-net-preview`）に、静的ファイルだけを置きます（`cloudflare.config.ts` の `preview` モード）。Worker のコードは動かないので、コメントや掲示板などサーバーで動く部品は表示されません。D1 も秘密の値も要りません。
+- 本番とは別の Worker（`simochee-net-preview`）に、静的ファイルだけを置きます（`cloudflare.config.ts` の `preview` モード）。Worker のコードは動かないので、D1 も秘密の値も要りません。
+- サーバーで動く部品（コメント、拍手、掲示板、アンケート、カウンター、閲覧者数、人気記事、最新コメントの RSS）は、見出しやリンクごと書き出しません。メニューの「掲示板」も出しません。
 - 下書きは Cloudflare Access で守ります。Worker にカスタムドメイン `preview.simochee.net` を割り当て、Access アプリケーションでドメインごと保護してください。`workers.dev` と Preview URL は Access を通らないので、設定で止めています。
 - RSS と `/posts.json` は、プレビューでも公開記事だけです。下書きの公開日はビルドした日時になります。
 
