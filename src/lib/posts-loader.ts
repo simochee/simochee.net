@@ -7,29 +7,34 @@ import { glob, type Loader } from "astro/loaders";
 import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkMdx from "remark-mdx";
+import remarkGfm from "remark-gfm";
 import { visit } from "unist-util-visit";
 import { frontmatterSchema } from "../content/schema";
 import { resolveContentSource } from "./content-source";
 import { isCI, readHistory, resolveDates, type History } from "./git-dates";
 import { isPreview } from "./preview";
+import { cardURLs } from "./link-urls";
+import { linkCardEntries } from "./remark-link-cards";
 
-function parseBody(body: string) {
-  return unified().use(remarkParse).use(remarkMdx).parse(body);
+function parseBody(body: string, mdx: boolean) {
+  const parser = unified().use(remarkParse).use(remarkGfm);
+  if (mdx) parser.use(remarkMdx);
+  return parser.parse(body);
 }
-export function plainText(body: string): string {
+export function plainText(body: string, mdx = true): string {
   const text: string[] = [];
-  visit(parseBody(body), (node) => {
+  visit(parseBody(body, mdx), (node) => {
     if (node.type === "text" || node.type === "inlineCode") text.push(node.value);
   });
   return text.join(" ").replace(/\s+/g, " ").trim();
 }
-export function excerpt(body: string): string {
-  return plainText(body).slice(0, 160);
+export function excerpt(body: string, mdx = true): string {
+  return plainText(body, mdx).slice(0, 160);
 }
 /** 本文に相対パスで書かれた画像。サムネイルと同じく、Astro が解決できるよう ./ 始まりのものだけを拾う。 */
-export function bodyImages(body: string): { src: string; alt: string }[] {
+export function bodyImages(body: string, mdx = true): { src: string; alt: string }[] {
   const found = new Map<string, string>();
-  visit(parseBody(body), "image", (node) => {
+  visit(parseBody(body, mdx), "image", (node) => {
     if (/^\.\/[^?#]+$/.test(node.url) && !found.has(node.url)) found.set(node.url, node.alt ?? "");
   });
   return [...found].map(([src, alt]) => ({ src, alt }));
@@ -74,13 +79,16 @@ export function postsLoader(): Loader {
           )
             continue;
           selected.push(file);
+          // glob は dev の変換結果を再利用できるため、CI の未取得チェックを remark の再実行だけに任せない。
+          if (isCI())
+            await linkCardEntries(resolve(base, file), cardURLs(content, file.endsWith(".mdx")));
           const thumbnail = thumbnails[0] ? `./${thumbnails[0]}` : undefined;
-          const images = bodyImages(content);
+          const images = bodyImages(content, file.endsWith(".mdx"));
           if (thumbnail && !images.some((image) => image.src === thumbnail))
             images.push({ src: thumbnail, alt: "" });
           metadata.set(dir.name, {
             ...frontmatter,
-            description: frontmatter.description ?? excerpt(content),
+            description: frontmatter.description ?? excerpt(content, file.endsWith(".mdx")),
             ...resolveDates(frontmatter, history.get(dir.name)),
             thumbnail,
             images,

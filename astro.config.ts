@@ -20,6 +20,7 @@ import { resolveContentSource } from "./src/lib/content-source";
 import { avatarPlugin } from "./src/lib/avatar-plugin";
 import { siteContentPlugin } from "./src/lib/site-content-plugin";
 import { isPreview, siteURL } from "./src/lib/preview";
+import { remarkLinkCards } from "./src/lib/remark-link-cards";
 const contentDir = process.env.SIMOCHEE_CONTENT_DIR;
 const { postsDir } = resolveContentSource(process.cwd());
 export default defineConfig({
@@ -59,7 +60,7 @@ export default defineConfig({
   ],
   markdown: {
     processor: unified({
-      remarkPlugins: [remarkAlerts],
+      remarkPlugins: [remarkAlerts, remarkLinkCards],
       remarkRehype: { footnoteLabel: "脚注", footnoteBackLabel: "本文へ戻る" },
       rehypePlugins: [
         rehypeCodeFrame,

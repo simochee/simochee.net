@@ -58,6 +58,81 @@
       text-decoration: underline;
     }
   }
+  & .link-card {
+    display: block;
+    max-inline-size: 100%;
+    color: var(--color-ink);
+    background: var(--color-paper);
+    border: 1px solid var(--color-frame);
+    text-decoration: none;
+    &:focus-visible {
+      outline: 2px solid var(--color-link-hover);
+      outline-offset: 2px;
+    }
+    &:is(:hover, :focus-visible) {
+      & .link-card-body {
+        background: var(--color-tint);
+      }
+      & .link-card-title {
+        color: var(--color-link-hover);
+      }
+    }
+  }
+  & .link-card-bar {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 3px 8px;
+    color: var(--color-on-accent);
+    background: var(--color-accent);
+    font-family: var(--font-small);
+    font-size: var(--text-small);
+    line-height: var(--text-small--line-height);
+    font-weight: bold;
+  }
+  /* 記号と案内文は見た目の飾り。内容に入れるとリンク名の読み上げに混ざるので、代替テキストを空にした擬似要素で出す。 */
+  & .link-card-label {
+    flex: none;
+    &::before {
+      content: "■ リンク" / "";
+    }
+  }
+  & .link-card-host {
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+  & .link-card-body {
+    display: block;
+    padding: 8px 10px;
+  }
+  & .link-card-title {
+    display: -webkit-box;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+    color: var(--color-link);
+    font-weight: bold;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  & .link-card-description {
+    display: -webkit-box;
+    margin-block-start: 4px;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  & .link-card-go {
+    display: block;
+    margin-block-start: 4px;
+    text-align: end;
+    color: var(--color-ink-soft);
+    font-family: var(--font-small);
+    font-size: var(--text-small);
+    line-height: var(--text-small--line-height);
+    &::before {
+      content: "≫ このページへ行く" / "";
+    }
+  }
   & :is(ul, ol) {
     padding-inline-start: 1.6em;
     & :is(ul, ol) {

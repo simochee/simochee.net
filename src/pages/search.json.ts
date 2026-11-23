@@ -8,7 +8,7 @@ export async function GET() {
     title: post.data.title,
     type: post.data.type,
     publishedAt: post.data.publishedAt.toISOString(),
-    text: plainText(post.body ?? ""),
+    text: plainText(post.body ?? "", post.filePath?.endsWith(".mdx") ?? false),
   }));
   return Response.json(entries);
 }

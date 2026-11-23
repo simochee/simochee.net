@@ -70,6 +70,29 @@ assert.match(
 );
 assert.doesNotMatch(await readFile(`${assets}/sitemap-0.xml`, "utf8"), /\/admin\//);
 const markdown = await readFile(`${assets}/posts/markdown-lab/index.html`, "utf8");
+for (const [slug, count] of [
+  ["markdown-lab", 3],
+  ["mdx-example", 1],
+] as const) {
+  const html = await readFile(`${assets}/posts/${slug}/index.html`, "utf8");
+  const cards = [...html.matchAll(/<a class="link-card"[^>]*>[\s\S]*?<\/a>/g)];
+  assert.equal(cards.length, count, `${slug}: link cards`);
+  for (const [card] of cards) {
+    assert.match(card, /target="_blank"/);
+    assert.match(card, /rel="noopener"/);
+    const href = /href="([^"]+)"/.exec(card)![1];
+    assert(
+      card.includes(
+        `class="link-card-host">${new URL(href).hostname.replace(/^www\./, "")}</span>`,
+      ),
+    );
+    assert.doesNotMatch(card, /<img\b/);
+    assert.doesNotMatch(card, /<span class="link-card-label">[^<]/);
+  }
+  assert.doesNotMatch(html, /<img\b[^>]*src="https?:/);
+}
+assert.match(markdown, /class="link-card-title">\/not-found-link-card<\/span>/);
+assert.doesNotMatch(await readFile(`${assets}/feed.xml`, "utf8"), /link-card/);
 for (const pattern of [
   /<a class="heading-anchor"/,
   /<div class="markdown-alert markdown-alert-note"/,

@@ -82,4 +82,16 @@ vp run build
 
 [Astro](https://astro.build/) の外部リンク例です。
 
+### リンクカード
+
+URL だけの段落は、保存済みの情報からカードになります。
+
+https://simochee.net/
+
+<https://astro.build/>
+
+取得できなかったリンクは、パスとドメインのカードになります。
+
+https://example.com/not-found-link-card
+
 [^1]: これは脚注のダミーです。
