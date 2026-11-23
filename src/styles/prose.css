@@ -118,6 +118,7 @@
     display: -webkit-box;
     margin-block-start: 4px;
     overflow: hidden;
+    line-height: 1.25rem;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
   }
