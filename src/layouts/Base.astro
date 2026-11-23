@@ -6,6 +6,7 @@ import bodyFont from "../assets/fonts/shinonome14-regular-kana.woff2?url";
 import Sidebar from "../components/layout/Sidebar.astro";
 import ThemeBoot from "../components/layout/ThemeBoot.astro";
 import { site } from "../site";
+import { hasServer } from "../lib/features";
 
 interface Props {
   title?: string;
@@ -27,7 +28,7 @@ const menu = [
   { href: "/", label: "ホーム" },
   { href: "/archive/", label: "全記事一覧" },
   { href: "/profile/", label: "プロフィール" },
-  { href: "/bbs/", label: "掲示板" },
+  ...(hasServer ? [{ href: "/bbs/", label: "掲示板" }] : []),
   { href: "/feed.xml", label: "RSS" },
 ];
 ---
@@ -45,7 +46,7 @@ const menu = [
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />    <link rel="canonical" href={canonical} />
     <link rel="alternate" type="application/rss+xml" title={site.name} href="/feed.xml" />
-    <link rel="alternate" type="application/rss+xml" title={`${site.name}（最新コメント）`} href="/comments.xml" />
+    {hasServer && <link rel="alternate" type="application/rss+xml" title={`${site.name}（最新コメント）`} href="/comments.xml" />}
     <link rel="preload" as="font" type="font/woff2" href={bodyFont} crossorigin />
     <meta property="og:site_name" content={site.name} />
     <meta property="og:locale" content="ja_JP" />

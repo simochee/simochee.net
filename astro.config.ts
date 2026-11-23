@@ -43,6 +43,7 @@ export default defineConfig({
         default: isPreview(),
       }),
       // Cloudflare Web Analytics の計測スクリプトに入れるサイトのトークン。未登録のあいだは計測しない。
+      SIMOCHEE_PREVIEW: envField.boolean({ context: "server", access: "public", default: false }),
       WEB_ANALYTICS_TOKEN: envField.string({ context: "server", access: "public", optional: true }),
       // 未登録のあいだは Cloudflare の試験用の鍵（必ず通る）になる。本番の秘密鍵とは組にならないので、投稿は受け付けられない。
       TURNSTILE_SITE_KEY: envField.string({

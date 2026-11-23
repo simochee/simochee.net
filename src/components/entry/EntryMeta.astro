@@ -6,6 +6,7 @@ import { formatDay } from "../../lib/dates";
 import { tagPath } from "../../lib/tags";
 import { categories } from "../../categories";
 import CommentCount from "./CommentCount.astro";
+import { hasServer } from "../../lib/features";
 
 interface Props {
   post: Post;
@@ -25,8 +26,14 @@ const { id, data } = Astro.props.post;
         </>
       )
     }
-    {" | "}
-    <Icon name="comment" /> <a href={`/posts/${id}/#comments`}>コメント(<CommentCount slug={id} />)</a>
+    {
+      hasServer && (
+        <>
+          {" | "}
+          <Icon name="comment" /> <a href={`/posts/${id}/#comments`}>コメント(<CommentCount slug={id} />)</a>
+        </>
+      )
+    }
     <share-button hidden data-title={data.title} data-url={`/posts/${id}/`}>
       {" | "}
       <Icon name="share" />

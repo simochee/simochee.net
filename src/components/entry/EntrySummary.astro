@@ -4,6 +4,7 @@ import type { Post } from "../../lib/posts";
 import { formatDay } from "../../lib/dates";
 import Clap from "./Clap.astro";
 import EntryMeta from "./EntryMeta.astro";
+import { hasServer } from "../../lib/features";
 
 interface Props {
   post: Post;
@@ -27,6 +28,6 @@ const href = `/posts/${post.id}/`;
     <p>{post.data.description}</p>
   </div>
   <p class="mx-6 my-8 text-right"><a href={href} aria-label={`「${post.data.title}」の続きを読む`}>続きを読む &raquo;</a></p>
-  <Clap slug={post.id} />
+  {hasServer && <Clap slug={post.id} />}
   <EntryMeta post={post} />
 </article>

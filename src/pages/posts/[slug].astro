@@ -8,6 +8,7 @@ import EntryMeta from "../../components/entry/EntryMeta.astro";
 import Pager from "../../components/entry/Pager.astro";
 import { posts } from "../../lib/posts";
 import { formatDay } from "../../lib/dates";
+import { hasServer } from "../../lib/features";
 
 export async function getStaticPaths() {
   const all = await posts();
@@ -48,10 +49,16 @@ const link = (target?: typeof post) => target && { href: `/posts/${target.id}/`,
       }
       <Content />
     </div>
-    <Clap slug={post.id} />
+    {hasServer && <Clap slug={post.id} />}
     <EntryMeta post={post} />
   </article>
   <Pager class="mt-16 p-4" label="前後の記事（ページ下）" newer={link(newer)} older={link(older)} />
-  <Comments slug={post.id} />
-  <CommentForm slug={post.id} />
+  {
+    hasServer && (
+      <>
+        <Comments slug={post.id} />
+        <CommentForm slug={post.id} />
+      </>
+    )
+  }
 </Base>

@@ -3,6 +3,7 @@ import Icon from "../components/ui/Icon.astro";
 import Base from "../layouts/Base.astro";
 import Avatar from "../components/ui/Avatar.astro";
 import { site } from "../site";
+import { hasServer } from "../lib/features";
 
 const { profile } = site;
 const cell = "border border-line px-8 py-3";
@@ -78,9 +79,13 @@ const cell = "border border-line px-8 py-3";
       </tbody>
     </table>
     </>)}
-    <visit-stat hidden>
-      <p class="type-small text-ink-soft">このブログに来てくれた人：<b data-slot="value"></b> 人</p>
-    </visit-stat>
+    {
+      hasServer && (
+        <visit-stat hidden>
+          <p class="type-small text-ink-soft">このブログに来てくれた人：<b data-slot="value"></b> 人</p>
+        </visit-stat>
+      )
+    }
   </div>
 </Base>
 

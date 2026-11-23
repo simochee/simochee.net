@@ -4,6 +4,7 @@ import type { Post } from "../../lib/posts";
 import { formatDay } from "../../lib/dates";
 import { categories } from "../../categories";
 import CommentCount from "./CommentCount.astro";
+import { hasServer } from "../../lib/features";
 
 interface Props {
   post: Post;
@@ -23,7 +24,13 @@ const href = `/posts/${post.id}/`;
   </p>
   <p class="type-small text-right text-ink-soft">
     <Icon name="folder" /> カテゴリ：<a href={`/${post.data.type}/`}>{categories[post.data.type]}</a>
-    {" | "}
-    <Icon name="comment" /> <a href={`${href}#comments`}>コメント(<CommentCount slug={post.id} />)</a>
+    {
+      hasServer && (
+        <>
+          {" | "}
+          <Icon name="comment" /> <a href={`${href}#comments`}>コメント(<CommentCount slug={post.id} />)</a>
+        </>
+      )
+    }
   </p>
 </article>
