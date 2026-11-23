@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "entries": {
+    "https://example.com/": {
+      "status": "ok",
+      "title": "Example Domain",
+      "fetchedAt": "2026-11-23T16:40:03.779Z"
+    },
+    "https://example.com/not-found-inline-link": {
+      "status": "error",
+      "reason": "Error: HTTP 404",
+      "fetchedAt": "2026-11-23T16:40:03.966Z"
+    },
+    "https://simochee.net/": {
+      "status": "ok",
+      "title": "ちぃさな雑記帳",
+      "description": "小さなことから大きなものまで気軽にどんどん書いていきます。",
+      "siteName": "ちぃさな雑記帳",
+      "fetchedAt": "2026-11-23T16:19:00.224Z"
+    }
+  }
+}
