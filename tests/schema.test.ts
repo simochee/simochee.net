@@ -24,6 +24,9 @@ test("下書きは CI と本番ビルドで有効化できない", () => {
   expect(includeDrafts("build", { SIMOCHEE_INCLUDE_DRAFTS: "1" })).toBe(false);
   expect(includeDrafts("dev", { SIMOCHEE_INCLUDE_DRAFTS: "1", WORKERS_CI: "1" })).toBe(false);
 });
+test("プレビューのビルドは CI でも下書きを含める", () => {
+  expect(includeDrafts("build", { SIMOCHEE_PREVIEW: "true", CI: "true" })).toBe(true);
+});
 test("抜粋には Markdown 記法や MDX 要素を含めない", () => {
   expect(excerpt("## 見出し\n\n**本文**と[リンク](https://example.com)\n\n<div>文章</div>")).toBe(
     "見出し 本文 と リンク 文章",

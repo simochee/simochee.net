@@ -9,7 +9,8 @@
     "schema": "node scripts/schema.ts",
     "prepare": "astro sync",
     "preview": "astro build && astro preview",
-    "deploy": "cf deploy"
+    "deploy": "cf deploy",
+    "deploy:preview": "rm -rf dist/preview && mkdir -p dist && cp -R .cloudflare/output/v1/workers/default/assets dist/preview && cf deploy --mode preview dist/preview"
   },
   "dependencies": {
     "@astrojs/cloudflare": "15.0.0-beta.6",
