@@ -1,7 +1,6 @@
 import { env } from "cloudflare:workers";
 import { z } from "zod";
 import { limits } from "../../../lib/limits";
-import { isAdmin } from "../../../server/admin";
 import { removeComment } from "../../../server/comments";
 import { database } from "../../../server/db";
 import { clientAddress, handler, json, parseId, readJson, throttle } from "../../../server/http";
@@ -15,6 +14,6 @@ export const DELETE = handler(async (context) => {
     z.object({ password: z.string().max(limits.password).optional() }),
   );
   await throttle(env.ACTION_LIMIT, `comment-delete:${clientAddress(context)}`);
-  await removeComment(await database(), id, { password, admin: await isAdmin(context.cookies) });
+  await removeComment(await database(), id, { password, admin: false });
   return json({ ok: true });
 });

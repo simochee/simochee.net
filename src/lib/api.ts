@@ -14,7 +14,7 @@ export interface Counts {
 export interface SidebarData {
   popular: { slug: string; title: string }[];
   comments: (PlacedComment & { postTitle: string })[];
-  board: { id: number; name: string; body: string; at: string }[];
+  board: { id: number; name: string; admin: boolean; body: string; at: string }[];
   /** これまでの訪問数の累計。 */
   total: number;
   /** いま見ている人のおおよその数。Web Analytics を読めないあいだは null。 */
@@ -35,6 +35,7 @@ export interface PollResponse extends PollResult {
 }
 
 export interface AdminInbox {
+  posts: { slug: string; title: string }[];
   comments: (InboxComment & { postTitle: string | null })[];
   bbs: BbsInboxPost[];
 }

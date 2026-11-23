@@ -24,7 +24,7 @@ interface Props {
             <a rel="nofollow ugc noopener">URL</a>
           </span>
           {" | "}
-          <span data-slot="name"></span>
+          <span data-slot="name"></span><span class="ml-2 type-small text-memo-ink" data-slot="admin">［管理人］</span>
           <span data-slot="delete">
             {" | "}
             <Icon name="edit" /> <Button variant="link" aria-expanded="false">削除</Button>
@@ -106,6 +106,7 @@ interface Props {
             if (comment.url) slot("link").querySelector("a")!.href = comment.url;
             else slot("link").remove();
             slot("name").textContent = comment.name;
+            if (!comment.admin) slot("admin").remove();
             if (!comment.deletable) {
               slot("delete").remove();
               slot("remover").remove();

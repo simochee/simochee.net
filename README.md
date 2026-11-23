@@ -276,8 +276,12 @@ export const GET: APIRoute = () => Response.json({ ok: true });
 ### 管理画面
 
 `/admin/` は管理人用のページです（どこからもリンクせず、検索とサイトマップから外しています）。
-`ADMIN_PASSWORD` でログインすると、非公開を含むコメントと掲示板の書き込みを読み、削除し、掲示板に返信できます。
-ログインは 30 日つづきます（`admin_sessions` 表）。全員をログアウトさせるときは、この表を空にします。
+Cloudflare Access でログインすると、非公開を含むコメントと掲示板の書き込みを読み、削除し、掲示板に返信できます。
+公開中の記事へのコメントと掲示板への書き込みも送れます。名前は管理人の表示名になり、公開ページには「管理人」の印が付きます。
+Access アプリケーションで `simochee.net/admin` と `simochee.net/api/admin` の両方を保護してください。
+Worker も Access の JWT（`Cf-Access-Jwt-Assertion` ヘッダー、なければ `CF_Authorization` cookie）の署名・発行元・対象・有効期間を検証します。
+ログアウトは `/cdn-cgi/access/logout` を使います。
+手元の dev では、Access の設定が片方でも空なら認証を省きます。本番では設定が空なら 503、トークンが無効なら 401 を返します。
 
 ## デプロイ
 
@@ -300,7 +304,8 @@ pnpm exec cf deploy --dry-run   # アップロードせずにビルドと検証�
 | 秘密の値               | 用途                                                             | ないとき                                                       |
 | ---------------------- | ---------------------------------------------------------------- | -------------------------------------------------------------- |
 | `TURNSTILE_SECRET_KEY` | Turnstile のシークレットキー                                     | コメントと掲示板の書き込みを受け付けない                       |
-| `ADMIN_PASSWORD`       | 管理画面のパスワード                                             | 管理画面に入れない                                             |
+| `ACCESS_TEAM_DOMAIN`   | Access のチームドメイン（例 `example.cloudflareaccess.com`）     | 管理人 API が 503 を返す                                       |
+| `ACCESS_AUD`           | Access アプリケーションの AUD（両方のパスに同じアプリを使用）    | 管理人 API が 503 を返す                                       |
 | `ANALYTICS_ACCOUNT_ID` | Cloudflare のアカウント ID                                       | 閲覧数を取り込まない（人気記事・カウンター・閲覧者数が止まる） |
 | `ANALYTICS_SITE_TAG`   | Web Analytics のサイトタグ（計測スクリプトのトークンとは別の値） | 同上                                                           |
 | `ANALYTICS_API_TOKEN`  | 「アカウントの分析の読み取り」権限だけを付けた API トークン      | 同上                                                           |

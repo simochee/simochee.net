@@ -1,7 +1,6 @@
 import { env } from "cloudflare:workers";
 import { z } from "zod";
 import { limits } from "../../../../lib/limits";
-import { isAdmin } from "../../../../server/admin";
 import { editBbsPost, removeBbsPost } from "../../../../server/bbs";
 import { database } from "../../../../server/db";
 import { fields } from "../../../../server/fields";
@@ -18,7 +17,7 @@ export const PATCH = handler(async (context) => {
     z.object({ key, title: fields.title, body: fields.body, colorId: fields.inkColor }),
   );
   await throttle(env.ACTION_LIMIT, `bbs-edit:${clientAddress(context)}`);
-  await editBbsPost(await database(), id, { ...change, admin: await isAdmin(context.cookies) });
+  await editBbsPost(await database(), id, { ...change, admin: false });
   return json({ ok: true });
 });
 
@@ -26,6 +25,6 @@ export const DELETE = handler(async (context) => {
   const id = parseId(context.params.id);
   const { key: given } = await readJson(context.request, z.object({ key }));
   await throttle(env.ACTION_LIMIT, `bbs-edit:${clientAddress(context)}`);
-  await removeBbsPost(await database(), id, { key: given, admin: await isAdmin(context.cookies) });
+  await removeBbsPost(await database(), id, { key: given, admin: false });
   return json({ ok: true });
 });

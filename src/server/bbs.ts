@@ -8,6 +8,7 @@ export interface BbsPost {
   id: number;
   title: string;
   name: string;
+  admin: boolean;
   url: string | null;
   body: string;
   colorId: InkColorId;
@@ -28,6 +29,7 @@ export interface BbsPage {
 export interface NewBbsPost {
   title: string;
   name: string;
+  admin?: boolean;
   url?: string;
   body: string;
   colorId: InkColorId;
@@ -38,6 +40,7 @@ interface Row {
   id: number;
   title: string;
   name: string;
+  admin: number;
   url: string | null;
   body: string;
   color_id: InkColorId;
@@ -50,6 +53,7 @@ const publicPost = (row: Row): BbsPost => ({
   id: row.id,
   title: row.title,
   name: row.name,
+  admin: row.admin === 1,
   url: row.url,
   body: row.body,
   colorId: row.color_id,
@@ -76,10 +80,16 @@ export async function bbsPage(db: D1Database, page: number, size: number): Promi
 
 export async function latestBbsPosts(db: D1Database, limit: number) {
   const { results } = await db
-    .prepare("SELECT id, name, body, created_at FROM bbs_posts ORDER BY id DESC LIMIT ?")
+    .prepare("SELECT id, name, admin, body, created_at FROM bbs_posts ORDER BY id DESC LIMIT ?")
     .bind(limit)
-    .all<Pick<Row, "id" | "name" | "body" | "created_at">>();
-  return results.map((row) => ({ id: row.id, name: row.name, body: row.body, at: row.created_at }));
+    .all<Pick<Row, "id" | "name" | "admin" | "body" | "created_at">>();
+  return results.map((row) => ({
+    id: row.id,
+    name: row.name,
+    admin: row.admin === 1,
+    body: row.body,
+    at: row.created_at,
+  }));
 }
 
 export async function bbsInbox(db: D1Database, limit: number): Promise<BbsInboxPost[]> {
@@ -97,8 +107,8 @@ export async function addBbsPost(db: D1Database, post: NewBbsPost, now = new Dat
   const [inserted] = await db.batch([
     db
       .prepare(
-        `INSERT INTO bbs_posts (title, name, url, body, color_id, key_hash, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id`,
+        `INSERT INTO bbs_posts (title, name, url, body, color_id, key_hash, created_at, admin)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
       )
       .bind(
         post.title,
@@ -108,6 +118,7 @@ export async function addBbsPost(db: D1Database, post: NewBbsPost, now = new Dat
         post.colorId,
         post.key ? await hashSecret(post.key) : null,
         now.toISOString(),
+        post.admin ? 1 : 0,
       ),
     db.prepare(
       `INSERT INTO counters (name, value) VALUES ('bbs_posts', 1)
