@@ -8,7 +8,7 @@ import PluginList from "../layout/PluginList.astro";
     <PluginList />
     <template>
       <li>
-        ・<span data-slot="name"></span><span class="ml-2 type-small text-memo-ink" data-slot="admin">［管理人］</span>：<a data-slot="post"></a> (<span data-slot="date"></span>)
+        ・<span data-slot="name"></span><span class="ml-2 type-small text-memo-ink" data-slot="admin">［管理人］</span>：<a data-slot="post"></a> (<time data-slot="date"></time>)
       </li>
     </template>
   </Plugin>
@@ -34,6 +34,7 @@ import PluginList from "../layout/PluginList.astro";
               if (!comment.admin) slot("admin").remove();
               slot<HTMLAnchorElement>("post").href = `/posts/${comment.slug}/#${commentAnchor(comment.number)}`;
               slot("post").textContent = comment.postTitle;
+              slot<HTMLTimeElement>("date").dateTime = comment.at;
               slot("date").textContent = formatMonthDay(new Date(comment.at));
               return fragment;
             }),

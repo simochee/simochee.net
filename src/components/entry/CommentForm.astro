@@ -38,7 +38,7 @@ interface Props {
   import { ApiError, call } from "../../scripts/api";
   import { commentsChanged } from "../../scripts/events";
   import { refreshSidebar } from "../../scripts/shared-data";
-  import { report, textFields } from "../../scripts/template";
+  import { clearForm, report, textFields } from "../../scripts/template";
   import type { TurnstileField } from "../../scripts/turnstile";
 
   customElements.define(
@@ -65,9 +65,7 @@ interface Props {
           const posted = await call<PostedComment>("/api/comments/", {
             body: { ...textFields(form), slug: this.dataset.slug, private: isPrivate },
           });
-          for (const name of ["title", "body", "password"])
-            (form.elements.namedItem(name) as HTMLInputElement).value = "";
-          form.querySelector<HTMLInputElement>("[name=private]")!.checked = false;
+          clearForm(form, ["name", "url"]);
           report(
             status,
             posted.private

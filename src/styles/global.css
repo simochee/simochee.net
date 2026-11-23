@@ -42,6 +42,7 @@
   --color-mark: #fff0a8;
   --color-ok: #2b6a2b;
   --color-danger: #9b2c2c;
+  --color-danger-wash: #fdeeee;
   --color-lcd: #111111;
   --color-lcd-ink: #7dff7a;
   --color-menu-divider: rgb(255 255 255 / 0.35);
@@ -64,6 +65,8 @@
 @layer base {
   :root {
     color-scheme: light;
+    /* accent ではなく link の色にしているのは、白テーマの accent が淡い灰色で、チェックの印が背景に溶けるため。 */
+    accent-color: var(--color-link);
   }
   /* 着せかえで替えるのは色みを持つトークンだけ。本文の墨色や日曜・土曜の赤青、注意書きの色は、どのテーマでも意味が変わらないように残す。 */
   :root[data-theme="shiro"] {

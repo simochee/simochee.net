@@ -5,4 +5,4 @@ type Props = HTMLAttributes<"textarea">;
 const { class: className, ...rest } = Astro.props;
 ---
 
-<textarea class:list={["border border-control bg-paper px-4 py-2", className]} {...rest}></textarea>
+<textarea class:list={["border border-control bg-paper px-4 py-2 user-invalid:border-danger user-invalid:bg-danger-wash", className]} {...rest}></textarea>

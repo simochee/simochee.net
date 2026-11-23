@@ -5,4 +5,4 @@ type Props = HTMLAttributes<"input">;
 const { class: className, type = "text", ...rest } = Astro.props;
 ---
 
-<input type={type} class:list={["border border-control bg-paper px-4 py-2", className]} {...rest} />
+<input type={type} class:list={["border border-control bg-paper px-4 py-2 user-invalid:border-danger user-invalid:bg-danger-wash", className]} {...rest} />

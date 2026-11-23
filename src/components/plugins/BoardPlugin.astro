@@ -7,7 +7,7 @@ import PluginList from "../layout/PluginList.astro";
   <latest-board hidden>
     <PluginList />
     <template>
-      <li><b data-slot="name"></b><span class="ml-2 type-small text-memo-ink" data-slot="admin">［管理人］</span> (<span data-slot="date"></span>)<br /><span data-slot="body"></span></li>
+      <li><b data-slot="name"></b><span class="ml-2 type-small text-memo-ink" data-slot="admin">［管理人］</span> (<time data-slot="date"></time>)<br /><span data-slot="body"></span></li>
     </template>
   </latest-board>
   <div class="px-4 py-6 text-right"><a href="/bbs/">書き込む »</a></div>
@@ -31,6 +31,7 @@ import PluginList from "../layout/PluginList.astro";
               const { fragment, slot } = stamp(template);
               slot("name").textContent = post.name;
               if (!post.admin) slot("admin").remove();
+              slot<HTMLTimeElement>("date").dateTime = post.at;
               slot("date").textContent = formatMonthDay(new Date(post.at));
               slot("body").textContent = truncate(post.body.replace(/\s+/g, " "), 40);
               return fragment;

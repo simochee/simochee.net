@@ -63,7 +63,7 @@ import { site } from "../site";
       <article class="mb-10 scroll-mt-16 border border-line">
         <div class="flex flex-wrap items-baseline justify-between gap-x-10 gap-y-2 border-b border-line bg-tint px-8 py-2">
           <b class="text-ink-strong" data-slot="heading"></b>
-          <span class="type-small text-ink-soft" data-slot="date"></span>
+          <time class="type-small text-ink-soft" data-slot="date"></time>
         </div>
         <div class="px-10 py-6">
           <div class="type-small text-ink-soft">名前：<b data-slot="name"></b><span class="ml-2 type-small text-memo-ink" data-slot="admin">［管理人］</span><span data-slot="home"> <Icon name="home" /> <a rel="nofollow ugc noopener">HOME</a></span></div>
@@ -109,7 +109,7 @@ import { site } from "../site";
   import { pageNumbers } from "../lib/paging";
   import { ApiError, call } from "../scripts/api";
   import { refreshSidebar } from "../scripts/shared-data";
-  import { report, stamp, textFields } from "../scripts/template";
+  import { clearForm, report, stamp, textFields } from "../scripts/template";
   import type { TurnstileField } from "../scripts/turnstile";
 
   const rememberKey = "bbs-author";
@@ -149,7 +149,7 @@ import { site } from "../site";
       connectedCallback() {
         const saved = storage.load();
         for (const name of remembered)
-          (this.#form.elements.namedItem(name) as HTMLInputElement).value = saved[name] ?? "";
+          (this.#form.elements.namedItem(name) as HTMLInputElement).defaultValue = saved[name] ?? "";
         this.addEventListener("submit", this);
         this.addEventListener("click", this);
         // ClientRouter は要素を差し替えたあとで location を更新するので、ページ番号はそのあとにもう一度読む。
@@ -199,6 +199,7 @@ import { site } from "../site";
         article.dataset.id = String(post.id);
         article.dataset.title = post.title;
         slot("heading").textContent = `[${post.id}] ${post.title}`;
+        slot<HTMLTimeElement>("date").dateTime = post.at;
         slot("date").textContent = formatMinutes(new Date(post.at));
         slot("name").textContent = post.name;
         if (!post.admin) slot("admin").remove();
@@ -265,7 +266,7 @@ import { site } from "../site";
         try {
           const { id } = await call<{ id: number }>("/api/bbs/", { body: values });
           storage.save(remember ? Object.fromEntries(remembered.map((name) => [name, values[name] ?? ""])) : undefined);
-          for (const name of ["title", "body", "key"]) (form.elements.namedItem(name) as HTMLInputElement).value = "";
+          clearForm(form, ["name", "url", "colorId", "remember"]);
           report(status, "書き込みました。ありがとうございます！");
           refreshSidebar();
           if (location.search) history.replaceState(history.state, "", "/bbs/");
