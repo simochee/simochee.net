@@ -28,7 +28,7 @@ test("Web Analytics からは、サイトのホスト名の閲覧だけを、ペ
           accounts: [
             {
               rumPageloadEventsAdaptiveGroups: [
-                { count: 4, sum: { visits: 0 }, dimensions: { requestPath: "/posts/pudding/" } },
+                { count: 4, sum: { visits: 0 }, dimensions: { requestPath: "/archive/pudding/" } },
                 { count: 10, sum: { visits: 5 }, dimensions: { requestPath: "/" } },
               ],
             },
@@ -46,7 +46,7 @@ test("Web Analytics からは、サイトのホスト名の閲覧だけを、ペ
   });
   const rows = await source(new Date("2026-11-19T02:00:00Z"), new Date("2026-11-19T03:00:00Z"));
   expect(rows).toEqual([
-    { path: "/posts/pudding/", views: 4, visits: 0 },
+    { path: "/archive/pudding/", views: 4, visits: 0 },
     { path: "/", views: 10, visits: 5 },
   ]);
   expect(requests[0]!.query).toMatch(/requestHost: \$host/);
@@ -54,11 +54,17 @@ test("Web Analytics からは、サイトのホスト名の閲覧だけを、ペ
 });
 
 test("記事のページの URL からだけ slug を取り出す", () => {
-  expect(slugOfPath("/posts/morning-at-kissaten/")).toBe("morning-at-kissaten");
-  expect(slugOfPath("/posts/morning-at-kissaten")).toBe("morning-at-kissaten");
-  expect(slugOfPath("/posts/")).toBeUndefined();
+  expect(slugOfPath("/archive/morning-at-kissaten/")).toBe("morning-at-kissaten");
+  expect(slugOfPath("/archive/morning-at-kissaten")).toBe("morning-at-kissaten");
+  expect(slugOfPath("/archive/")).toBeUndefined();
+  expect(slugOfPath("/archive/2026/11/")).toBeUndefined();
   expect(slugOfPath("/tags/喫茶店/")).toBeUndefined();
-  expect(slugOfPath("/posts/a/b/")).toBeUndefined();
+  expect(slugOfPath("/archive/a/b/")).toBeUndefined();
+});
+
+test("記事が /archive/ へ移る前の /posts/ の閲覧も、同じ記事の閲覧として数える", () => {
+  expect(slugOfPath("/posts/morning-at-kissaten/")).toBe("morning-at-kissaten");
+  expect(slugOfPath("/posts/")).toBeUndefined();
 });
 
 test("初めて取り込むときは、集計が落ち着いた直前の 1 時間だけを取り込む", () => {
@@ -85,11 +91,11 @@ test("記事ごとの閲覧数を日本時間の日付ごとに足し、訪問�
   const db = await migratedD1();
   const rows: Record<string, PathViews[]> = {
     "2026-11-19T14:00:00.000Z": [
-      { path: "/posts/pudding/", views: 3, visits: 2 },
-      { path: "/posts/pudding", views: 1, visits: 0 },
+      { path: "/archive/pudding/", views: 3, visits: 2 },
+      { path: "/archive/pudding", views: 1, visits: 0 },
       { path: "/", views: 4, visits: 4 },
     ],
-    "2026-11-19T15:00:00.000Z": [{ path: "/posts/pudding/", views: 5, visits: 1 }],
+    "2026-11-19T15:00:00.000Z": [{ path: "/archive/pudding/", views: 5, visits: 1 }],
   };
   const source: PageviewSource = async (start) => rows[start.toISOString()] ?? [];
   await db.prepare("INSERT INTO counters (name, value) VALUES ('visitors', 100)").run();
@@ -115,7 +121,7 @@ test("同じ時間は二度取り込まず、取り込みに失敗した時間�
   let failing = true;
   const source: PageviewSource = async () => {
     if (failing) throw new Error("Web Analytics に届かない");
-    return [{ path: "/posts/pudding/", views: 2, visits: 1 }];
+    return [{ path: "/archive/pudding/", views: 2, visits: 1 }];
   };
   const now = at("2026-11-19T03:20:00Z");
   await expect(importAnalytics(db, source, now)).rejects.toThrow();

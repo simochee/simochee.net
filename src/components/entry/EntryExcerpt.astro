@@ -1,5 +1,6 @@
 ---
 import Icon from "../ui/Icon.astro";
+import { postPath } from "../../lib/archive";
 import type { Post } from "../../lib/posts";
 import { formatDay } from "../../lib/dates";
 import { categories } from "../../categories";
@@ -10,7 +11,7 @@ interface Props {
   post: Post;
 }
 const { post } = Astro.props;
-const href = `/posts/${post.id}/`;
+const href = postPath(post.id);
 ---
 
 <article class="mb-22">

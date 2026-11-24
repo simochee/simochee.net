@@ -1,5 +1,6 @@
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
+import { postPath } from "../lib/archive";
 import { commentAnchor } from "../lib/comments";
 import { site } from "../site";
 import { recentComments } from "../server/comments";
@@ -19,7 +20,7 @@ export async function GET(context: APIContext) {
     items: (await recentComments(db, posts.keys(), 30)).map(
       ({ slug, number, title, name, body, at }) => ({
         title: `${title} ― ${name}（「${posts.get(slug)!.title}」へのコメント）`,
-        link: `/posts/${slug}/#${commentAnchor(number)}`,
+        link: `${postPath(slug)}#${commentAnchor(number)}`,
         pubDate: new Date(at),
         description: body,
       }),

@@ -1,3 +1,4 @@
+import { postPath } from "../lib/archive";
 import { formatDay } from "../lib/dates";
 import { pageNumbers } from "../lib/paging";
 import { resultPage, search, snippet, terms, type SearchEntry } from "../lib/search";
@@ -114,7 +115,7 @@ customElements.define(
       const articles = items.map((entry) => {
         const article = template.content.cloneNode(true) as DocumentFragment;
         const text = (name: string) => article.querySelector<HTMLElement>(`[data-${name}]`)!;
-        const post = `/posts/${entry.id}/`;
+        const post = postPath(entry.id);
         const date = new Date(entry.publishedAt);
         text("date").textContent = formatDay(date);
         text("date").setAttribute("datetime", entry.publishedAt);

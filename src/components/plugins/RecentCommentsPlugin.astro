@@ -15,6 +15,7 @@ import PluginList from "../layout/PluginList.astro";
 </recent-comments>
 
 <script>
+  import { postPath } from "../../lib/archive";
   import { commentAnchor } from "../../lib/comments";
   import { formatMonthDay } from "../../lib/dates";
   import { onSidebar } from "../../scripts/shared-data";
@@ -32,7 +33,7 @@ import PluginList from "../layout/PluginList.astro";
               const { fragment, slot } = stamp(template);
               slot("name").textContent = comment.name;
               if (!comment.admin) slot("admin").remove();
-              slot<HTMLAnchorElement>("post").href = `/posts/${comment.slug}/#${commentAnchor(comment.number)}`;
+              slot<HTMLAnchorElement>("post").href = `${postPath(comment.slug)}#${commentAnchor(comment.number)}`;
               slot("post").textContent = comment.postTitle;
               slot<HTMLTimeElement>("date").dateTime = comment.at;
               slot("date").textContent = formatMonthDay(new Date(comment.at));

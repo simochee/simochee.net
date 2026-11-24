@@ -93,7 +93,7 @@ try {
       });
     const result = build("../content/posts");
     assert.equal(result.status, 0, result.stdout + result.stderr);
-    const html = readFileSync(join(site, assets, "posts/deploy-example/index.html"), "utf8");
+    const html = readFileSync(join(site, assets, "archive/deploy-example/index.html"), "utf8");
     assert.match(html, /datetime="2025-02-03T03:00:00.000Z"/);
     assert.match(html, /datetime="2025-02-05T03:00:00.000Z"/);
     assert.deepEqual(readdirSync(join(site, assets, "posts")), ["deploy-example"]);

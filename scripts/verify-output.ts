@@ -9,7 +9,10 @@ const expected = (await readdir("content/posts", { withFileTypes: true }))
   .filter((entry) => entry.isDirectory() && entry.name !== "unfinished")
   .map((entry) => entry.name)
   .sort();
-assert.deepEqual((await readdir(`${assets}/posts`)).sort(), expected);
+const archived = (await readdir(`${assets}/archive`)).filter(
+  (name) => name !== "index.html" && !/^\d{4}$/.test(name),
+);
+assert.deepEqual(archived.sort(), expected);
 for (const path of [
   "index.html",
   "tech/index.html",
@@ -54,7 +57,7 @@ for (const dir of [".cloudflare/output", "dist", ".astro", "node_modules/.astro"
 // 手元の dev で入る見本のコメント（db/dev-seed.sql）は、本番の Worker にも静的ファイルにも入れない。
 await checkMarkers(".cloudflare/output", /COMMENT-ON-DRAFT-DO-NOT-SHIP/);
 // コメントと拍手は書かれたらすぐ出したいので、ページには器だけを書き出し、中身はサーバーから読む。
-const morning = await readFile(`${assets}/posts/morning-at-kissaten/index.html`, "utf8");
+const morning = await readFile(`${assets}/archive/morning-at-kissaten/index.html`, "utf8");
 assert.match(morning, /<post-comments data-slug="morning-at-kissaten"/);
 assert.match(morning, /<clap-button [^>]*data-slug="morning-at-kissaten"/);
 // サーバーが記事を知るための一覧には、公開中の記事だけを載せる。
@@ -69,12 +72,12 @@ assert.match(
   /<meta name="robots" content="noindex, nofollow"/,
 );
 assert.doesNotMatch(await readFile(`${assets}/sitemap-0.xml`, "utf8"), /\/admin\//);
-const markdown = await readFile(`${assets}/posts/markdown-lab/index.html`, "utf8");
+const markdown = await readFile(`${assets}/archive/markdown-lab/index.html`, "utf8");
 for (const [slug, count] of [
   ["markdown-lab", 3],
   ["mdx-example", 1],
 ] as const) {
-  const html = await readFile(`${assets}/posts/${slug}/index.html`, "utf8");
+  const html = await readFile(`${assets}/archive/${slug}/index.html`, "utf8");
   const cards = [...html.matchAll(/<a class="link-card"[^>]*>[\s\S]*?<\/a>/g)];
   assert.equal(cards.length, count, `${slug}: link cards`);
   for (const [card] of cards) {
@@ -118,7 +121,7 @@ for (const pattern of [
 ])
   assert.match(markdown, pattern);
 assert.match(
-  await readFile(`${assets}/posts/mdx-example/index.html`, "utf8"),
+  await readFile(`${assets}/archive/mdx-example/index.html`, "utf8"),
   /MDX で記述した要素です。/,
 );
 console.log(

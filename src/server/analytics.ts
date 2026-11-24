@@ -20,7 +20,7 @@ export interface AnalyticsCredentials {
 }
 
 // ゾーンで計測スクリプトを自動で入れているサイトタグは、同じドメインのサブドメイン（ステージングなど）もまとめて数える。
-// サイトタグだけで絞ると、ほかのホストの /posts/ の閲覧が人気記事とカウンターに混ざるので、ホスト名でも絞る。
+// サイトタグだけで絞ると、ほかのホストの記事の閲覧が人気記事とカウンターに混ざるので、ホスト名でも絞る。
 const query = `query ($account: string!, $site: string!, $host: string!, $start: Time!, $end: Time!) {
   viewer {
     accounts(filter: { accountTag: $account }) {
@@ -88,7 +88,9 @@ export function webAnalytics({
 
 /** 記事のページの URL なら、その記事の slug。 */
 export function slugOfPath(path: string) {
-  return /^\/posts\/([a-z0-9]+(?:-[a-z0-9]+)*)\/?$/.exec(path)?.[1];
+  // 記事は 2026-11-25 に /posts/<slug>/ から /archive/<slug>/ へ移った。それより前の時間を取り込み直すときに
+  // 旧 URL の閲覧を落とさないよう、/posts/ も記事として数える。転送されたあとの /posts/ は閲覧として届かない。
+  return /^\/(?:archive|posts)\/([a-z0-9]+(?:-[a-z0-9]+)*)\/?$/.exec(path)?.[1];
 }
 
 const hour = 60 * 60 * 1000;

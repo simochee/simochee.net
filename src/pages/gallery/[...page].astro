@@ -3,6 +3,7 @@ import { getImage, Image } from "astro:assets";
 import Base from "../../layouts/Base.astro";
 import Button from "../../components/ui/Button.astro";
 import PageNumbers from "../../components/entry/PageNumbers.astro";
+import { postPath } from "../../lib/archive";
 import { dayKey } from "../../lib/dates";
 import { galleryPageSize, photos } from "../../lib/gallery";
 import { pageCount, pageOf, pageParams } from "../../lib/paging";
@@ -24,7 +25,7 @@ const shown = await Promise.all(
     ]);
     return {
       ...photo,
-      href: `/posts/${photo.postId}/`,
+      href: postPath(photo.postId),
       date: dayKey(photo.publishedAt),
       large: {
         src: large.src,

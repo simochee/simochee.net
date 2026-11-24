@@ -2,6 +2,7 @@
 import Icon from "../ui/Icon.astro";
 import Button from "../ui/Button.astro";
 import type { Post } from "../../lib/posts";
+import { postPath } from "../../lib/archive";
 import { formatDay } from "../../lib/dates";
 import { tagPath } from "../../lib/tags";
 import { categories } from "../../categories";
@@ -30,11 +31,11 @@ const { id, data } = Astro.props.post;
       hasServer && (
         <>
           {" | "}
-          <Icon name="comment" /> <a href={`/posts/${id}/#comments`}>コメント(<CommentCount slug={id} />)</a>
+          <Icon name="comment" /> <a href={`${postPath(id)}#comments`}>コメント(<CommentCount slug={id} />)</a>
         </>
       )
     }
-    <share-button hidden data-title={data.title} data-url={`/posts/${id}/`}>
+    <share-button hidden data-title={data.title} data-url={postPath(id)}>
       {" | "}
       <Icon name="share" />
       <Button variant="link" aria-label={`「${data.title}」を共有する`}>共有する</Button>

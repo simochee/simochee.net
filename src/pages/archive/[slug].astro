@@ -7,6 +7,7 @@ import Comments from "../../components/entry/Comments.astro";
 import EntryMeta from "../../components/entry/EntryMeta.astro";
 import Pager from "../../components/entry/Pager.astro";
 import { posts } from "../../lib/posts";
+import { postPath } from "../../lib/archive";
 import { formatDay } from "../../lib/dates";
 import { hasServer } from "../../lib/features";
 
@@ -21,7 +22,7 @@ const { post, newer, older } = Astro.props;
 const { Content, headings } = await render(post);
 // 脚注の見出しは remark が足す読み上げ専用のもので、目に見える見出しではない。
 const toc = headings.filter((heading) => heading.depth <= 3 && heading.slug !== "footnote-label");
-const link = (target?: typeof post) => target && { href: `/posts/${target.id}/`, label: target.data.title };
+const link = (target?: typeof post) => target && { href: postPath(target.id), label: target.data.title };
 ---
 
 <Base title={post.data.title} description={post.data.description} image={`/og/${post.id}.jpg`} article publishedAt={post.data.publishedAt} updatedAt={post.data.updatedAt}>

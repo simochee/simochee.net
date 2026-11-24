@@ -1,6 +1,7 @@
 ---
 import Plugin from "../layout/Plugin.astro";
 import PluginList from "../layout/PluginList.astro";
+import { postPath } from "../../lib/archive";
 import { formatMonthDay } from "../../lib/dates";
 import { posts } from "../../lib/posts";
 
@@ -13,7 +14,7 @@ const recent = (await posts()).slice(0, 5);
       <PluginList>
         {recent.map((post) => (
           <li>
-            ・<a href={`/posts/${post.id}/`}>{post.data.title}</a> ({formatMonthDay(post.data.publishedAt)})
+            ・<a href={postPath(post.id)}>{post.data.title}</a> ({formatMonthDay(post.data.publishedAt)})
           </li>
         ))}
       </PluginList>

@@ -10,6 +10,8 @@ export interface Month<T> {
   path: string;
   posts: T[];
 }
+export const postPath = (slug: string) => `/archive/${slug}/`;
+
 const yearMonth = (date: Date) => formatDay(date).slice(0, 7);
 
 export function groupByMonth<T extends Dated>(posts: T[]): Month<T>[] {

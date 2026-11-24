@@ -9,6 +9,7 @@ import Plugin from "../layout/Plugin.astro";
 </popular-posts>
 
 <script>
+  import { postPath } from "../../lib/archive";
   import { onSidebar } from "../../scripts/shared-data";
 
   customElements.define(
@@ -20,7 +21,7 @@ import Plugin from "../layout/Plugin.astro";
           this.querySelector("ol")!.replaceChildren(
             ...popular.map(({ slug, title }) => {
               const item = document.createElement("li");
-              item.append(Object.assign(document.createElement("a"), { href: `/posts/${slug}/`, textContent: title }));
+              item.append(Object.assign(document.createElement("a"), { href: postPath(slug), textContent: title }));
               return item;
             }),
           );
