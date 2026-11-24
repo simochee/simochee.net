@@ -11,7 +11,7 @@
   & ol {
     list-style: decimal;
   }
-  /* Preflight は code と kbd を等幅フォントの一覧へ切り替える。kbd と samp はドットフォントのままにし、コードだけ下で --font-code に替える。 */
+  /* Preflight は code と kbd を等幅フォントの一覧へ切り替える。ドットフォントは全角・半角がそろっているので、本文と同じ書体のままにする。 */
   & :is(code, kbd, samp) {
     font-family: inherit;
     font-size: inherit;
@@ -158,10 +158,6 @@
   }
   & :not(pre) > code {
     padding: 0 3px;
-    font-family: var(--font-code);
-    /* pre と同じく、輪郭で描く等幅フォントは body のアンチエイリアス切りを戻さないとギザギザになる。 */
-    -webkit-font-smoothing: auto;
-    text-rendering: auto;
     background: var(--color-wash);
     border: 1px solid var(--color-line-soft);
   }
