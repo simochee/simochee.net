@@ -11,6 +11,7 @@ import {
   transformerNotationWordHighlight,
 } from "@shikijs/transformers";
 import remarkAlerts from "remark-github-blockquote-alert";
+import remarkBreaks from "remark-breaks";
 import externalLinks from "rehype-external-links";
 import autolinkHeadings from "rehype-autolink-headings";
 import { rehypeAlerts } from "./src/lib/rehype-alerts";
@@ -60,7 +61,7 @@ export default defineConfig({
   ],
   markdown: {
     processor: unified({
-      remarkPlugins: [remarkAlerts, remarkLinkCards],
+      remarkPlugins: [remarkAlerts, remarkBreaks, remarkLinkCards],
       remarkRehype: { footnoteLabel: "脚注", footnoteBackLabel: "本文へ戻る" },
       rehypePlugins: [
         rehypeCodeFrame,
