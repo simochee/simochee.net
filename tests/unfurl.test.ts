@@ -53,10 +53,10 @@ async function server() {
   return { url: `http://127.0.0.1:${address.port}`, hits };
 }
 
-test("段落が裸の HTTP URL または山括弧リンクだけのときにカードの対象になる", () => {
+test("リストの外の段落が裸の HTTP URL または山括弧リンクだけのときにカードの対象になる", () => {
   expect(
     cardURLs(
-      `https://example.com/a\n\n<http://example.com/b>\n\n文中 https://example.com/c\n\n[見出し](https://example.com/d)\n\n[https://example.com/e](https://example.com/e)\n\n<ftp://example.com/f>\n\n\`https://example.com/g\`\n\nhttps://example.com/a`,
+      `https://example.com/a\n\n<http://example.com/b>\n\n文中 https://example.com/c\n\n[見出し](https://example.com/d)\n\n[https://example.com/e](https://example.com/e)\n\n<ftp://example.com/f>\n\n\`https://example.com/g\`\n\n- https://example.com/h\n\n1. <https://example.com/i>\n\nhttps://example.com/a`,
     ),
   ).toEqual(["http://example.com/b", "https://example.com/a"]);
   expect(cardURLs("import A from './a'\n\nhttps://example.com/mdx\n\n<A />", true)).toEqual([
