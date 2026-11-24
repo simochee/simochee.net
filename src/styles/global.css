@@ -68,6 +68,12 @@
     /* accent ではなく link の色にしているのは、白テーマの accent が淡い灰色で、チェックの印が背景に溶けるため。 */
     accent-color: var(--color-link);
   }
+  :root[data-font="system"] {
+    --font-body:
+      system-ui, -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+      "Yu Gothic UI", Meiryo, sans-serif;
+    --font-small: var(--font-body);
+  }
   /* 着せかえで替えるのは色みを持つトークンだけ。本文の墨色や日曜・土曜の赤青、注意書きの色は、どのテーマでも意味が変わらないように残す。 */
   :root[data-theme="shiro"] {
     --color-accent: #e8e8e8;
@@ -154,6 +160,12 @@
     /* 東雲フォントは下線位置を持たず、漢字やかなが字面の最下段まで埋まっているので、既定の下線は字の底に重なる。
        px で下げるとブラウザの文字サイズを上げたときにまた重なるため、字面の下端を基準にする。 */
     text-underline-position: under;
+  }
+  :root[data-font="system"] body {
+    -webkit-font-smoothing: auto;
+    font-synthesis: weight style;
+    font-kerning: auto;
+    text-rendering: auto;
   }
   a {
     color: var(--color-link);

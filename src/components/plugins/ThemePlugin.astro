@@ -15,6 +15,7 @@ import { themes } from "../../lib/themes";
           ))
         }
       </div>
+      <label class="type-small mt-8 block"><input type="checkbox" data-retro-font checked /> レトロフォントを使う</label>
     </div>
   </Plugin>
 </theme-picker>
@@ -22,10 +23,9 @@ import { themes } from "../../lib/themes";
 <script>
   import { defaultTheme, themes } from "../../lib/themes";
 
-  const key = "theme";
-  const save = (theme: string) => {
+  const save = (key: "theme" | "font", value: string) => {
     try {
-      localStorage.setItem(key, theme);
+      localStorage.setItem(key, value);
     } catch {
       // 保存できない環境（プライベートブラウズなど）でも、このページの見た目は変わる。
     }
@@ -36,21 +36,34 @@ import { themes } from "../../lib/themes";
     class extends HTMLElement {
       connectedCallback() {
         this.addEventListener("click", this);
+        this.addEventListener("change", this);
         this.hidden = false;
         this.reflect();
       }
       handleEvent(event: Event) {
-        const choice = (event.target as Element).closest("button")?.dataset.themeChoice;
+        if (event.type === "change") this.chooseFont(event.target as HTMLInputElement);
+        else this.chooseTheme(event.target as Element);
+      }
+      chooseTheme(target: Element) {
+        const choice = target.closest("button")?.dataset.themeChoice;
         if (!choice) return;
         document.documentElement.dataset.theme = choice;
         document.querySelector('link[rel="icon"][type="image/svg+xml"]')?.setAttribute("href", `/favicon/${choice}.svg`);
-        save(choice);
+        save("theme", choice);
+        this.reflect();
+      }
+      chooseFont(checkbox: HTMLInputElement) {
+        if (!checkbox.matches("[data-retro-font]")) return;
+        if (checkbox.checked) delete document.documentElement.dataset.font;
+        else document.documentElement.dataset.font = "system";
+        save("font", checkbox.checked ? "retro" : "system");
         this.reflect();
       }
       reflect() {
         const theme = themes.find((item) => item.id === document.documentElement.dataset.theme) ?? defaultTheme;
         for (const button of this.querySelectorAll<HTMLElement>("[aria-pressed]"))
           button.ariaPressed = String(button.dataset.themeChoice === theme.id);
+        this.querySelector<HTMLInputElement>("[data-retro-font]")!.checked = document.documentElement.dataset.font !== "system";
       }
     },
   );

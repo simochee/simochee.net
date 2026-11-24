@@ -47,6 +47,7 @@ const menu = [
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />    <link rel="canonical" href={canonical} />
     <link rel="alternate" type="application/rss+xml" title={site.name} href="/feed.xml" />
     {hasServer && <link rel="alternate" type="application/rss+xml" title={`${site.name}（最新コメント）`} href="/comments.xml" />}
+    {/* システムフォントを選んだ人には無駄な読み込みになる。それでもスクリプトで足さないのは、head のスクリプトはスタイルシートを待ってから動くので、既定のレトロフォントの人の読み込みが遅れるため。 */}
     <link rel="preload" as="font" type="font/woff2" href={bodyFont} crossorigin />
     <meta property="og:site_name" content={site.name} />
     <meta property="og:locale" content="ja_JP" />
