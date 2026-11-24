@@ -243,13 +243,12 @@ SIMOCHEE_CONTENT_DIR= vp run dev
 `thumbnail.png`、`thumbnail.jpg`、`thumbnail.jpeg`、`thumbnail.webp` のうち1枚を記事ディレクトリに置きます。
 複数ある場合はビルドエラーです。
 一覧では `astro:assets` がレスポンシブな WebP に最適化します。
-記事の OG 画像は 1200×630 の JPEG で、サムネイルがあれば中央を cover-crop し、なければタイトルとサイト名から生成します。
+記事の OG 画像は 1200×630 の JPEG で、サムネイルがあれば中央を cover-crop し、なければタイトル・公開日・サイト名から生成します。
 本文の相対画像も Astro の画像処理を通ります。
 本文の `![説明](./x.png)` とサムネイルは、ビルド時に集めて `/gallery/` の画像一覧に並べます（説明がなければ記事のタイトルが題になります）。
 
-自動生成には同梱の M PLUS 1p Regular を使用します。
-フォントは [Google Fonts](https://github.com/google/fonts/tree/main/ofl/mplus1p) 由来で、SIL Open Font License 1.1 です。
-ライセンスは `fonts/OFL.txt` に含めています。
+自動生成の画像は、サイトと同じ東雲フォントで描きます。
+satori は WOFF2 を読めないので、`src/assets/fonts` の 14px 用（標準と太字）をかな・漢字を合わせた TTF に戻して `fonts/` に置いています。
 システムフォントやビルド中のフォント取得に依存しません。
 
 ## 検索

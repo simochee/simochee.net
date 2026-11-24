@@ -12,3 +12,16 @@ pyftsubset in.woff2 --flavor=woff2 --layout-features='*' \
 pyftsubset in.woff2 --flavor=woff2 --layout-features='*' \
   --unicodes="U+3400-9FFF,U+F900-FAFF" --output-file=out-kanji.woff2
 ```
+
+OG 画像を描く satori は WOFF2 を読めないので、14px 用の標準と太字はかなと漢字を 1 つの TTF に戻して `fonts/` にも置いています。
+
+```py
+from fontTools.ttLib import TTFont
+from fontTools.merge import Merger
+
+for part in ["kana", "kanji"]:
+    font = TTFont(f"shinonome14-bold-{part}.woff2")
+    font.flavor = None
+    font.save(f"shinonome14-bold-{part}.ttf")
+Merger().merge(["shinonome14-bold-kana.ttf", "shinonome14-bold-kanji.ttf"]).save("shinonome14-bold.ttf")
+```
