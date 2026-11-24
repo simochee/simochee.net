@@ -138,6 +138,19 @@ test("文中やリスト項目の素の URL は href をそのままにタイト
   expect(code).not.toContain("説明");
   expect(code).not.toContain("<img");
 });
+test("リスト項目が URL だけでもカードにせず、文中と同じくタイトルへ置き換える", async () => {
+  const path = await article({ [url]: { status: "ok", title: "題名", fetchedAt } });
+  const { code } = await render(path, `- ${url}\n\n1. <${url}>\n\n- 項目\n\n  ${url}`);
+  expect(
+    code.match(
+      new RegExp(
+        `<a href="${url}"[^>]*>題名</a> <span class="link-mention-host">\\(example.com\\)</span>`,
+        "g",
+      ),
+    ),
+  ).toHaveLength(3);
+  expect(code).not.toContain("link-card");
+});
 test("取得失敗した文中の URL にはホスト名を添えない", async () => {
   const path = await article({ [url]: { status: "error", reason: "HTTP 404", fetchedAt } });
   const { code } = await render(path, `文中 ${url} です`);

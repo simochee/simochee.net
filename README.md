@@ -116,7 +116,7 @@ MDX では裸の URL を使ってください（`<https://...>` は Astro の MD
 https://example.com/
 ```
 
-文中に書いた素の URL（`https://example.com/` や Markdown の `<https://example.com/>`）は、カードにはならず、リンクのテキストが「タイトル (ホスト名)」になります。
+文中に書いた素の URL（`https://example.com/` や Markdown の `<https://example.com/>`）と、リストの中の素の URL は、項目が URL だけでもカードにはならず、リンクのテキストが「タイトル (ホスト名)」になります。
 リンク先は書いた URL のままで、取得に失敗した URL はそのまま表示します。
 `[見出し](https://example.com/)` のように書き手がテキストを付けたリンクは変わりません。
 

@@ -1,9 +1,9 @@
-import type { Link, Paragraph } from "mdast";
+import type { Link, Paragraph, Root } from "mdast";
 import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
 import remarkMdx from "remark-mdx";
-import { visit } from "unist-util-visit";
+import { SKIP, visit } from "unist-util-visit";
 
 export function bareLinkURL(link: Link, source: string): string | undefined {
   if (link.children.length !== 1) return;
@@ -19,21 +19,27 @@ export function bareLinkURL(link: Link, source: string): string | undefined {
   return link.url;
 }
 
-export function cardURL(node: Paragraph, source: string): string | undefined {
+function cardURL(node: Paragraph, source: string): string | undefined {
   if (node.children.length !== 1) return;
   const link = node.children[0];
   return link.type === "link" ? bareLinkURL(link, source) : undefined;
 }
 
+export function cardParagraphs(tree: Root, source: string): { node: Paragraph; url: string }[] {
+  const found: { node: Paragraph; url: string }[] = [];
+  visit(tree, (node) => {
+    if (node.type === "list") return SKIP;
+    if (node.type !== "paragraph") return;
+    const url = cardURL(node, source);
+    if (url) found.push({ node, url });
+  });
+  return found;
+}
+
 export function cardURLs(body: string, mdx = false): string[] {
   const parser = unified().use(remarkParse).use(remarkGfm);
   if (mdx) parser.use(remarkMdx);
-  const found = new Set<string>();
-  visit(parser.parse(body), "paragraph", (node) => {
-    const url = cardURL(node, body);
-    if (url) found.add(url);
-  });
-  return [...found].sort();
+  return [...new Set(cardParagraphs(parser.parse(body), body).map(({ url }) => url))].sort();
 }
 
 export function bareURLs(body: string, mdx = false): string[] {

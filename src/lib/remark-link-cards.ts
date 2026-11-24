@@ -1,8 +1,8 @@
 import { dirname } from "node:path";
-import type { Link, Paragraph, Parents, PhrasingContent, Root } from "mdast";
+import type { Link, Parents, PhrasingContent, Root } from "mdast";
 import type { Plugin } from "unified";
 import { visit } from "unist-util-visit";
-import { bareLinkURL, cardURL } from "./link-urls";
+import { bareLinkURL, cardParagraphs } from "./link-urls";
 import { readLinks } from "./link-cache";
 import { isCI } from "./git-dates";
 
@@ -40,11 +40,7 @@ export async function linkCardEntries(path: string, urls: string[], ci = isCI())
 
 export const remarkLinkCards: Plugin<[{ ci?: boolean }?], Root> = (options = {}) => {
   return async (tree, file) => {
-    const targets: { node: Paragraph; url: string }[] = [];
-    visit(tree, "paragraph", (node) => {
-      const url = cardURL(node, String(file));
-      if (url) targets.push({ node, url });
-    });
+    const targets = cardParagraphs(tree, String(file));
     const cardLinks = new Set(targets.map(({ node }) => node.children[0]));
     const mentions: { node: Link; parent: Parents; url: string }[] = [];
     visit(tree, "link", (node, _index, parent) => {
