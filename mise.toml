@@ -1,0 +1,4 @@
+[tools]
+# npm の latest タグはまだ 0.x を指していて、cloudflare.config.ts が前提にする 1.0 系と食い違う。
+# package.json の devDependencies と同じ版に揃える。
+"npm:cf" = "1.0.0-rc.1"

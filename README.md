@@ -75,7 +75,7 @@ vp check
 vp test
 vp run astro:check
 vp run build
-pnpm exec cf deploy --dry-run
+cf deploy --dry-run
 ```
 
 `vp dev` と `vp build` は通常の Vite 用です。
@@ -339,7 +339,7 @@ Cloudflare Workers にデプロイします。操作には Cloudflare の CLI（
 ```sh
 vp install --frozen-lockfile
 vp run deploy               # ビルドしてデプロイ（cf deploy）
-pnpm exec cf deploy --dry-run   # アップロードせずにビルドと検証だけ
+cf deploy --dry-run         # アップロードせずにビルドと検証だけ
 ```
 
 デプロイには `cf auth login` でのサインインか、環境変数 `CLOUDFLARE_API_TOKEN` が要ります。トークンには Workers スクリプトの編集に加えて、D1 の編集の権限が要ります（デプロイのたびに、名前で D1 を探し、なければ作るため）。
