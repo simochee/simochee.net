@@ -195,6 +195,14 @@
   font-size: var(--text-small);
   line-height: var(--text-small--line-height);
 }
+@utility bullet {
+  /* ::marker は li の枠の外に出るので、項目の下の点線がマーカーの下まで届かない。疑似要素をぶら下げて枠の内側に置く。 */
+  padding-inline-start: 1em;
+  text-indent: -1em;
+  &::before {
+    content: "・" / "";
+  }
+}
 @utility title-box {
   padding: 6px 8px;
   font-weight: bold;

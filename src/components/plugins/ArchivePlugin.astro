@@ -13,8 +13,8 @@ const shown = months.slice(0, 5);
     <Plugin title="月別アーカイブ">
       <PluginList>
         {shown.map((month) => (
-          <li>
-            ・<a href={month.path}>{month.year}/{month.month}</a> ({month.posts.length})
+          <li class="bullet">
+            <a href={month.path}>{month.year}/{month.month}</a> ({month.posts.length})
           </li>
         ))}
         <li class="border-b-0!">

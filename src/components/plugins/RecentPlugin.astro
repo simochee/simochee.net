@@ -13,8 +13,8 @@ const recent = (await posts()).slice(0, 5);
     <Plugin title="最新記事">
       <PluginList>
         {recent.map((post) => (
-          <li>
-            ・<a href={postPath(post.id)}>{post.data.title}</a> ({formatMonthDay(post.data.publishedAt)})
+          <li class="bullet">
+            <a href={postPath(post.id)}>{post.data.title}</a> ({formatMonthDay(post.data.publishedAt)})
           </li>
         ))}
       </PluginList>

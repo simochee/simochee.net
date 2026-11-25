@@ -11,8 +11,8 @@ const all = await posts();
   <PluginList>
     {
       Object.entries(categories).map(([type, name]) => (
-        <li>
-          ・<a href={`/${type}/`}>{name}</a> ({all.filter((post) => post.data.type === type).length})
+        <li class="bullet">
+          <a href={`/${type}/`}>{name}</a> ({all.filter((post) => post.data.type === type).length})
         </li>
       ))
     }

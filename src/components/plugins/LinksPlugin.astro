@@ -8,8 +8,8 @@ import { site } from "../../site";
   <PluginList>
     {
       site.links.map((link) => (
-        <li>
-          ・<a href={link.href} rel="me noopener">{link.label}</a> <span class="type-small text-ink-soft">（{link.note}）</span>
+        <li class="bullet">
+          <a href={link.href} rel="me noopener">{link.label}</a> <span class="type-small text-ink-soft">（{link.note}）</span>
         </li>
       ))
     }

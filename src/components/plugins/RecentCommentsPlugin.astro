@@ -7,8 +7,8 @@ import PluginList from "../layout/PluginList.astro";
   <Plugin title="最新コメント">
     <PluginList />
     <template>
-      <li>
-        ・<span data-slot="name"></span><span class="ml-2 type-small text-memo-ink" data-slot="admin">［管理人］</span>：<a data-slot="post"></a> (<time data-slot="date"></time>)
+      <li class="bullet">
+        <span data-slot="name"></span><span class="ml-2 type-small text-memo-ink" data-slot="admin">［管理人］</span>：<a data-slot="post"></a> (<time data-slot="date"></time>)
       </li>
     </template>
   </Plugin>
