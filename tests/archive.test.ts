@@ -1,5 +1,11 @@
 import { expect, test } from "vitest";
-import { addMonths, calendarWeeks, groupByMonth } from "../src/lib/archive";
+import {
+  addMonths,
+  calendarDayPath,
+  calendarWeeks,
+  groupByDay,
+  groupByMonth,
+} from "../src/lib/archive";
 import { dayKey } from "../src/lib/dates";
 
 const post = (iso: string) => ({ data: { publishedAt: new Date(iso) } });
@@ -64,4 +70,22 @@ test("記事のない月もカレンダーにできる", () => {
   const weeks = calendarWeeks({ year: "2026", month: "02", posts: [] });
   expect(weeks.flat().filter(Boolean)).toHaveLength(28);
   expect(weeks.flat().every((cell) => !cell?.posts.length)).toBe(true);
+});
+test("記事は日本時間の公開日ごとにまとまり、日付のページの URL は年・月・日で決まる", () => {
+  const days = groupByDay([
+    post("2026-11-18T09:00:00+09:00"),
+    post("2026-11-17T15:30:00Z"),
+    post("2026-11-17T09:00:00+09:00"),
+  ]);
+  expect(days.map((day) => [day.path, day.label, day.posts.length])).toEqual([
+    ["/archive/2026/11/18/", "2026年11月18日", 2],
+    ["/archive/2026/11/17/", "2026年11月17日", 1],
+  ]);
+});
+test("カレンダーの日付は、記事が 1 件ならその記事へ、2 件以上ならその日の記事一覧へつながる", () => {
+  const date = "2026/11/18";
+  expect(calendarDayPath({ date, posts: [{ id: "morning" }] })).toBe("/archive/morning/");
+  expect(calendarDayPath({ date, posts: [{ id: "morning" }, { id: "night" }] })).toBe(
+    "/archive/2026/11/18/",
+  );
 });

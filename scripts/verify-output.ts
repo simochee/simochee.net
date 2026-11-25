@@ -23,6 +23,7 @@ for (const path of [
   "search/index.html",
   "search.json",
   "gallery/index.html",
+  "archive/2026/11/18/index.html",
   "404.html",
   "feed.xml",
   "sitemap-index.xml",

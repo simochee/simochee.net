@@ -34,8 +34,8 @@ const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
 <script>
   import {
     addMonths,
+    calendarDayPath,
     calendarWeeks,
-    postPath,
     groupByMonth,
     type CalendarPost,
     type YearMonth,
@@ -123,8 +123,11 @@ const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
                 if (post) {
                   const link = document.createElement("a");
                   link.className = "font-bold";
-                  link.href = postPath(post.id);
-                  link.ariaLabel = `${cell.day}日の記事「${post.data.title}」`;
+                  link.href = calendarDayPath(cell);
+                  link.ariaLabel =
+                    cell.posts.length === 1
+                      ? `${cell.day}日の記事「${post.data.title}」`
+                      : `${cell.day}日の記事（${cell.posts.length}件）`;
                   link.textContent = String(cell.day);
                   td.append(link);
                 } else td.append(String(cell.day));
