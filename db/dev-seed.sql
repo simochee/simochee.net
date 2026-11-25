@@ -43,3 +43,12 @@ INSERT INTO poll_totals (poll, choice, votes)
 SELECT poll, choice, COUNT(*) FROM poll_votes GROUP BY poll, choice;
 
 UPDATE counters SET value = (SELECT COUNT(*) FROM bbs_posts) WHERE name = 'bbs_posts';
+
+INSERT INTO daily_visits (day, count) VALUES
+  (strftime('%Y/%m/%d', 'now', '+9 hours', '-6 days'), 14),
+  (strftime('%Y/%m/%d', 'now', '+9 hours', '-5 days'), 22),
+  (strftime('%Y/%m/%d', 'now', '+9 hours', '-4 days'), 19),
+  (strftime('%Y/%m/%d', 'now', '+9 hours', '-3 days'), 9),
+  (strftime('%Y/%m/%d', 'now', '+9 hours', '-2 days'), 35),
+  (strftime('%Y/%m/%d', 'now', '+9 hours', '-1 days'), 27),
+  (strftime('%Y/%m/%d', 'now', '+9 hours', '-0 days'), 8);

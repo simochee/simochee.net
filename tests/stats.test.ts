@@ -4,6 +4,7 @@ import { clap, clapCounts } from "../src/server/claps";
 import { dayKey } from "../src/lib/dates";
 import {
   currentViewers,
+  dailyVisits,
   popularCacheSeconds,
   popularPosts,
   viewersCacheSeconds,
@@ -88,4 +89,43 @@ test("拍手は押すたびに 1 つ増え、公開中の記事の分だけ数�
   expect(await clap(db, "morning")).toBe(2);
   await clap(db, "draft");
   expect(await clapCounts(db, ["morning", "quiet"])).toEqual({ morning: 2 });
+});
+
+test("直近7日の訪問数は日本時間の今日までを古い順に並べ、記録のない日は0にする", async () => {
+  const db = await migratedD1();
+  for (const [day, count] of [
+    ["2026/11/18", 99],
+    ["2026/11/19", 2],
+    ["2026/11/23", 8],
+    ["2026/11/25", 5],
+    ["2026/11/26", 70],
+  ] as const) {
+    await db.prepare("INSERT INTO daily_visits (day, count) VALUES (?, ?)").bind(day, count).run();
+  }
+  expect(await dailyVisits(db, new Date("2026-11-25T14:59:59Z"))).toEqual([
+    { day: "2026/11/19", count: 2 },
+    { day: "2026/11/20", count: 0 },
+    { day: "2026/11/21", count: 0 },
+    { day: "2026/11/22", count: 0 },
+    { day: "2026/11/23", count: 8 },
+    { day: "2026/11/24", count: 0 },
+    { day: "2026/11/25", count: 5 },
+  ]);
+  const next = await dailyVisits(db, new Date("2026-11-25T15:00:00Z"));
+  expect(next[0]).toEqual({ day: "2026/11/20", count: 0 });
+  expect(next.at(-1)).toEqual({ day: "2026/11/26", count: 70 });
+});
+
+test("日本時間の年越しでも7日ぶんを返す", async () => {
+  const days = await dailyVisits(await migratedD1(), new Date("2026-12-31T15:00:00Z"));
+  expect(days.map(({ day }) => day)).toEqual([
+    "2026/12/26",
+    "2026/12/27",
+    "2026/12/28",
+    "2026/12/29",
+    "2026/12/30",
+    "2026/12/31",
+    "2027/01/01",
+  ]);
+  expect(days.every(({ count }) => count === 0)).toBe(true);
 });

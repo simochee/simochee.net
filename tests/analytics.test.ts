@@ -114,6 +114,12 @@ test("記事ごとの閲覧数を日本時間の日付ごとに足し、訪問�
   expect(
     await db.prepare("SELECT value FROM counters WHERE name = 'visitors'").first("value"),
   ).toBe(107);
+  expect(
+    (await db.prepare("SELECT day, count FROM daily_visits ORDER BY day").all()).results,
+  ).toEqual([
+    { day: "2026/11/19", count: 6 },
+    { day: "2026/11/20", count: 1 },
+  ]);
 });
 
 test("同じ時間は二度取り込まず、取り込みに失敗した時間は次の回にやりなおす", async () => {
@@ -130,4 +136,49 @@ test("同じ時間は二度取り込まず、取り込みに失敗した時間�
   await importAnalytics(db, source, now);
   await importAnalytics(db, source, now);
   expect(await db.prepare("SELECT count FROM page_views").first("count")).toBe(2);
+  expect((await db.prepare("SELECT day, count FROM daily_visits").all()).results).toEqual([
+    { day: "2026/11/19", count: 1 },
+  ]);
+  expect(
+    await db.prepare("SELECT value FROM counters WHERE name = 'visitors'").first("value"),
+  ).toBe(1);
+});
+
+test("日別訪問数の保存に失敗したbatchは累計も進捗も戻し、次の取り込みで一度だけ足す", async () => {
+  const db = await migratedD1();
+  const now = at("2026-11-19T03:20:00Z");
+  const source: PageviewSource = async () => [{ path: "/archive/pudding/", views: 5, visits: 3 }];
+  await db.prepare("DROP TABLE daily_visits").run();
+  await expect(importAnalytics(db, source, now)).rejects.toThrow();
+  expect(await db.prepare("SELECT COUNT(*) AS n FROM page_views").first("n")).toBe(0);
+  expect(
+    await db
+      .prepare("SELECT COUNT(*) AS n FROM counters WHERE name IN ('visitors', 'analytics_until')")
+      .first("n"),
+  ).toBe(0);
+  await db
+    .prepare("CREATE TABLE daily_visits (day TEXT PRIMARY KEY, count INTEGER NOT NULL)")
+    .run();
+  await importAnalytics(db, source, now);
+  await importAnalytics(db, source, now);
+  expect(await db.prepare("SELECT count FROM daily_visits").first("count")).toBe(3);
+  expect(
+    await db.prepare("SELECT value FROM counters WHERE name = 'visitors'").first("value"),
+  ).toBe(3);
+});
+
+test("同じ日の別の時間の訪問数は日別の同じ行に足す", async () => {
+  const db = await migratedD1();
+  await db
+    .prepare("INSERT INTO counters (name, value) VALUES ('analytics_until', ?)")
+    .bind(at("2026-11-19T01:00:00Z"))
+    .run();
+  await importAnalytics(
+    db,
+    async () => [{ path: "/", views: 4, visits: 2 }],
+    at("2026-11-19T03:20:00Z"),
+  );
+  expect((await db.prepare("SELECT day, count FROM daily_visits").all()).results).toEqual([
+    { day: "2026/11/19", count: 4 },
+  ]);
 });

@@ -1,4 +1,5 @@
 import type { D1Database } from "@cloudflare/workers-types/index.ts";
+import { visitWeek, type DailyVisits } from "../lib/counter";
 import { dayKey } from "../lib/dates";
 import { recentVisits, type PageviewSource } from "./analytics";
 import { snapshot } from "./snapshots";
@@ -56,4 +57,14 @@ export async function popularPosts(
   );
   const shown = new Set(published);
   return ranked.filter((post) => shown.has(post.slug)).slice(0, limit);
+}
+
+/** 今日を含む日本時間の直近 7 日の訪問数。 */
+export async function dailyVisits(db: D1Database, now = new Date()): Promise<DailyVisits[]> {
+  const week = visitWeek([], now);
+  const { results } = await db
+    .prepare("SELECT day, count FROM daily_visits WHERE day >= ? AND day <= ? ORDER BY day")
+    .bind(week[0]!.day, week[6]!.day)
+    .all<DailyVisits>();
+  return visitWeek(results, now);
 }

@@ -1,41 +1,147 @@
 ---
 import Plugin from "../layout/Plugin.astro";
+import Button from "../ui/Button.astro";
 ---
 
 <access-counter hidden>
   <Plugin title="アクセスカウンター">
     <div class="px-4 py-8 text-center">
-      <div class="inline-flex gap-2" role="img" data-slot="digits"></div>
+      <div class="counter-disclosure relative inline-block">
+        <Button type="button" variant="link" class="block" aria-expanded="false" aria-controls="counter-daily-visits">
+          <canvas role="img" data-slot="digits" class="block"></canvas>
+          <span class="sr-only">、押すとこの7日間の日別の人数を開閉します</span>
+        </Button>
+        <div id="counter-daily-visits" data-slot="popup" class="absolute top-full z-10 pt-4 text-left" hidden>
+          <canvas aria-hidden="true" data-slot="chart" class="block"></canvas>
+          <table class="sr-only">
+            <caption>この7日間の日別のお客様（訪問数）</caption>
+            <thead><tr><th scope="col">日付</th><th scope="col">人数</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
       <div class="type-small mt-4">これまでに来てくれたお客様の数です</div>
     </div>
   </Plugin>
 </access-counter>
 
+<style>
+  canvas { image-rendering: pixelated; }
+</style>
+
 <script>
-  import { counterDigits } from "../../lib/counter";
+  import type { SidebarData } from "../../lib/api";
+  import { visitDayLabel } from "../../lib/counter";
+  import { loadCounterFonts, paintCounter, paintVisitChart } from "../../lib/counter-canvas";
   import { onSidebar } from "../../scripts/shared-data";
 
   customElements.define(
     "access-counter",
     class extends HTMLElement {
       #stop: (() => void) | undefined;
-      connectedCallback() {
-        this.#stop = onSidebar(({ total }) => {
-          const digits = this.querySelector<HTMLElement>("[data-slot=digits]")!;
-          digits.ariaLabel = `これまでのお客様 ${total} 人`;
-          digits.replaceChildren(
-            ...[...counterDigits(total)].map((digit) =>
-              Object.assign(document.createElement("span"), {
-                className: "inline-block w-14 bg-lcd py-1 font-bold text-lcd-ink",
-                textContent: digit,
-              }),
-            ),
-          );
+      #events: AbortController | undefined;
+      #theme: MutationObserver | undefined;
+      #timer: ReturnType<typeof setTimeout> | undefined;
+      #pinned = false;
+      #data: SidebarData | undefined;
+      #button!: HTMLButtonElement;
+      #popup!: HTMLElement;
+      #digits!: HTMLCanvasElement;
+      #chart!: HTMLCanvasElement;
+
+      async connectedCallback() {
+        this.#events = new AbortController();
+        const { signal } = this.#events;
+        this.#button = this.querySelector("button")!;
+        this.#popup = this.querySelector("[data-slot=popup]")!;
+        this.#digits = this.querySelector("[data-slot=digits]")!;
+        this.#chart = this.querySelector("[data-slot=chart]")!;
+        const disclosure = this.querySelector<HTMLElement>(".counter-disclosure")!;
+        disclosure.addEventListener("pointerenter", (event) => {
+          if (event.pointerType === "mouse") this.open();
+        }, { signal });
+        disclosure.addEventListener("pointerleave", (event) => {
+          if (event.pointerType === "mouse" && !this.#pinned) {
+            clearTimeout(this.#timer);
+            this.#timer = setTimeout(() => this.close(), 250);
+          }
+        }, { signal });
+        this.#button.addEventListener("click", () => {
+          if (this.#pinned) this.close();
+          else {
+            this.#pinned = true;
+            this.open();
+          }
+        }, { signal });
+        document.addEventListener("keydown", (event) => {
+          if (event.key === "Escape" && !this.#popup.hidden) {
+            // ホバーで開いたグラフは、ほかの入力欄で書いている途中の Esc でも閉じる。そのときにフォーカスまで奪わないよう、カウンターの中にあったときだけ戻す。
+            const focusedHere = disclosure.contains(document.activeElement);
+            this.close();
+            if (focusedHere) this.#button.focus();
+          }
+        }, { signal });
+        document.addEventListener("pointerdown", (event) => {
+          if (!disclosure.contains(event.target as Node)) this.close();
+        }, { signal });
+        window.addEventListener("resize", () => {
+          this.render();
+          if (!this.#popup.hidden) this.position();
+        }, { signal });
+        this.#theme = new MutationObserver(() => this.render());
+        this.#theme.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+        await loadCounterFonts();
+        if (signal.aborted) return;
+        this.#stop = onSidebar((data) => {
+          this.#data = data;
+          this.#digits.ariaLabel = `これまでのお客様 ${data.total} 人`;
+          this.querySelector("tbody")!.replaceChildren(...data.dailyVisits.map(({ day, count }) => {
+            const row = document.createElement("tr");
+            const date = document.createElement("th");
+            date.scope = "row";
+            date.textContent = visitDayLabel(day);
+            const people = document.createElement("td");
+            people.textContent = `${count}人`;
+            row.append(date, people);
+            return row;
+          }));
+          this.render();
           this.hidden = false;
         });
       }
+
+      render() {
+        if (!this.#data) return;
+        paintCounter(this.#digits, this.#data.total);
+        paintVisitChart(this.#chart, this.#data.dailyVisits);
+      }
+
+      position() {
+        const button = this.#button.getBoundingClientRect();
+        const width = this.#chart.getBoundingClientRect().width;
+        const left = Math.max(4, Math.min(button.left + (button.width - width) / 2, document.documentElement.clientWidth - width - 4));
+        this.#popup.style.left = `${Math.round(left - button.left)}px`;
+      }
+
+      open() {
+        clearTimeout(this.#timer);
+        this.#popup.hidden = false;
+        this.#button.ariaExpanded = "true";
+        this.position();
+      }
+
+      close() {
+        clearTimeout(this.#timer);
+        this.#pinned = false;
+        this.#popup.hidden = true;
+        this.#button.ariaExpanded = "false";
+      }
+
       disconnectedCallback() {
         this.#stop?.();
+        this.#events?.abort();
+        this.#theme?.disconnect();
+        this.close();
       }
     },
   );

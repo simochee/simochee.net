@@ -145,6 +145,12 @@ export async function importAnalytics(db: D1Database, source: PageviewSource, no
       ),
       db
         .prepare(
+          `INSERT INTO daily_visits (day, count) VALUES (?, ?)
+           ON CONFLICT (day) DO UPDATE SET count = count + excluded.count`,
+        )
+        .bind(day, visits),
+      db
+        .prepare(
           `INSERT INTO counters (name, value) VALUES ('visitors', ?)
            ON CONFLICT (name) DO UPDATE SET value = value + excluded.value`,
         )

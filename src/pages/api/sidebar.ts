@@ -5,7 +5,7 @@ import { database } from "../../server/db";
 import { handler, json } from "../../server/http";
 import { publishedPosts } from "../../server/posts";
 import { analyticsSource } from "../../server/analytics-source";
-import { currentViewers, popularPosts, visitorTotal } from "../../server/stats";
+import { currentViewers, dailyVisits, popularPosts, visitorTotal } from "../../server/stats";
 
 export const prerender = false;
 
@@ -13,11 +13,12 @@ export const prerender = false;
 export const GET = handler(async ({ url }) => {
   const [db, posts] = await Promise.all([database(), publishedPosts(url.origin)]);
   const slugs = [...posts.keys()];
-  const [popular, comments, board, total, viewers] = await Promise.all([
+  const [popular, comments, board, total, visits, viewers] = await Promise.all([
     popularPosts(db, slugs, 5),
     recentComments(db, slugs, 5),
     latestBbsPosts(db, 2),
     visitorTotal(db),
+    dailyVisits(db),
     // Web Analytics に問い合わせられなくても、ほかの区画は出す。
     currentViewers(db, analyticsSource()).catch((error: unknown) => {
       console.error(error);
@@ -30,6 +31,7 @@ export const GET = handler(async ({ url }) => {
     comments: comments.map((comment) => ({ ...comment, postTitle: titleOf(comment.slug) })),
     board,
     total,
+    dailyVisits: visits,
     viewers,
   } satisfies SidebarData);
 });
